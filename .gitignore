@@ -1,0 +1,9 @@
+lib-cov
+coverage
+*.lcov
+dist
+.cache/
+.serverless/
+node_modules
+.tmp
+

@@ -1,0 +1,17 @@
+name: master-build
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    name: Build master
+    uses: flaviostutz/gh-makefile/.github/workflows/make-ci.yml@main
+    with:
+      working-directory: ./
+      tooling: node
+      tooling-version: 16
+      target-build: true
+      target-lint: true
+      target-unit-tests: true

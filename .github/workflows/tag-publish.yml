@@ -1,0 +1,33 @@
+name: tag-publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    name: Publish new version to NPM
+    uses: flaviostutz/gh-makefile/.github/workflows/make-ci.yml@main
+    with:
+      working-directory: ./
+      tooling: node
+      tooling-version: 16
+      stage: prd
+      target-build: true
+      target-lint: true
+      target-unit-tests: true
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: make build
+      - run: make publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}

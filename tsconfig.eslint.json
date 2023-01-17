@@ -1,0 +1,5 @@
+// https://bobbyhadz.com/blog/typescript-parsing-error-cannot-read-file
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", ".eslintrc.js", "jest.config.js"]
+}
