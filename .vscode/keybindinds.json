@@ -1,0 +1,4 @@
+{
+    "key": "shift+cmd+a",
+    "command": "eslint.executeAutofix"
+}
