@@ -1,60 +1,29 @@
-#!/usr/bin/env node
+import yargs, { Argv } from 'yargs';
 
-// eslint-disable-next-line node/shebang
-import * as fs from 'fs';
+// import yargs from 'yargs/yargs';
+// import { hideBin } from 'yargs/helpers';
 
-import yargs from 'yargs/yargs';
-import { hideBin } from 'yargs/helpers';
-
-const argv = yargs(hideBin(process.argv))
-  .option('verbose', {
+const addOptions = (y: any): Argv => {
+  const rargs = y.option('verbose', {
     alias: 'v',
     type: 'boolean',
     description: 'Run with verbose logging',
     default: false,
+  });
+  return rargs;
+};
+
+const args = yargs
+  .command('first', 'description', (y): Argv => {
+    const opts = addOptions(y);
+    return opts;
   })
-  .option('base-dir', {
-    alias: 'r',
-    type: 'string',
-    description: 'Monorepo base dir',
-    default: '.',
-  })
-  .option('config', {
-    alias: 'c',
-    type: 'string',
-    description: "Config file. Defaults to '.monolint.json'",
-    default: '.monolint.json',
-  })
-  .option('fix', {
-    alias: 'f',
-    type: 'boolean',
-    description: "Try to fix failed checks automatically by changing files. Defaults to 'false'",
-    default: false,
+  .command('second', 'description2', (y): Argv => {
+    const opts = addOptions(y);
+    return opts;
   })
   .parseSync();
 
-if (!argv.verbose) {
-  // console.debug = () => {};
-}
-
-if (!fs.existsSync(argv.baseDir)) {
-  console.log(`Monorepo basedir ${argv.baseDir} not found`);
-  process.exit(1);
-}
-
-try {
-  // show results
-  if (argv.verbose) {
-    const baseConfig = loadBaseConfig(argv.baseDir, argv.config);
-    const modules = discoverModules(argv.baseDir, baseConfig, argv.config);
-    console.log(`Found ${modules.length} modules: ${modules.map((mm) => mm.path).toString()}`);
-  }
-  
-} catch (err) {
-  const err1 = err as Error;
-  if (!argv.verbose && err1.message) {
-    console.log(`Error: ${err1.message}`);
-  } else {
-    throw err;
-  }
-}
+console.log(`>>> ${JSON.stringify(args)}`);
+console.log(args._);
+console.log(args.verbose);
