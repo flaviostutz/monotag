@@ -96,16 +96,22 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
 
     echo 'test1d' > prefix2/test1
     git add prefix2/test1
-    echo 'tes3d' > prefix2/test3
+    echo 'test3d' > prefix2/test3
     git add prefix2/test3
     git commit -m 'feat: adding test3 file for module prefix2'
 
-
     echo 'test1c' > prefix2/test1
     git add prefix2/test1
-    echo 'tes2c' > prefix2/test2
+    echo 'test2c' > prefix2/test2
     git add prefix2/test2
     git commit -m 'fix: updating test1 and test2 files for module prefix2'
+
+    echo 'test4f' > prefix2/test4
+    git add prefix2/test4
+    echo 'test4f' > prefix1/test4
+    git add prefix1/test4
+    git commit -m 'feat: adding test4 for both prefix1 and prefix2'
+
     `,
   );
 };

@@ -39,7 +39,7 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD',
       path: 'prefix1',
     });
-    expect(clogs).toHaveLength(6);
+    expect(clogs).toHaveLength(7);
   });
   it('should return commits related to prefix2 path', async () => {
     const clogs = await filterCommits({
@@ -48,6 +48,6 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD',
       path: 'prefix2',
     });
-    expect(clogs).toHaveLength(7);
+    expect(clogs).toHaveLength(8);
   });
 });
