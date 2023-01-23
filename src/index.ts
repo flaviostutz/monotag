@@ -1,0 +1,1 @@
+export { nextTag } from './tag';
