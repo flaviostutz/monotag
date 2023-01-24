@@ -36,6 +36,7 @@
   "devDependencies": {
     "@stutzlab/eslint-config": "^1.1.1",
     "@tsconfig/node14": "^1.0.3",
+    "@types/conventional-commits-parser": "^3.0.3",
     "@types/debug": "^4.1.7",
     "@types/jest": "^29.1.2",
     "@types/yargs": "^17.0.20",

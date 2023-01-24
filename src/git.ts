@@ -9,25 +9,35 @@ import { tagParts } from './utils/tagParts';
  * @returns {DefaultLogFields[]} List of commits
  */
 const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
-  if (!opts.repoDir || !opts.path) {
-    throw new Error("'repoDir' and 'path' must be defined");
+  if (!opts.repoDir) {
+    throw new Error("'repoDir' must be defined");
   }
+  if (!opts.toRef) {
+    throw new Error('toRef is required');
+  }
+
+  let refs = opts.toRef;
+  if (opts.fromRef) {
+    refs = `${opts.fromRef}..${opts.toRef}`;
+  }
+
+  // check if command is successfull
+  execCmd(opts.repoDir, `git log ${refs} --pretty=format:"%H"`, false);
 
   const out = execCmd(
     opts.repoDir,
-    `git log ${opts.fromRef} ${opts.toRef} --pretty=format:"%H" | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
-    true,
+    `git log ${refs} --pretty=format:"%H" | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    false,
   );
 
   const commits = out
     .trim()
     .split('COMMIT')
-    .map((celem: string): Commit => {
+    .map((celem: string): Commit | null => {
       if (celem.trim().length === 0) {
         return null;
       }
       const fields = celem.trim().split(';');
-      console.log(`>>>${fields}`);
       const com: Commit = {
         id: fields[1],
         author: fields[2],
@@ -38,7 +48,7 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
       return com;
     })
     .filter((cm: Commit | null): boolean => {
-      if (cm == null) {
+      if (cm === null) {
         return false;
       }
       // only keep commits that have touched any file inside "path"
@@ -47,7 +57,7 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
       });
     });
 
-  return commits;
+  return <Commit[]>commits.reverse();
 };
 
 /**
