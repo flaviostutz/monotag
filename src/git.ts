@@ -1,12 +1,16 @@
+import conventionalCommitsParser from 'conventional-commits-parser';
+
 import { BasicOptions } from './types/BasicOptions';
 import { Commit } from './types/Commit';
+import { CommitsSummary } from './types/CommitsSummary';
+import { SemverLevel } from './types/SemverLevel';
 import { execCmd } from './utils/execCmd';
 import { tagParts } from './utils/tagParts';
 
 /**
  * Looks for commits that touched a certain path
  * @param opts {BasicOptions} parameters for commits filtering
- * @returns {DefaultLogFields[]} List of commits
+ * @returns {Commit[]} List of commits
  */
 const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
   if (!opts.repoDir) {
@@ -64,8 +68,8 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
  * Get last tag in repository for a certain prefix according to semantic versioning
  * Ex.: Existing tags 'myservice/1.1.2', 'myservice/1.4.2' and 'yourservice/3.4.1'
  *      If you query for tag prefix 'myservice/', it will return 'myservice/1.4.2'
- * @param repoDir
- * @param tagPrefix
+ * @param repoDir {string} directory of the git repo
+ * @param tagPrefix {string} tag prefix for looking for last tag and for generating the next tag
  * @returns The tag with the same prefix that has the greatest semantic version
  */
 const lastTagForPrefix = async (repoDir: string, tagPrefix: string): Promise<string | null> => {
@@ -90,4 +94,87 @@ const lastTagForPrefix = async (repoDir: string, tagPrefix: string): Promise<str
   return null;
 };
 
-export { filterCommits, lastTagForPrefix };
+/**
+ * Summarize commit according to semantic versioning
+ * @param commits {Commit[]} Collection of commits
+ * @returns {CommitsSummary} Summary
+ */
+const summarizeCommits = (commits: Commit[]): CommitsSummary => {
+  const sum = <CommitsSummary>{
+    features: <string[]>[],
+    fixes: <string[]>[],
+    maintenance: <string[]>[],
+    nonConventional: <string[]>[],
+    notes: <string[]>[],
+    level: SemverLevel.PATCH,
+    authors: <string[]>[],
+    references: <string[]>[],
+  };
+  commits.reduce((summary, clog): any => {
+    // remove ! from type because the parser doesn't support it
+    // (but it's valid for conventional commit)
+    const convLog = conventionalCommitsParser.sync(clog.message.replace('!', ''));
+    if (!convLog.header) {
+      return summary;
+    }
+
+    // feat
+    if (convLog.type === 'feat') {
+      pushItem(summary.features, convLog);
+      if (summary.level > SemverLevel.MINOR) summary.level = SemverLevel.MINOR;
+
+      // fix
+    } else if (convLog.type === 'fix') {
+      pushItem(summary.fixes, convLog);
+      if (summary.level > SemverLevel.PATCH) summary.level = SemverLevel.PATCH;
+
+      // chore
+    } else if (convLog.type === 'chore') {
+      pushItem(summary.maintenance, convLog);
+      if (summary.level > SemverLevel.PATCH) summary.level = SemverLevel.PATCH;
+
+      // non conventional commits
+    } else {
+      summary.nonConventional.push(convLog.header.trim());
+    }
+
+    // breaking changes/major level
+    if (clog.message.includes('!:')) {
+      if (summary.level > SemverLevel.MAJOR) summary.level = SemverLevel.MAJOR;
+    } else if (convLog.notes.some((note) => note.title.includes('BREAKING CHANGE'))) {
+      if (summary.level > SemverLevel.MAJOR) summary.level = SemverLevel.MAJOR;
+    }
+
+    // notes
+    convLog.notes.forEach((note) => {
+      summary.notes.push(`${note.title}: ${note.text}`);
+    });
+
+    // references
+    convLog.references.forEach((reference) => {
+      summary.references.push(`${reference.action} ${reference.raw}`);
+    });
+
+    return summary;
+  }, sum);
+
+  // authors
+  commits.forEach((com) => {
+    sum.authors.push(com.author);
+  });
+
+  return sum;
+};
+
+const pushItem = (pushTo: string[], convLog: conventionalCommitsParser.Commit): void => {
+  if (!convLog.subject) {
+    return;
+  }
+  if (convLog.scope) {
+    pushTo.push(`${convLog.scope}: ${convLog.subject.trim()}`);
+    return;
+  }
+  pushTo.push(`${convLog.subject.trim()}`);
+};
+
+export { filterCommits, lastTagForPrefix, summarizeCommits };

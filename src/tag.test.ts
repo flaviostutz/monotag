@@ -1,10 +1,6 @@
-// import debug from 'debug';
-
 import { filterCommits } from './git';
 import { nextTag } from './tag';
 import { createSampleRepo } from './utils/createSampleRepo';
-
-// debug.enable('simple-git:task:*');
 
 describe('when generating next tag with notes', () => {
   const repoDir = './testcases/nexttagrepo';
@@ -12,23 +8,29 @@ describe('when generating next tag with notes', () => {
     await createSampleRepo(repoDir);
   });
   it('should fail if no commits found touching path', async () => {
-    const exec = async (): Promise<void> => {
-      await nextTag({
+    const nt = await nextTag(
+      {
         repoDir,
         fromRef: 'auto',
         toRef: 'HEAD',
         path: 'inexistentModule',
-      });
-    };
-    await expect(exec).rejects.toThrow('No commits');
+        tagPrefix: 'inexistentModule/',
+      },
+      false,
+    );
+    expect(nt.changesDetected).toBe(0);
   });
   it('should return next version if minor changes found in path after last tag', async () => {
-    const nt = await nextTag({
-      repoDir,
-      fromRef: 'auto',
-      toRef: 'HEAD',
-      path: 'prefix1',
-    });
+    const nt = await nextTag(
+      {
+        repoDir,
+        fromRef: 'auto',
+        toRef: 'HEAD',
+        path: 'prefix1',
+        tagPrefix: 'prefix1/',
+      },
+      false,
+    );
     console.log(nt.releaseNotes);
     expect(nt.tagName).toBe('prefix1/3.4.0');
     expect(nt.releaseNotes.includes('Features:')).toBeTruthy();
@@ -40,21 +42,20 @@ describe('when generating next tag with notes', () => {
   });
 
   it('should return next version if major changes found in path after last tag', async () => {
-    const nt = await nextTag({
-      repoDir,
-      fromRef: 'auto',
-      toRef: 'HEAD',
-      path: 'prefix2',
-    });
-    console.log(nt.releaseNotes);
+    const nt = await nextTag(
+      {
+        repoDir,
+        fromRef: 'auto',
+        toRef: 'HEAD',
+        path: 'prefix2',
+        tagPrefix: 'prefix2/',
+      },
+      false,
+    );
     expect(nt.tagName).toBe('prefix2/21.0.0');
-    expect(nt.releaseNotes.includes('Features:')).toBeTruthy();
-    expect(
-      nt.releaseNotes.includes('updating test1 and test2 files for module prefix2'),
-    ).toBeTruthy();
-    expect(nt.releaseNotes.includes('Fixes:')).toBeTruthy();
-    expect(nt.releaseNotes.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
-    expect(nt.releaseNotes.trim()).toBe(`Features:
+    expect(nt.releaseNotes.trim()).toBe(`Version 'prefix2/21.0.0'
+
+Features:
   - 12 prefix2 adding test3 file for module prefix2
   - 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
 
@@ -64,7 +65,7 @@ Fixes:
 Maintenance:
   - 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
 
-References: closes #45
+Refs: closes #45
 
 Authors: Flávio Stutz <flaviostutz@gmail.com>`);
   });

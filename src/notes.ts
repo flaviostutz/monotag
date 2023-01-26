@@ -1,7 +1,41 @@
+import { filterCommits, summarizeCommits } from './git';
+import { BasicOptions } from './types/BasicOptions';
 import { CommitsSummary } from './types/CommitsSummary';
 
-const formatReleaseNotes = (commitsSummary: CommitsSummary, markdownNotes: boolean): string => {
+/**
+ * Filters commits according to opts and creates a formatted string with release notes
+ * @param opts {BasicOptions} parameters for getting commits and creating the release notes
+ * @returns {string} Release notes
+ */
+const releaseNotes = async (opts: BasicOptions): Promise<string> => {
+  if (!opts.fromRef || opts.fromRef === 'auto') {
+    throw new Error("'fromRef' is required");
+  }
+  if (!opts.toRef) {
+    throw new Error("'toRef' is required");
+  }
+
+  const commits = await filterCommits(opts);
+  if (commits.length === 0) {
+    throw new Error(`No commits found touching path '${opts.path}'`);
+  }
+
+  const commitsSummary = summarizeCommits(commits);
+
+  const rn = formatReleaseNotes(commitsSummary, opts.onlyConvCommit);
+  return rn;
+};
+
+const formatReleaseNotes = (
+  commitsSummary: CommitsSummary,
+  onlyConvCommit?: boolean,
+  versionName?: string,
+): string => {
   let notes = '';
+
+  if (versionName) {
+    notes += `Version '${versionName}'\n\n`;
+  }
 
   // features
   if (commitsSummary.features.length > 0) {
@@ -13,7 +47,7 @@ const formatReleaseNotes = (commitsSummary: CommitsSummary, markdownNotes: boole
   }
 
   // fixes
-  if (commitsSummary.features.length > 0) {
+  if (commitsSummary.fixes.length > 0) {
     notes += 'Fixes:';
     notes = commitsSummary.fixes.reduce((pv, fix) => {
       return `${pv}\n  - ${fix}`;
@@ -28,6 +62,17 @@ const formatReleaseNotes = (commitsSummary: CommitsSummary, markdownNotes: boole
       return `${pv}\n  - ${maintenance}`;
     }, notes);
     notes += '\n\n';
+  }
+
+  // misc (non conventional commits)
+  if (!onlyConvCommit) {
+    if (commitsSummary.nonConventional.length > 0) {
+      notes += 'Misc:';
+      notes = commitsSummary.nonConventional.reduce((pv, nonConventional) => {
+        return `${pv}\n  - ${nonConventional}`;
+      }, notes);
+      notes += '\n\n';
+    }
   }
 
   // notes
@@ -45,7 +90,7 @@ const formatReleaseNotes = (commitsSummary: CommitsSummary, markdownNotes: boole
     const references = commitsSummary.references.filter((value, index, self) => {
       return self.indexOf(value) === index;
     });
-    notes += `References: ${JSON.stringify(references)
+    notes += `Refs: ${JSON.stringify(references)
       .replace('[', '')
       .replace(']', '')
       .replace(/"/g, '')}`;
@@ -68,4 +113,4 @@ const formatReleaseNotes = (commitsSummary: CommitsSummary, markdownNotes: boole
   return notes;
 };
 
-export { formatReleaseNotes };
+export { formatReleaseNotes, releaseNotes };

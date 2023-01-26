@@ -1,5 +1,8 @@
 import { SemverLevel } from './SemverLevel';
 
+/**
+ * Commit summarized according to conventional commit
+ */
 export type CommitsSummary = {
   fixes: string[];
   features: string[];
@@ -8,4 +11,5 @@ export type CommitsSummary = {
   level: SemverLevel;
   authors: string[];
   references: string[];
+  nonConventional: string[];
 };

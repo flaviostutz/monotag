@@ -4,7 +4,7 @@ build: install
 	npx tsc --emitDeclarationOnly --outDir dist
 
 run:
-	npx ts-node src/main.ts tag -v
+	npx ts-node src/main.ts tag -v --from-ref HEAD~1
 
 lint:
 	npx eslint . --ext .ts
