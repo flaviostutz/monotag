@@ -26,10 +26,13 @@ A monorepo has the following structure:
 ```
 
 The team will commit and merge things to "main" branch changing files in all those modules, so your commit log might be:
+
+```
 2023-01-01: feat: adding new API call to google <-- this touched service1 and lib2
 2023-01-01: feat: new interface to lib2         <-- this touched lib2 and service2
 2023-01-03: fix: bug fix according to #43       <-- this touched service2
 2023-01-04: feat!(lib1): upgrading interface    <-- this touched lib1
+```
 
 We want to tag and create a release notes for lib1 before publishing to NPM and a release notes to service2 before deploying it to production. All commits are mixed together because the team was working with things integrated (which is an advantage of using a monorepo actually).
 
