@@ -8,8 +8,8 @@ import { incrementTag } from './utils/incrementTag';
  * Checks latest tag for a certain prefix, checks a range of commit and calculates
  * the next tag according to the type of change according to conventional commits, so
  * that semver level will be derived if the commit was a feat, fix, chore, BREAKING CHANGE etc.
- * @param opts {NextTagOptions}
- * @param verbose {boolean}
+ * @param {NextTagOptions} opts
+ * @param {boolean} verbose
  * @returns {TagNotes}
  */
 const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {

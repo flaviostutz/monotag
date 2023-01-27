@@ -68,9 +68,9 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
  * Get last tag in repository for a certain prefix according to semantic versioning
  * Ex.: Existing tags 'myservice/1.1.2', 'myservice/1.4.2' and 'yourservice/3.4.1'
  *      If you query for tag prefix 'myservice/', it will return 'myservice/1.4.2'
- * @param repoDir {string} directory of the git repo
- * @param tagPrefix {string} tag prefix for looking for last tag and for generating the next tag
- * @returns The tag with the same prefix that has the greatest semantic version
+ * @param {string} repoDir directory of the git repo
+ * @param {string} tagPrefix tag prefix for looking for last tag and for generating the next tag
+ * @returns {string} The tag with the same prefix that has the greatest semantic version
  */
 const lastTagForPrefix = async (repoDir: string, tagPrefix: string): Promise<string | null> => {
   // list tags by semver in descending order
@@ -96,7 +96,7 @@ const lastTagForPrefix = async (repoDir: string, tagPrefix: string): Promise<str
 
 /**
  * Summarize commit according to semantic versioning
- * @param commits {Commit[]} Collection of commits
+ * @param {Commit[]} commits Collection of commits
  * @returns {CommitsSummary} Summary
  */
 const summarizeCommits = (commits: Commit[]): CommitsSummary => {

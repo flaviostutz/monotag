@@ -11,6 +11,9 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     `
     git init
 
+    git config user.email "you@example.com"
+    git config user.name "Your Name"
+
     // root dir
     echo 'test1' > test1
     git add test1

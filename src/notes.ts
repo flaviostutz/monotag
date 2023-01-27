@@ -4,7 +4,7 @@ import { CommitsSummary } from './types/CommitsSummary';
 
 /**
  * Filters commits according to opts and creates a formatted string with release notes
- * @param opts {BasicOptions} parameters for getting commits and creating the release notes
+ * @param {BasicOptions} opts parameters for getting commits and creating the release notes
  * @returns {string} Release notes
  */
 const releaseNotes = async (opts: BasicOptions): Promise<string> => {

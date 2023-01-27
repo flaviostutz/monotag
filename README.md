@@ -10,7 +10,7 @@ Monotag does the commit filtering by path prefix, looks for the latest tag in a 
 
 Run 'npx monotag --help' or 'npx monotag tag --help' for info on specific commands
 
-You can use this as a library also. [Check documentation here](lib.md)
+You can use this as a library also. Check example below.
 
 ## Example
 
@@ -25,7 +25,7 @@ A monorepo has the following structure:
    /my-lib2
 ```
 
-The team will commit and merge things to "main" branch changing files in all those modules, so your commit log might be:
+The team will commit and merge things to the "main" branch changing files in all those modules, so your commit log might be:
 
 ```
 2023-01-01: feat: adding new API call to google <-- this touched service1 and lib2
@@ -53,6 +53,8 @@ See a complete github actions workflow that publishes libs to NPM with automatic
 
 ## Usage
 
+### CLI
+
 ```text
 monotag [command]
 
@@ -67,10 +69,27 @@ Commands:
 Options:
   --version  Show version number                                       [boolean]
   --help     Show help                                                 [boolean]
-
 ```
 
-## CLI examples
+### Lib
+
+```ts
+import { nextTag, releaseNotes, lastTagForPrefix, filterCommits, summarizeCommits } from 'monotag';
+```
+
+- nextTag - calculates next tag
+- releaseNotes - calculates only release notes based on a commit range on a prefix
+- lastTagForPrefix - find latest tag for a certain tag prefix name
+- filterCommits - find commits that touches a certain path in a range
+- summarizeCommits - gets a list of commits and summarize them according to the conventional commit classification
+
+Check http://github.com/flaviostutz/monotag/src/ for more details.
+
+The library exposes its ts types, so you can use VSCode for auto completing and seeing jsdoc for types.
+
+## Examples
+
+### CLI example
 
 - 'monotag tag'
   - Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes
@@ -80,3 +99,44 @@ Options:
 
 - 'monotag tag --path services/myservice'
   - Generate tag "myservice/1.3.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
+
+## Lib example
+
+- Having a repo with structure
+
+```text
+/modules
+   /mymodule
+   /another-one
+```
+
+- Existing tags:
+  - mymodule/1.6.2,
+  - mymodule/2.4.7,
+  - another-one/0.3.5
+- Existing commits after latest tag:
+  - feat(ui): Cache capability <-- changed mymodule/ files
+  - feat!: Upgrading API interfaces <-- changed another-one/ files
+
+```ts
+import { nextTag } from 'monotag';
+
+const nt = await nextTag({
+  repoDir: 'repos/myrepo',
+  toRef: 'HEAD',
+  path: 'modules/mymodule',
+});
+
+console.log(nt.tagName);
+// shows "2.5.0"
+console.log(nt.releaseNotes)
+// shows "Features: -ui: Cache capability"
+```
+
+- What happened:
+  - default tag prefix is the name of the path: 'mymodule'
+  - find latest tag with prefix 'mymodule/': 'mymodule/2.4.7'
+  - find commits from the latest tag to HEAD
+  - filter out commits that didn't touch files in path 'modules/mymodule', only one commit touched
+  - check the commit message and look for conventional commit patterns. It found prefix 'feat', which is related to a new feature, so semver will be incremented in minor level
+  - Latest tag was mymodule/2.4.7, incrementing minor gives 'mymodule/2.5.0'
