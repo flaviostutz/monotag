@@ -1,6 +1,9 @@
 build: install
 	rm -rf dist
+	# lib build
 	npx esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js
+	# cli build
+	npx esbuild src/cli.ts --bundle --platform=node --outfile=dist/cli.js
 	npx tsc --emitDeclarationOnly --outDir dist
 
 run:
