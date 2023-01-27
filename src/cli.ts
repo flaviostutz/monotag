@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+
+// eslint-disable-next-line node/shebang
 import yargs, { Argv } from 'yargs';
 
 import { releaseNotes } from './notes';
