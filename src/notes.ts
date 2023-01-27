@@ -93,7 +93,8 @@ const formatReleaseNotes = (
     notes += `Refs: ${JSON.stringify(references)
       .replace('[', '')
       .replace(']', '')
-      .replace(/"/g, '')}`;
+      .replace(/"/g, '')
+      .replace(',', ', ')}`;
     notes += '\n\n';
   }
 
@@ -106,7 +107,8 @@ const formatReleaseNotes = (
     notes += `Authors: ${JSON.stringify(authors)
       .replace('[', '')
       .replace(']', '')
-      .replace(/"/g, '')}`;
+      .replace(/"/g, '')
+      .replace(',', ', ')}`;
     notes += '\n\n';
   }
 

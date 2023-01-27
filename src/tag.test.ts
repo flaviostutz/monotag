@@ -8,29 +8,23 @@ describe('when generating next tag with notes', () => {
     await createSampleRepo(repoDir);
   });
   it('should fail if no commits found touching path', async () => {
-    const nt = await nextTag(
-      {
-        repoDir,
-        fromRef: 'auto',
-        toRef: 'HEAD',
-        path: 'inexistentModule',
-        tagPrefix: 'inexistentModule/',
-      },
-      false,
-    );
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'inexistentModule',
+      tagPrefix: 'inexistentModule/',
+    });
     expect(nt.changesDetected).toBe(0);
   });
   it('should return next version if minor changes found in path after last tag', async () => {
-    const nt = await nextTag(
-      {
-        repoDir,
-        fromRef: 'auto',
-        toRef: 'HEAD',
-        path: 'prefix1',
-        tagPrefix: 'prefix1/',
-      },
-      false,
-    );
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix1',
+      tagPrefix: 'prefix1/',
+    });
     console.log(nt.releaseNotes);
     expect(nt.tagName).toBe('prefix1/3.4.0');
     expect(nt.releaseNotes.includes('Features:')).toBeTruthy();
@@ -42,16 +36,13 @@ describe('when generating next tag with notes', () => {
   });
 
   it('should return next version if major changes found in path after last tag', async () => {
-    const nt = await nextTag(
-      {
-        repoDir,
-        fromRef: 'auto',
-        toRef: 'HEAD',
-        path: 'prefix2',
-        tagPrefix: 'prefix2/',
-      },
-      false,
-    );
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix2',
+      tagPrefix: 'prefix2/',
+    });
     expect(nt.tagName).toBe('prefix2/21.0.0');
     expect(nt.releaseNotes.trim()).toBe(`Version 'prefix2/21.0.0'
 

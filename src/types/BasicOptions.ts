@@ -11,4 +11,5 @@ export type BasicOptions = {
   // git ref range (ending point) for searches
   toRef?: string;
   onlyConvCommit?: boolean;
+  verbose?: boolean;
 };

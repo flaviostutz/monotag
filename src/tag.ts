@@ -12,7 +12,7 @@ import { incrementTag } from './utils/incrementTag';
  * @param verbose {boolean}
  * @returns {TagNotes}
  */
-const nextTag = async (opts: NextTagOptions, verbose?: boolean): Promise<TagNotes> => {
+const nextTag = async (opts: NextTagOptions): Promise<TagNotes> => {
   if (!opts.fromRef) {
     throw new Error("'fromRef' is required. Use 'auto' so it will use the latest tag");
   }
@@ -23,7 +23,7 @@ const nextTag = async (opts: NextTagOptions, verbose?: boolean): Promise<TagNote
   // current tag
   const latestTag = await lastTagForPrefix(opts.repoDir, opts.tagPrefix);
 
-  if (verbose && !latestTag) {
+  if (opts.verbose && !latestTag) {
     console.log(`No existing tag found with for prefix "${opts.tagPrefix}"`);
   }
 
@@ -32,7 +32,7 @@ const nextTag = async (opts: NextTagOptions, verbose?: boolean): Promise<TagNote
     opts.fromRef = latestTag ?? '';
   }
 
-  if (verbose) {
+  if (opts.verbose) {
     console.log(
       `Analysing commit range ${opts.fromRef}...${opts.toRef} and filtering path "${opts.path}"`,
     );
@@ -40,7 +40,7 @@ const nextTag = async (opts: NextTagOptions, verbose?: boolean): Promise<TagNote
 
   const commits = await filterCommits(opts);
   if (commits.length === 0) {
-    if (verbose) {
+    if (opts.verbose) {
       console.log('No changes detected in commit range');
     }
     // nothing changed in the commit range
@@ -50,7 +50,7 @@ const nextTag = async (opts: NextTagOptions, verbose?: boolean): Promise<TagNote
     };
   }
 
-  if (verbose) {
+  if (opts.verbose) {
     console.log(`${commits.length} relevant commits found`);
   }
 
