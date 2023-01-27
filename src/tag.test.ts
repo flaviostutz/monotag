@@ -15,7 +15,7 @@ describe('when generating next tag with notes', () => {
       path: 'inexistentModule',
       tagPrefix: 'inexistentModule/',
     });
-    expect(nt.changesDetected).toBe(0);
+    expect(nt).toBeNull();
   });
   it('should return next version if minor changes found in path after last tag', async () => {
     const nt = await nextTag({
@@ -25,6 +25,7 @@ describe('when generating next tag with notes', () => {
       path: 'prefix1',
       tagPrefix: 'prefix1/',
     });
+    if (!nt) throw new Error('Shouldnt be null');
     console.log(nt.releaseNotes);
     expect(nt.tagName).toBe('prefix1/3.4.0');
     expect(nt.releaseNotes.includes('Features:')).toBeTruthy();
@@ -43,6 +44,7 @@ describe('when generating next tag with notes', () => {
       path: 'prefix2',
       tagPrefix: 'prefix2/',
     });
+    if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix2/21.0.0');
     expect(nt.releaseNotes.trim()).toBe(`Version 'prefix2/21.0.0'
 

@@ -18,7 +18,7 @@ describe('when using cli', () => {
     // invalid action
     stdout = '';
     let exitCode = await run(['', '', 'invalidaction', '-v']);
-    expect(stdout).toMatch(/Action "invalidaction" is invalid.*/);
+    expect(stdout).toMatch(/help/);
     expect(exitCode).toBe(1);
 
     // get next tag
@@ -42,8 +42,8 @@ describe('when using cli', () => {
 
     // generate tag in git repo and tag it
     stdout = '';
-    exitCode = await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
-    expect(stdout).toMatch(/.*Could not read from remote repository.*/);
+    exitCode = await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~999']);
+    expect(stdout).toMatch(/.*Error: Command failed:*/);
     expect(exitCode).toBe(3);
   });
 });

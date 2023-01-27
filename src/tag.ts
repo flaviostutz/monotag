@@ -12,7 +12,7 @@ import { incrementTag } from './utils/incrementTag';
  * @param verbose {boolean}
  * @returns {TagNotes}
  */
-const nextTag = async (opts: NextTagOptions): Promise<TagNotes> => {
+const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
   if (!opts.fromRef) {
     throw new Error("'fromRef' is required. Use 'auto' so it will use the latest tag");
   }
@@ -42,6 +42,9 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes> => {
   if (commits.length === 0) {
     if (opts.verbose) {
       console.log('No changes detected in commit range');
+    }
+    if (!latestTag) {
+      return null;
     }
     // nothing changed in the commit range
     return <TagNotes>{

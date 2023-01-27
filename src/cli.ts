@@ -1,4 +1,4 @@
-import yargs, { argv, Argv } from 'yargs';
+import yargs, { Argv } from 'yargs';
 
 import { releaseNotes } from './notes';
 import { nextTag } from './tag';
@@ -14,18 +14,18 @@ const run = async (processArgs: string[]): Promise<number> => {
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
-      (y): Argv => addOptions(y, false),
-    )
-    .command(
-      'notes',
-      'Calculate and show release notes according to detected commits in path',
       (y): Argv =>
-        addOptions(y, true).option('show-notes', {
+        addOptions(y, false).option('show-notes', {
           alias: 'k',
           type: 'string',
           describe: 'Show release notes along with the newer version',
           default: true,
         }),
+    )
+    .command(
+      'notes',
+      'Calculate and show release notes according to detected commits in path',
+      (y): Argv => addOptions(y, true),
     )
     .command(
       'tag-git',
@@ -37,7 +37,18 @@ const run = async (processArgs: string[]): Promise<number> => {
       'Calculate next tag, git-tag and git-push it to remote',
       (y): Argv => addOptions(y, false),
     )
-    .help();
+    .help()
+    .example([
+      [
+        'monotag tag',
+        'Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes',
+      ],
+      [
+        'monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice',
+        'Generate release notes according to changes made in the last 3 commits for changes in dir services/myservice of the repo',
+      ],
+    ])
+    .epilogue('For more information, check https://github.com/flaviostutz/monotag');
 
   const args2 = yargs2.parseSync();
 
@@ -59,6 +70,10 @@ const execAction = async (
 
     if (action === 'tag') {
       const nt = await nextTag(opts);
+      if (nt == null) {
+        console.log('No changes detected and no previous tag found');
+        return 4;
+      }
       console.log(nt.tagName);
       if (showNotes && nt.releaseNotes) {
         console.log('===============');
@@ -76,37 +91,52 @@ const execAction = async (
     if (action === 'tag-git') {
       if (opts.verbose) console.log('Calculating next tag');
       const nt = await nextTag(opts);
-      if (nt.changesDetected > 0) {
+      if (nt && nt.changesDetected > 0) {
         console.log(`Creating tag ${nt.tagName}`);
         execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${nt.releaseNotes}"`, opts.verbose);
         console.log('Tag created successfully');
         return 0;
+      }
+      if (nt == null) {
+        console.log('No changes detected and no previous tag found');
+        return 4;
       }
       console.log(`Skipping tag creation. No changes detected. Latest tag=${nt.tagName}`);
       return 2;
     }
 
     if (action === 'tag-push') {
-      if (opts.verbose) console.log('Calculating next tag');
-      const nt = await nextTag(opts);
-      if (nt.changesDetected > 0) {
-        console.log(`Creating tag ${nt.tagName}`);
-        execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${nt.releaseNotes}"`, opts.verbose);
-        console.log('Pushing tag to remote origin');
-        execCmd(opts.repoDir, `git push origin ${nt.tagName}`, opts.verbose);
-        console.log('Tag created and pushed to origin successfully');
-        return 0;
-      }
-      console.log(`Skipping tag creation. No changes detected. Latest tag=${nt.tagName}`);
-      return 2;
+      return await tagPush(opts);
     }
 
-    yargs2.showHelp();
+    console.log(await yargs2.getHelp());
     return 1;
   } catch (err) {
-    console.log(err);
+    const errs = `${err}`;
+    let i = errs.indexOf('\n');
+    if (i === -1) i = errs.length;
+    console.log(errs.substring(0, i));
     return 3;
   }
+};
+
+const tagPush = async (opts: NextTagOptions): Promise<number> => {
+  if (opts.verbose) console.log('Calculating next tag');
+  const nt = await nextTag(opts);
+  if (nt && nt.changesDetected > 0) {
+    console.log(`Creating tag ${nt.tagName}`);
+    execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${nt.releaseNotes}"`, opts.verbose);
+    console.log('Pushing tag to remote origin');
+    execCmd(opts.repoDir, `git push origin ${nt.tagName}`, opts.verbose);
+    console.log('Tag created and pushed to origin successfully');
+    return 0;
+  }
+  if (nt == null) {
+    console.log('No changes detected and no previous tag found');
+    return 4;
+  }
+  console.log(`Skipping tag creation. No changes detected. Latest tag=${nt.tagName}`);
+  return 2;
 };
 
 const expandDefaults = (args: any): NextTagOptions => {
