@@ -70,7 +70,7 @@ Options:
 
 ```
 
-## Examples
+## CLI examples
 
 - 'monotag tag'
   - Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes
