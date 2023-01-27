@@ -47,6 +47,10 @@ const run = async (processArgs: string[]): Promise<number> => {
         'monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice',
         'Generate release notes according to changes made in the last 3 commits for changes in dir services/myservice of the repo',
       ],
+      [
+        'monotag tag --path services/myservice',
+        'Generate tag "myservice/1.3.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD',
+      ],
     ])
     .epilogue('For more information, check https://github.com/flaviostutz/monotag');
 

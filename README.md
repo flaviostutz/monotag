@@ -1,23 +1,37 @@
 # monotag
 
-Semantic versioning for monorepos based on tag prefix, path prefix, affected files and conventional commit
+Semantic versioning for monorepos based on tag prefix, path prefix, affected files and conventional commit.
+
+Run 'npx monotag --help' or 'npx monotag tag --help' for info on specific commands
+
+You can use this as a library also. [Check documentation here](lib.md)
 
 ## Usage
 
-```sh
-npx monotag [command - tag, notes, tag-git, tag-push, tag-packagejson]
-  --verbose=true (show details in output)
-  --path=/services/mymodule1 (file path inside repo to consider when analysing changes. Commits that dont touch files in this path will be ignored)
-  --prefix=mymodule1 (tag prefix added to generated tags. if not defined will be derived from last path part)
-  --from-ref=auto|tags/mymodule1/1.4.5 (if not defined, will be last version with this same tag prefix)
-  --to-ref=auto|branches/head (if not defined, defaults to HEAD)
-  --semver-level=auto|1|2|3 (if not defined, detect automatically based on semantic commit - if not semantic commit, then level=3)
-  --conventional-commit=true (use only conventional commit styled commits during release notes creation)
-```
+```text
+monotag [command]
 
 Commands:
-  tag - calculate and show next tag
-  notes - calculate and show release notes
-  tag-git - calculate and git-tag next tag
-  tag-push - calculate, git-tag and git-push next tag to remote
-  tag-packagejson - calculate and change packagejson version with the semver part of the tag (the “1.2.3” part, without tag prefix)
+  monotag tag       Calculate and show next tag, incrementing semver according
+                    to detected changes on path
+  monotag notes     Calculate and show release notes according to detected
+                    commits in path
+  monotag tag-git   Calculate next tag and tag it in local git repo
+  monotag tag-push  Calculate next tag, git-tag and git-push it to remote
+
+Options:
+  --version  Show version number                                       [boolean]
+  --help     Show help                                                 [boolean]
+
+```
+
+## Examples
+
+- 'monotag tag'
+  - Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes
+  
+- 'monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice'
+  - Generate release notes according to changes made in the last 3 commits for changes in dir services/myservice of the repo
+
+- 'monotag tag --path services/myservice'
+  - Generate tag "myservice/1.3.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
