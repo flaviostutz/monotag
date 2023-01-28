@@ -34,54 +34,58 @@ const formatReleaseNotes = (
   let notes = '';
 
   if (versionName) {
-    notes += `Version '${versionName}'\n\n`;
+    notes += `## Version '${versionName}'\n\n`;
   }
 
   // features
   if (commitsSummary.features.length > 0) {
-    notes += 'Features:';
+    notes += '## Features\n\n';
     notes = commitsSummary.features.reduce((pv, feat) => {
-      return `${pv}\n  - ${feat}`;
+      return `${pv}- ${feat}\n`;
     }, notes);
-    notes += '\n\n';
+    notes += '\n';
   }
 
   // fixes
   if (commitsSummary.fixes.length > 0) {
-    notes += 'Fixes:';
+    notes += '## Fixes\n\n';
     notes = commitsSummary.fixes.reduce((pv, fix) => {
-      return `${pv}\n  - ${fix}`;
+      return `${pv}- ${fix}\n`;
     }, notes);
-    notes += '\n\n';
+    notes += '\n';
   }
 
   // maintenance
   if (commitsSummary.maintenance.length > 0) {
-    notes += 'Maintenance:';
+    notes += '## Maintenance\n\n';
     notes = commitsSummary.maintenance.reduce((pv, maintenance) => {
-      return `${pv}\n  - ${maintenance}`;
+      return `${pv}- ${maintenance}\n`;
     }, notes);
-    notes += '\n\n';
+    notes += '\n';
   }
 
   // misc (non conventional commits)
   if (!onlyConvCommit) {
     if (commitsSummary.nonConventional.length > 0) {
-      notes += 'Misc:';
+      notes += '## Misc\n\n';
       notes = commitsSummary.nonConventional.reduce((pv, nonConventional) => {
-        return `${pv}\n  - ${nonConventional}`;
+        return `${pv}- ${nonConventional}\n`;
       }, notes);
-      notes += '\n\n';
+      notes += '\n';
     }
   }
 
   // notes
   if (commitsSummary.notes.length > 0) {
-    notes += 'Notes:';
+    notes += '## Notes\n\n';
     notes = commitsSummary.notes.reduce((pv, cnotes) => {
-      return `${pv}\n  - ${cnotes}`;
+      return `${pv}- ${cnotes}\n`;
     }, notes);
-    notes += '\n\n';
+    notes += '\n';
+  }
+
+  if (commitsSummary.references.length > 0 && commitsSummary.authors.length > 0) {
+    notes += '## Info\n\n';
   }
 
   // references
@@ -90,12 +94,12 @@ const formatReleaseNotes = (
     const references = commitsSummary.references.filter((value, index, self) => {
       return self.indexOf(value) === index;
     });
-    notes += `Refs: ${JSON.stringify(references)
+    notes += `- Refs: ${JSON.stringify(references)
       .replace('[', '')
       .replace(']', '')
       .replace(/"/g, '')
       .replace(',', ', ')}`;
-    notes += '\n\n';
+    notes += '\n';
   }
 
   // authors
@@ -104,12 +108,12 @@ const formatReleaseNotes = (
     const authors = commitsSummary.authors.filter((value, index, self) => {
       return self.indexOf(value) === index;
     });
-    notes += `Authors: ${JSON.stringify(authors)
+    notes += `- Authors: ${JSON.stringify(authors)
       .replace('[', '')
       .replace(']', '')
       .replace(/"/g, '')
       .replace(',', ', ')}`;
-    notes += '\n\n';
+    notes += '\n';
   }
 
   return notes;

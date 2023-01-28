@@ -96,7 +96,15 @@ const execAction = async (
     const nt = await nextTag(opts);
     if (nt && nt.changesDetected > 0) {
       console.log(`Creating tag ${nt.tagName}`);
-      execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${nt.releaseNotes}"`, opts.verbose);
+
+      // transform notes into a single line
+      const notes = nt.releaseNotes
+        .replace(/##(.*)\n\n/, '$1:')
+        .replace(/\n\n/, '\n')
+        .replace(/\n/, ';')
+        .replace(/- /, '');
+
+      execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${notes}"`, opts.verbose);
       console.log('Tag created successfully');
       return 0;
     }

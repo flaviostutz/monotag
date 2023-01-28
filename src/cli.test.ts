@@ -29,9 +29,9 @@ describe('when using cli', () => {
 
     // get release notes
     stdout = '';
-    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3', '-v']);
+    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
     expect(stdout).toMatch('Refs: closes #45');
-    expect(stdout).toMatch('Maintenance:');
+    expect(stdout).toMatch('## Features');
     expect(exitCode).toBe(0);
 
     // generate tag in git repo and tag it

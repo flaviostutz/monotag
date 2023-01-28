@@ -17,4 +17,8 @@ jobs:
           git config --global user.email "flaviostutz@gmail.com"
           git config --global user.name "Flávio Stutz"
           npx -y monotag@latest tag-push
-
+        env:
+          # create a personal token and a secret with name GITHUB_TOKEN with its contents
+          # this is needed if you want the tag push to trigger another workflow
+          # https://github.com/orgs/community/discussions/27028
+          GITHUB_TOKEN: ${{ secrets.GH_PERSONAL_TOKEN }}

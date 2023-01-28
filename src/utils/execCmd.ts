@@ -8,6 +8,7 @@ export const execCmd = (baseDir: string, commands: string, echo?: boolean): stri
     }
     return `${cur} && ${line}`;
   }, `cd ${baseDir}`);
+
   if (echo) {
     console.log(`${new Date().toISOString()}: Executing on baseDir=${baseDir}`);
     console.log(`${new Date().toISOString()}: ${cmd}`);

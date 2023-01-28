@@ -28,11 +28,11 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     console.log(nt.releaseNotes);
     expect(nt.tagName).toBe('prefix1/3.4.0');
-    expect(nt.releaseNotes.includes('Features:')).toBeTruthy();
+    expect(nt.releaseNotes.includes('## Features')).toBeTruthy();
     expect(
       nt.releaseNotes.includes('updating test1 and test2 files for module prefix1'),
     ).toBeTruthy();
-    expect(nt.releaseNotes.includes('Fixes:')).toBeTruthy();
+    expect(nt.releaseNotes.includes('## Fixes')).toBeTruthy();
     expect(nt.releaseNotes.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
   });
 
@@ -46,21 +46,25 @@ describe('when generating next tag with notes', () => {
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix2/21.0.0');
-    expect(nt.releaseNotes.trim()).toBe(`Version 'prefix2/21.0.0'
+    expect(nt.releaseNotes.trim()).toBe(`## Version 'prefix2/21.0.0'
 
-Features:
-  - 12 prefix2 adding test3 file for module prefix2
-  - 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
+## Features
 
-Fixes:
-  - anyscope: 10 prefix2 updating test1 and test2 files again for module prefix2
+- 12 prefix2 adding test3 file for module prefix2
+- 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
 
-Maintenance:
-  - 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
+## Fixes
 
-Refs: closes #45
+- anyscope: 10 prefix2 updating test1 and test2 files again for module prefix2
 
-Authors: Flávio Stutz <flaviostutz@gmail.com>`);
+## Maintenance
+
+- 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
+
+## Info
+
+- Refs: closes #45
+- Authors: Flávio Stutz <flaviostutz@gmail.com>`);
   });
 
   it('should return zero commits for inexisting path', async () => {

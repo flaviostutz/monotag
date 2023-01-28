@@ -1,3 +1,5 @@
+import { FormatType } from './FormatType';
+
 /**
  * Basic options for searching for changes in a certain path
  */
@@ -11,5 +13,6 @@ export type BasicOptions = {
   // git ref range (ending point) for searches
   toRef?: string;
   onlyConvCommit?: boolean;
+  notesFormatType?: FormatType;
   verbose?: boolean;
 };
