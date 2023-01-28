@@ -140,3 +140,4 @@ console.log(nt.releaseNotes)
   - filter out commits that didn't touch files in path 'modules/mymodule', only one commit touched
   - check the commit message and look for conventional commit patterns. It found prefix 'feat', which is related to a new feature, so semver will be incremented in minor level
   - Latest tag was mymodule/2.4.7, incrementing minor gives 'mymodule/2.5.0'
+
