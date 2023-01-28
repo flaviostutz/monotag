@@ -18,6 +18,17 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('31.0.0');
   });
+  it('should return latest if nothing changed', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: '',
+      tagPrefix: '',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('31.0.0');
+  });
   it('should fail if no commits found touching path', async () => {
     const nt = await nextTag({
       repoDir,
@@ -45,6 +56,18 @@ describe('when generating next tag with notes', () => {
     ).toBeTruthy();
     expect(nt.releaseNotes.includes('## Fixes')).toBeTruthy();
     expect(nt.releaseNotes.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
+  });
+  it('should return latest only with different suffix if nothing changed', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix1',
+      tagPrefix: 'prefix1/',
+      tagSuffix: '-alphaaaaa',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix1/3.5.0-alphaaaaa');
   });
   it('should return next version if minor changes found in path after last tag', async () => {
     const nt = await nextTag({
