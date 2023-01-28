@@ -21,7 +21,7 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
   }
 
   // current tag
-  const latestTag = await lastTagForPrefix(opts.repoDir, opts.tagPrefix);
+  const latestTag = await lastTagForPrefix(opts.repoDir, opts.tagPrefix, opts.verbose);
 
   if (opts.verbose && !latestTag) {
     console.log(`No existing tag found with for prefix "${opts.tagPrefix}"`);

@@ -26,7 +26,7 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
   }
 
   // check if command is successfull
-  execCmd(opts.repoDir, `git log ${refs} --pretty=format:"%H"`, false);
+  execCmd(opts.repoDir, `git log ${refs} --pretty=format:"%H"`, opts.verbose);
 
   const out = execCmd(
     opts.repoDir,
@@ -72,9 +72,13 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
  * @param {string} tagPrefix tag prefix for looking for last tag and for generating the next tag
  * @returns {string} The tag with the same prefix that has the greatest semantic version
  */
-const lastTagForPrefix = async (repoDir: string, tagPrefix: string): Promise<string | null> => {
+const lastTagForPrefix = async (
+  repoDir: string,
+  tagPrefix: string,
+  verbose?: boolean,
+): Promise<string | null> => {
   // list tags by semver in descending order
-  const tags = execCmd(repoDir, 'git tag --sort=-v:refname').split('\n');
+  const tags = execCmd(repoDir, 'git tag --sort=-v:refname', verbose).split('\n');
 
   for (let i = 0; i < tags.length; i += 1) {
     const tag = tags[i];

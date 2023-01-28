@@ -67,61 +67,53 @@ const execAction = async (
   showNotes: boolean,
   yargs2: Argv,
 ): Promise<number> => {
-  try {
-    if (opts.verbose) {
-      console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
-    }
-
-    if (action === 'tag') {
-      const nt = await nextTag(opts);
-      if (nt == null) {
-        console.log('No changes detected and no previous tag found');
-        return 4;
-      }
-      console.log(nt.tagName);
-      if (showNotes && nt.releaseNotes) {
-        console.log('===============');
-        console.log(nt.releaseNotes);
-      }
-      return 0;
-    }
-
-    if (action === 'notes') {
-      const nt = await releaseNotes(opts);
-      console.log(nt);
-      return 0;
-    }
-
-    if (action === 'tag-git') {
-      if (opts.verbose) console.log('Calculating next tag');
-      const nt = await nextTag(opts);
-      if (nt && nt.changesDetected > 0) {
-        console.log(`Creating tag ${nt.tagName}`);
-        execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${nt.releaseNotes}"`, opts.verbose);
-        console.log('Tag created successfully');
-        return 0;
-      }
-      if (nt == null) {
-        console.log('No changes detected and no previous tag found');
-        return 4;
-      }
-      console.log(`Skipping tag creation. No changes detected. Latest tag=${nt.tagName}`);
-      return 2;
-    }
-
-    if (action === 'tag-push') {
-      return await tagPush(opts);
-    }
-
-    console.log(await yargs2.getHelp());
-    return 1;
-  } catch (err) {
-    const errs = `${err}`;
-    let i = errs.indexOf('\n');
-    if (i === -1) i = errs.length;
-    console.log(errs.substring(0, i));
-    return 3;
+  if (opts.verbose) {
+    console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
   }
+
+  if (action === 'tag') {
+    const nt = await nextTag(opts);
+    if (nt == null) {
+      console.log('No changes detected and no previous tag found');
+      return 4;
+    }
+    console.log(nt.tagName);
+    if (showNotes && nt.releaseNotes) {
+      console.log('===============');
+      console.log(nt.releaseNotes);
+    }
+    return 0;
+  }
+
+  if (action === 'notes') {
+    const nt = await releaseNotes(opts);
+    console.log(nt);
+    return 0;
+  }
+
+  if (action === 'tag-git') {
+    if (opts.verbose) console.log('Calculating next tag');
+    const nt = await nextTag(opts);
+    if (nt && nt.changesDetected > 0) {
+      console.log(`Creating tag ${nt.tagName}`);
+      execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${nt.releaseNotes}"`, opts.verbose);
+      console.log('Tag created successfully');
+      return 0;
+    }
+    if (nt == null) {
+      console.log('No changes detected and no previous tag found');
+      return 4;
+    }
+    console.log(`Skipping tag creation. No changes detected. Latest tag=${nt.tagName}`);
+    return 2;
+  }
+
+  if (action === 'tag-push') {
+    return await tagPush(opts);
+  }
+
+  console.log(await yargs2.getHelp());
+  return 1;
 };
 
 const tagPush = async (opts: NextTagOptions): Promise<number> => {
@@ -148,8 +140,8 @@ const expandDefaults = (args: any): NextTagOptions => {
   // detect current dir reference to repo
   let path = <string>args.path;
   if (path === 'auto') {
-    const gitRootDir = execCmd(process.cwd(), 'git rev-parse --show-toplevel');
-    const currentDir = execCmd(process.cwd(), 'pwd');
+    const gitRootDir = execCmd(process.cwd(), 'git rev-parse --show-toplevel', verbose);
+    const currentDir = execCmd(process.cwd(), 'pwd', verbose);
     if (currentDir.includes(gitRootDir)) {
       path = currentDir.replace(gitRootDir, '');
     } else {
