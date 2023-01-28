@@ -84,7 +84,7 @@ const formatReleaseNotes = (
     notes += '\n';
   }
 
-  if (commitsSummary.references.length > 0 && commitsSummary.authors.length > 0) {
+  if (commitsSummary.references.length > 0 || commitsSummary.authors.length > 0) {
     notes += '## Info\n\n';
   }
 
