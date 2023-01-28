@@ -27,7 +27,7 @@ describe('when generating next tag with notes', () => {
     });
     if (!nt) throw new Error('Shouldnt be null');
     console.log(nt.releaseNotes);
-    expect(nt.tagName).toBe('prefix1/3.4.0');
+    expect(nt.tagName).toBe('prefix1/3.5.0');
     expect(nt.releaseNotes.includes('## Features')).toBeTruthy();
     expect(
       nt.releaseNotes.includes('updating test1 and test2 files for module prefix1'),
@@ -35,7 +35,18 @@ describe('when generating next tag with notes', () => {
     expect(nt.releaseNotes.includes('## Fixes')).toBeTruthy();
     expect(nt.releaseNotes.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
   });
-
+  it('should return next version if minor changes found in path after last tag', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix1',
+      tagPrefix: 'prefix1/',
+      tagSuffix: '-beta-gama',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix1/3.5.0-beta-gama');
+  });
   it('should return next version if major changes found in path after last tag', async () => {
     const nt = await nextTag({
       repoDir,
@@ -66,6 +77,31 @@ describe('when generating next tag with notes', () => {
 - Refs: closes #45
 - Authors: Flávio Stutz <flaviostutz@gmail.com>`);
   });
+  it('should simply return latest tag if no new commits found after latest tag in path', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix3',
+      tagPrefix: 'prefix3/',
+    });
+    if (!nt) throw new Error('Shoulnt be null');
+    expect(nt.tagName).toBe('prefix3/1.0.0-alpha');
+    expect(nt.releaseNotes).toBeUndefined();
+  });
+  it('should return latest tag version with new prefix if no new commits found after latest tag in path', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix3',
+      tagPrefix: 'prefix3/',
+      tagSuffix: '-rc1.0-all',
+    });
+    if (!nt) throw new Error('Shoulnt be null');
+    expect(nt.tagName).toBe('prefix3/1.0.0-rc1.0-all');
+    expect(nt.releaseNotes).toBeUndefined();
+  });
 
   it('should return zero commits for inexisting path', async () => {
     const clogs = await filterCommits({
@@ -90,7 +126,7 @@ describe('when generating next tag with notes', () => {
   it('should return commits related to prefix1 path', async () => {
     const clogs = await filterCommits({
       repoDir,
-      fromRef: 'HEAD~14',
+      fromRef: 'HEAD~15',
       toRef: 'HEAD',
       path: 'prefix1',
     });
@@ -101,7 +137,7 @@ describe('when generating next tag with notes', () => {
   it('should return commits related to prefix2 path', async () => {
     const clogs = await filterCommits({
       repoDir,
-      fromRef: 'HEAD~10',
+      fromRef: 'HEAD~11',
       toRef: 'HEAD',
       path: 'prefix2',
     });

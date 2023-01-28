@@ -9,10 +9,12 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
   execCmd(
     repoDir,
     `
+    set -e
+
     git init
 
-    git config user.email "flaviostutz@gmail.com"
-    git config user.name "Flávio Stutz"
+    git config user.email 'flaviostutz@gmail.com'
+    git config user.name 'Flávio Stutz'
 
     // root dir
     echo 'test1' > test1
@@ -46,6 +48,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git tag prefix1/2.0.0
     git tag prefix1/3.2.1
     git tag prefix1/3.3.5
+    git tag prefix1/3.4.5-alpha
 
     // prefix2 dir
     mkdir -p prefix2
@@ -78,6 +81,13 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git tag prefix2/20.0.0-alpha-volume1
     git tag prefix2/20.10.0
 
+    // prefix3 dir
+    mkdir -p prefix3
+
+    echo 'test1' > prefix3/test1
+    git add prefix3/test1
+    git commit -m 'feat(test): 88 prefix3 adding test1 file'
+    git tag prefix3/1.0.0-alpha
 
     // add commits without tags yet (candidates for next tags)
     echo 'test1c' > prefix1/test1

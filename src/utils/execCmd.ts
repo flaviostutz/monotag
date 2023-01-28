@@ -9,6 +9,22 @@ export const execCmd = (baseDir: string, commands: string, echo?: boolean): stri
     return `${cur} && ${line}`;
   }, `cd ${baseDir}`);
 
+  // if (commands.includes('"')) {
+  //   throw new Error(`Command |${commands}| cannot contain " character`);
+  // }
+
+  // // transform bash into a single liner
+  // const commands2 = commands
+  //   .trim()
+  //   // .replace(/"/g, "'")
+  //   .replace(/\n+/g, ';')
+  //   .replace(/\/\/.*?/g, '')
+  //   .replace(/[ ]+/g, ' ')
+  //   .replace(/[;]+/g, ';')
+  //   .replace(/^[ ;]+/g, '');
+  //
+  // const cmd = `cd ${baseDir} && /bin/bash -c "${commands2}"`;
+
   if (echo) {
     console.log(`${new Date().toISOString()}: Executing on baseDir=${baseDir}`);
     console.log(`${new Date().toISOString()}: ${cmd}`);

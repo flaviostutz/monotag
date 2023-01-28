@@ -88,10 +88,12 @@ const lastTagForPrefix = async (
     }
     if (tagPrefix) {
       if (tparts[2] === tagPrefix) {
-        return tparts[1];
+        return tag;
+        // return tparts[1];
       }
     } else if (!tparts[2]) {
-      return tparts[1];
+      return tag;
+      // return tparts[1];
     }
   }
   // tag with prefix not found

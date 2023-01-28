@@ -7,6 +7,8 @@ import { SemverLevel } from './SemverLevel';
 export type NextTagOptions = BasicOptions & {
   // Tag prefix to look for latest tag and for generating the tag
   tagPrefix: string;
+  // Tag suffix to add to generated tag
+  tagSuffix?: string;
   // Which level to increment the version. If null, will be automatic, based on commit messages
   semverLevel?: SemverLevel;
 };

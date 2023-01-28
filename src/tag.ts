@@ -3,6 +3,7 @@ import { formatReleaseNotes } from './notes';
 import { NextTagOptions } from './types/NextTagOptions';
 import { TagNotes } from './types/TagNotes';
 import { incrementTag } from './utils/incrementTag';
+import { tagParts } from './utils/tagParts';
 
 /**
  * Checks latest tag for a certain prefix, checks a range of commit and calculates
@@ -12,6 +13,7 @@ import { incrementTag } from './utils/incrementTag';
  * @param {boolean} verbose
  * @returns {TagNotes}
  */
+// eslint-disable-next-line complexity
 const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
   if (!opts.fromRef) {
     throw new Error("'fromRef' is required. Use 'auto' so it will use the latest tag");
@@ -47,6 +49,13 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
       return null;
     }
     // nothing changed in the commit range
+    const tparts = tagParts(latestTag);
+    if (opts.tagSuffix && tparts) {
+      return <TagNotes>{
+        tagName: `${tparts[2] ? tparts[2] : ''}${tparts[3]}${opts.tagSuffix}`,
+        changesDetected: 0,
+      };
+    }
     return <TagNotes>{
       tagName: latestTag,
       changesDetected: 0,
@@ -60,7 +69,11 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
   const commitsSummary = summarizeCommits(commits);
 
   const currentTag = latestTag ?? `${opts.tagPrefix}0.0.0`;
-  const tagName = incrementTag(currentTag, opts.semverLevel ?? commitsSummary.level);
+  const tagName = incrementTag(
+    currentTag,
+    opts.semverLevel ?? commitsSummary.level,
+    opts.tagSuffix,
+  );
 
   const releaseNotes = formatReleaseNotes(commitsSummary, opts.onlyConvCommit, tagName);
 

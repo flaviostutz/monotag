@@ -8,7 +8,7 @@ describe('when using git', () => {
   });
   it('should get latest tag for prefix1', async () => {
     const ltag = await lastTagForPrefix(repoDir, 'prefix1/');
-    expect(ltag).toBe('prefix1/3.3.5');
+    expect(ltag).toBe('prefix1/3.4.5-alpha');
   });
   it('should get latest tag for prefix2', async () => {
     const ltag = await lastTagForPrefix(repoDir, 'prefix2/');
