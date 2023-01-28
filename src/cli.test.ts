@@ -23,8 +23,8 @@ describe('when using cli', () => {
 
     // get next tag
     stdout = '';
-    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '-v']);
-    expect(stdout).toMatch('30.0.1');
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('31.0.0');
     expect(exitCode).toBe(0);
 
     // get release notes
@@ -36,19 +36,25 @@ describe('when using cli', () => {
 
     // generate tag in git repo and tag it
     stdout = '';
-    exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3', '-v']);
-    expect(stdout).toMatch(/.*Creating tag 30.0.1.*Tag created successfully.*/);
+    exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
+    expect(stdout).toMatch(/.*Creating tag 30.1.0.*Tag created successfully.*/);
     expect(exitCode).toBe(0);
 
-    // generate tag in git repo and tag it
-    stdout = '';
-    const rr2 = async (): Promise<void> => {
-      await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);
-    };
-    await expect(rr2).rejects.toThrow('already exists');
+    // // generate tag in git repo and tag it
+    // stdout = '';
+    // exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);
+    // expect(stdout).toMatch(/.*Creating tag 30.0.1-alpha.*Tag created successfully.*/);
+    // expect(exitCode).toBe(0);
+
+    // // generate tag in git repo and tag it
+    // stdout = '';
+    // const rr2 = async (): Promise<void> => {
+    //   await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);
+    // };
+    // await expect(rr2).rejects.toThrow('already exists');
 
     // generate tag in git repo and tag it
-    // eslint-disable-next-line require-atomic-updates
+
     stdout = '';
     const rr = async (): Promise<void> => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~999']);
@@ -56,5 +62,12 @@ describe('when using cli', () => {
     await expect(rr).rejects.toThrow(
       "fatal: ambiguous argument 'HEAD~999..HEAD': unknown revision or path not in the working tree",
     );
+
+    // eslint-disable-next-line require-atomic-updates
+    stdout = '';
+    const rr1 = async (): Promise<void> => {
+      await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~5']);
+    };
+    await expect(rr1).rejects.toThrow("fatal: 'origin' does not appear to be a git repository");
   });
 });

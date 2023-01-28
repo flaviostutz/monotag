@@ -230,7 +230,7 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
       type: 'number',
       describe:
         'Increase tag in specific semver level (1,2,3). If not defined, detect automatically based on semantic commit',
-      default: 0,
+      default: null,
     })
       .option('prefix', {
         alias: 'p',

@@ -7,7 +7,7 @@ describe('when generating next tag with notes', () => {
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
-  it('should increment minor on root path/prefix', async () => {
+  it('should increment major on root path/prefix because something has breaking change in history', async () => {
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
