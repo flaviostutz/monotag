@@ -1,0 +1,15 @@
+name: Create tag automatically
+
+on:
+  workflow_dispatch:
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    # permissions:
+    #   contents: write
+    steps:
+    - name: Create tag and push to repo
+      run: |
+        npx -y monotag@latest tag-push
+
