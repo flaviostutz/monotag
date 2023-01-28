@@ -6,11 +6,11 @@ This lib can help you if you want to tag changes in specific parts of the monore
 
 Normally this is not easy because the monorepo shares the entire commit history and to identify which commits touched a specific dir requires some sort of filtering.
 
-Monotag does the commit filtering by path prefix, looks for the latest tag in a specific part of the repo (by tag prefix), creates release notes per prefix/path and increments the tag according to semantic versioning and conventional commits.
+<img src="diagram.png" with="600">
 
 Run 'npx monotag --help' or 'npx monotag tag --help' for info on specific commands
 
-You can use this as a library also. Check example below.
+You can use this as a library also. Check examples below.
 
 ## Example
 
