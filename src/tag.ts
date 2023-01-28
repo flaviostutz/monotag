@@ -48,6 +48,7 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
     if (!latestTag) {
       return null;
     }
+
     // nothing changed in the commit range
     const tparts = tagParts(latestTag);
     if (opts.tagSuffix && tparts) {

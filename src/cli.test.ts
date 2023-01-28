@@ -42,6 +42,20 @@ describe('when using cli', () => {
 
     // generate tag in git repo and tag it
     stdout = '';
+    exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);
+    expect(stdout).toMatch(/.*Creating tag 30.0.1-alpha.*Tag created successfully.*/);
+    expect(exitCode).toBe(0);
+
+    // generate tag in git repo and tag it
+    stdout = '';
+    const rr2 = async (): Promise<void> => {
+      await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);
+    };
+    await expect(rr2).rejects.toThrow('already exists');
+
+    // generate tag in git repo and tag it
+    // eslint-disable-next-line require-atomic-updates
+    stdout = '';
     const rr = async (): Promise<void> => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~999']);
     };

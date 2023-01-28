@@ -94,25 +94,24 @@ const execAction = async (
   if (action === 'tag-git') {
     if (opts.verbose) console.log('Calculating next tag');
     const nt = await nextTag(opts);
-    if (nt && nt.changesDetected > 0) {
-      console.log(`Creating tag ${nt.tagName}`);
+    if (nt == null) {
+      console.log('Skipping tag creation. No changes detected and no previous tag found');
+      return 2;
+    }
+    console.log(`Creating tag ${nt.tagName}`);
 
-      // transform notes into a single line
-      const notes = nt.releaseNotes.split('\n').reduce((prev: string, cur: string): string => {
+    // transform notes into a single line
+    let notes = '';
+    if (nt.releaseNotes) {
+      notes = nt.releaseNotes.split('\n').reduce((prev: string, cur: string): string => {
         if (cur.trim().length === 0) return prev;
         return `${prev} -m "${cur}"`;
       }, '');
+    }
 
-      execCmd(opts.repoDir, `git tag ${nt.tagName} ${notes}`, opts.verbose);
-      console.log('Tag created successfully');
-      return 0;
-    }
-    if (nt == null) {
-      console.log('No changes detected and no previous tag found');
-      return 4;
-    }
-    console.log(`Skipping tag creation. No changes detected. Latest tag=${nt.tagName}`);
-    return 2;
+    execCmd(opts.repoDir, `git tag ${nt.tagName} ${notes}`, opts.verbose);
+    console.log('Tag created successfully');
+    return 0;
   }
 
   if (action === 'tag-push') {
@@ -178,6 +177,7 @@ const expandDefaults = (args: any): NextTagOptions => {
     ...basicOpts,
     ...{
       tagPrefix,
+      tagSuffix: args.suffix,
       semverLevel: <number>args['semver-level'],
     },
   };
@@ -231,13 +231,20 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
       describe:
         'Increase tag in specific semver level (1,2,3). If not defined, detect automatically based on semantic commit',
       default: 0,
-    }).option('prefix', {
-      alias: 'p',
-      type: 'string',
-      describe:
-        'Tag prefix added to generated tags. If not defined will be derived from last path part',
-      default: 'auto',
-    });
+    })
+      .option('prefix', {
+        alias: 'p',
+        type: 'string',
+        describe:
+          'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part',
+        default: 'auto',
+      })
+      .option('suffix', {
+        alias: 's',
+        type: 'string',
+        describe: 'Tag suffix to be added to generated tags',
+        default: '',
+      });
   }
 
   return y1;
