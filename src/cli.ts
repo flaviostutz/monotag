@@ -109,7 +109,7 @@ const execAction = async (
   }
 
   if (action === 'tag-push') {
-    return await tagPush(opts);
+    return tagPush(opts);
   }
 
   console.log(await yargs2.getHelp());
