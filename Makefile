@@ -3,7 +3,7 @@ build: install
 	# lib build
 	npx esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js
 	# cli build
-	npx esbuild src/cli.ts --bundle --platform=node --outfile=dist/cli.js
+	npx esbuild src/main.ts --bundle --platform=node --outfile=dist/main.js
 	npx tsc --emitDeclarationOnly --outDir dist
 
 run:
