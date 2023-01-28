@@ -98,13 +98,12 @@ const execAction = async (
       console.log(`Creating tag ${nt.tagName}`);
 
       // transform notes into a single line
-      const notes = nt.releaseNotes
-        .replace(/##(.*)\n\n/, '$1:')
-        .replace(/\n\n/, '\n')
-        .replace(/\n/, ';')
-        .replace(/- /, '');
+      const notes = nt.releaseNotes.split('\n').reduce((prev: string, cur: string): string => {
+        if (cur.trim().length === 0) return prev;
+        return `${prev} -m "${cur}"`;
+      }, '');
 
-      execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${notes}"`, opts.verbose);
+      execCmd(opts.repoDir, `git tag ${nt.tagName} ${notes}`, opts.verbose);
       console.log('Tag created successfully');
       return 0;
     }
