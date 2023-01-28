@@ -34,7 +34,7 @@ const formatReleaseNotes = (
   let notes = '';
 
   if (versionName) {
-    notes += `## Version '${versionName}'\n\n`;
+    notes += `## Version ${versionName}\n\n`;
   }
 
   // features

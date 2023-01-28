@@ -46,7 +46,7 @@ describe('when generating next tag with notes', () => {
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix2/21.0.0');
-    expect(nt.releaseNotes.trim()).toBe(`## Version 'prefix2/21.0.0'
+    expect(nt.releaseNotes.trim()).toBe(`## Version prefix2/21.0.0
 
 ## Features
 
