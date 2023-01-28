@@ -7,6 +7,17 @@ describe('when generating next tag with notes', () => {
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
+  it('should increment minor on root path/prefix', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: '',
+      tagPrefix: '',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('31.0.0');
+  });
   it('should fail if no commits found touching path', async () => {
     const nt = await nextTag({
       repoDir,
@@ -126,7 +137,7 @@ describe('when generating next tag with notes', () => {
   it('should return commits related to prefix1 path', async () => {
     const clogs = await filterCommits({
       repoDir,
-      fromRef: 'HEAD~15',
+      fromRef: 'HEAD~16',
       toRef: 'HEAD',
       path: 'prefix1',
     });
@@ -137,7 +148,7 @@ describe('when generating next tag with notes', () => {
   it('should return commits related to prefix2 path', async () => {
     const clogs = await filterCommits({
       repoDir,
-      fromRef: 'HEAD~11',
+      fromRef: 'HEAD~12',
       toRef: 'HEAD',
       path: 'prefix2',
     });
@@ -148,11 +159,11 @@ describe('when generating next tag with notes', () => {
   it('should return last 5 commits', async () => {
     const clogs = await filterCommits({
       repoDir,
-      fromRef: 'HEAD~5',
+      fromRef: 'HEAD~6',
       toRef: 'HEAD',
       path: '',
     });
-    expect(clogs).toHaveLength(5);
+    expect(clogs).toHaveLength(6);
     expect(clogs[0].message.includes('10')).toBeTruthy();
     expect(clogs[1].message.includes('11')).toBeTruthy();
     expect(clogs[2].message.includes('12')).toBeTruthy();

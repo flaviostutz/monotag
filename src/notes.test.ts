@@ -9,7 +9,7 @@ describe('when creating release notes notes', () => {
   it('should return release notes for a commit range', async () => {
     const nt = await releaseNotes({
       repoDir,
-      fromRef: 'HEAD~2',
+      fromRef: 'HEAD~3',
       toRef: 'HEAD',
       path: 'prefix2',
     });

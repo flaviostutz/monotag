@@ -126,6 +126,10 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git add prefix1/test4
     git commit -m 'feat: 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2'
 
+    echo 'test2' > test2
+    git add test2
+    git commit -m 'feat: 15 adding test2 file to root'
+
     `,
     false,
   );
