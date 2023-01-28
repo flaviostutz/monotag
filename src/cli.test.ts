@@ -42,8 +42,11 @@ describe('when using cli', () => {
 
     // generate tag in git repo and tag it
     stdout = '';
-    exitCode = await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~999']);
-    expect(stdout).toMatch(/.*Error: Command failed:*/);
-    expect(exitCode).toBe(3);
+    const rr = async (): Promise<void> => {
+      await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~999']);
+    };
+    await expect(rr).rejects.toThrow(
+      "fatal: ambiguous argument 'HEAD~999..HEAD': unknown revision or path not in the working tree",
+    );
   });
 });
