@@ -49,7 +49,7 @@ npx monotag tag --path=services/my-service2
 
 ```
 
-See a complete github actions workflow that publishes libs to NPM with automatic versioning and release notes generation in a monorepo using monotag [here](https://github.com/flaviostutz/idempotender/tree/main/.github/workflows)
+See a complete github actions workflow that publishes libs to NPM with automatic versioning and release notes generation in a monorepo using monotag [here](https://github.com/flaviostutz/monotag/blob/1.0.14/.github/workflows/create-next-tag.yml)
 
 ## Usage
 
