@@ -40,6 +40,7 @@ describe('when using cli', () => {
     expect(stdout).toMatch(/.*Creating tag 30.1.0.*Tag created successfully.*/);
     expect(exitCode).toBe(0);
 
+    // these were failing on CI/CD but not locally (maybe due to race conditions)
     // // generate tag in git repo and tag it
     // stdout = '';
     // exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);

@@ -14,13 +14,7 @@ const run = async (processArgs: string[]): Promise<number> => {
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
-      (y): Argv =>
-        addOptions(y, false).option('show-notes', {
-          alias: 'k',
-          type: 'string',
-          describe: 'Show release notes along with the newer version',
-          default: true,
-        }),
+      (y): Argv => addOptions(y, false),
     )
     .command(
       'notes',
@@ -71,7 +65,16 @@ const execAction = async (
     console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
   }
 
-  if (action === 'tag') {
+  // NOTES ACTION
+  if (action === 'notes') {
+    const nt = await releaseNotes(opts);
+    console.log(nt);
+    return 0;
+  }
+
+  // TAG* ACTIONS
+  if (action.startsWith('tag')) {
+    // calculate and show tag
     const nt = await nextTag(opts);
     if (nt == null) {
       console.log('No changes detected and no previous tag found');
@@ -81,64 +84,39 @@ const execAction = async (
     if (showNotes && nt.releaseNotes) {
       console.log('===============');
       console.log(nt.releaseNotes);
-    }
-    return 0;
-  }
-
-  if (action === 'notes') {
-    const nt = await releaseNotes(opts);
-    console.log(nt);
-    return 0;
-  }
-
-  if (action === 'tag-git') {
-    if (opts.verbose) console.log('Calculating next tag');
-    const nt = await nextTag(opts);
-    if (nt == null) {
-      console.log('Skipping tag creation. No changes detected and no previous tag found');
-      return 2;
-    }
-    console.log(`Creating tag ${nt.tagName}`);
-
-    // transform notes into a single line
-    let notes = '';
-    if (nt.releaseNotes) {
-      notes = nt.releaseNotes.split('\n').reduce((prev: string, cur: string): string => {
-        if (cur.trim().length === 0) return prev;
-        return `${prev} -m "${cur}"`;
-      }, '');
+      console.log('===============');
     }
 
-    execCmd(opts.repoDir, `git tag ${nt.tagName} ${notes}`, opts.verbose);
-    console.log('Tag created successfully');
-    return 0;
-  }
+    if (action === 'tag') {
+      return 0;
+    }
 
-  if (action === 'tag-push') {
-    return tagPush(opts);
+    if (action === 'tag-git' || action === 'tag-push') {
+      console.log(`Creating tag ${nt.tagName}`);
+
+      // transform notes into a single line
+      let notes = '';
+      if (nt.releaseNotes) {
+        notes = nt.releaseNotes.split('\n').reduce((prev: string, cur: string): string => {
+          if (cur.trim().length === 0) return prev;
+          return `${prev} -m "${cur}"`;
+        }, '');
+      }
+
+      execCmd(opts.repoDir, `git tag ${nt.tagName} ${notes}`, opts.verbose);
+      console.log('Tag created successfully');
+
+      if (action === 'tag-push') {
+        console.log("Pushing tag to remote 'origin'");
+        execCmd(opts.repoDir, `git push origin ${nt.tagName}`, opts.verbose);
+        console.log('Tag pushed to origin successfully');
+      }
+      return 0;
+    }
   }
 
   console.log(await yargs2.getHelp());
   return 1;
-};
-
-const tagPush = async (opts: NextTagOptions): Promise<number> => {
-  if (opts.verbose) console.log('Calculating next tag');
-  const nt = await nextTag(opts);
-  if (nt && nt.changesDetected > 0) {
-    console.log(`Creating tag ${nt.tagName}`);
-    execCmd(opts.repoDir, `git tag ${nt.tagName} -m "${nt.releaseNotes}"`, opts.verbose);
-    console.log('Pushing tag to remote origin');
-    execCmd(opts.repoDir, `git push origin ${nt.tagName}`, opts.verbose);
-    console.log('Tag created and pushed to origin successfully');
-    return 0;
-  }
-  if (nt == null) {
-    console.log('No changes detected and no previous tag found');
-    return 4;
-  }
-  console.log(`Skipping tag creation. No changes detected. Latest tag=${nt.tagName}`);
-  return 2;
 };
 
 const expandDefaults = (args: any): NextTagOptions => {
@@ -222,6 +200,12 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
       type: 'string',
       describe: 'Git repo dir to run command on. Defaults to current process dir',
       default: process.cwd(),
+    })
+    .option('show-notes', {
+      alias: 'n',
+      type: 'string',
+      describe: 'Show release notes along with the newer version',
+      default: true,
     });
 
   if (!onlyNotes) {

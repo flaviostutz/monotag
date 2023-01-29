@@ -2,7 +2,7 @@
 
 Semantic versioning for monorepos based on tag prefix, path prefix, affected files and conventional commit.
 
-This lib can help you if you want to tag changes in specific parts of the monorepo using tag prefixes or publishing libs or deploying services independently, even though they reside in a single monorepo.
+This lib can help you tag changes in specific parts of the monorepo using tag prefixes or publishing libs or deploying services independently, even though they reside in a single monorepo.
 
 Normally this is not easy because the monorepo shares the entire commit history and to identify which commits touched a specific dir requires some sort of filtering.
 
@@ -10,7 +10,7 @@ Normally this is not easy because the monorepo shares the entire commit history 
 
 Run 'npx monotag --help' or 'npx monotag tag --help' for info on specific commands
 
-You can use this as a library also. Check examples below.
+The automatic versioning feature can be used for non-monorepos too and you can use this as a library also. Check examples below.
 
 ## Example
 
@@ -100,7 +100,44 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
 - 'monotag tag --path services/myservice'
   - Generate tag "myservice/1.3.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
 
-## Lib example
+### Github actions workflow
+
+- Create file .github/workflows/create-next-tag.yml in your repo
+
+```yml
+name: create-next-tag
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      # needed for pushing new tag
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          # this is needed if you want the tag push to trigger another workflow
+          # create a personal token and set a secret with name GH_PERSONAL_TOKEN
+          # https://github.com/orgs/community/discussions/27028
+          token: ${{ secrets.GH_PERSONAL_TOKEN }}
+      - name: Create tag and push to repo
+        run: |
+          git config --global user.email "flaviostutz@gmail.com"
+          git config --global user.name "Flávio Stutz"
+          npx -y monotag@latest tag-push
+```
+
+- Push this file to the repo. A new action will be available to be triggered manually on GH
+
+- When you have a release candidate and want to tag it, go to Github -> repository -> Actions -> (on the left) "create-next-tag" -> Hit "Run workflow"
+
+- It will get the last tag, create release notes, increment semantic version, tag repo and push it automatically
+
+### Lib example
 
 - Having a repo with structure
 
