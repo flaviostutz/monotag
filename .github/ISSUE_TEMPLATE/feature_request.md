@@ -6,14 +6,9 @@ labels: 'enhancement'
 assignees: ''
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## Problem being solved
+<!-- Ex.: When I am using large repos, it takes 60min for doing queries -->
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+## Proposal
+<!-- Ex.: Use git filtering for tags to lower the time processing tags -->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Additional context**
-Add any other context or screenshots about the feature request here.

@@ -78,7 +78,11 @@ const lastTagForPrefix = async (
   verbose?: boolean,
 ): Promise<string | null> => {
   // list tags by semver in descending order
-  const tags = execCmd(repoDir, 'git tag --sort=-v:refname', verbose).split('\n');
+  const tags = execCmd(
+    repoDir,
+    `git tag --list '${tagPrefix}' --sort=-v:refname | head -n 30`,
+    verbose,
+  ).split('\n');
 
   for (let i = 0; i < tags.length; i += 1) {
     const tag = tags[i];
