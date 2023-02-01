@@ -894,13 +894,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/debug@^4.1.7":
-  version "4.1.7"
-  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.7.tgz#7cc0ea761509124709b8b2d1090d8f6c17aadb82"
-  integrity sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==
-  dependencies:
-    "@types/ms" "*"
-
 "@types/graceful-fs@^4.1.2", "@types/graceful-fs@^4.1.3":
   version "4.1.6"
   resolved "https://registry.yarnpkg.com/@types/graceful-fs/-/graceful-fs-4.1.6.tgz#e14b2576a1c25026b7f02ede1de3b84c3a1efeae"
@@ -950,11 +943,6 @@
   resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.2.tgz#ee771e2ba4b3dc5b372935d549fd9617bf345b8c"
   integrity sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==
 
-"@types/ms@*":
-  version "0.7.31"
-  resolved "https://registry.yarnpkg.com/@types/ms/-/ms-0.7.31.tgz#31b7ca6407128a3d2bbc27fe2d21b345397f6197"
-  integrity sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==
-
 "@types/node@*":
   version "18.11.18"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.18.tgz#8dfb97f0da23c2293e554c5a50d61ef134d7697f"
@@ -992,17 +980,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@types/yargs@^17.0.20":
-  version "17.0.20"
-  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-17.0.20.tgz#107f0fcc13bd4a524e352b41c49fe88aab5c54d5"
-  integrity sha512-eknWrTHofQuPk2iuqDm1waA7V6xPlbgBoaaXEgYkClhLOnB0TtbW+srJaOToAgawPxPlHQzwypFA2bhZaUGP5A==
-  dependencies:
-    "@types/yargs-parser" "*"
-
-"@types/yargs@^17.0.8":
-  version "17.0.19"
-  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-17.0.19.tgz#8dbecdc9ab48bee0cb74f6e3327de3fa0d0c98ae"
-  integrity sha512-cAx3qamwaYX9R0fzOIZAlFpo4A+1uBVCxqpKz9D26uTF4srRXaGTTsikQmaotCtNdbhzyUH7ft6p9ktz9s6UNQ==
+"@types/yargs@^17.0.22", "@types/yargs@^17.0.8":
+  version "17.0.22"
+  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-17.0.22.tgz#7dd37697691b5f17d020f3c63e7a45971ff71e9a"
+  integrity sha512-pet5WJ9U8yPVRhkwuEIp5ktAeAqRZOq4UdAyWLWzxbtpyXnzbtLdKiXAjJzi/KLmPGS9wk86lUFWZFN6sISo4g==
   dependencies:
     "@types/yargs-parser" "*"
 
