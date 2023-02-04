@@ -80,7 +80,7 @@ const lastTagForPrefix = async (
   // list tags by semver in descending order
   const tags = execCmd(
     repoDir,
-    `git tag --list '${tagPrefix}' --sort=-v:refname | head -n 30`,
+    `git tag --list '${tagPrefix}*' --sort=-v:refname | head -n 30`,
     verbose,
   ).split('\n');
 
@@ -97,7 +97,6 @@ const lastTagForPrefix = async (
       }
     } else if (!tparts[2]) {
       return tag;
-      // return tparts[1];
     }
   }
   // tag with prefix not found

@@ -9,6 +9,7 @@ module.exports = {
       },
     ],
   },
+  coverageReporters: ['text'],
   collectCoverage: true,
   collectCoverageFrom: ['./src/**'],
   coverageThreshold: {
