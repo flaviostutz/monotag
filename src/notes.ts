@@ -98,7 +98,7 @@ const formatReleaseNotes = (
       .replace('[', '')
       .replace(']', '')
       .replace(/"/g, '')
-      .replace(',', ', ')}`;
+      .replace(/,/g, ', ')}`;
     notes += '\n';
   }
 
@@ -112,7 +112,7 @@ const formatReleaseNotes = (
       .replace('[', '')
       .replace(']', '')
       .replace(/"/g, '')
-      .replace(',', ', ')}`;
+      .replace(/,/g, ', ')}`;
     notes += '\n';
   }
 
