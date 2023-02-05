@@ -16,7 +16,7 @@ describe('when generating next tag with notes', () => {
       tagPrefix: '',
     });
     if (!nt) throw new Error('Shouldnt be null');
-    expect(nt.tagName).toBe('31.0.0');
+    expect(nt.tagName).toBe('346.0.0');
   });
   it('should return latest if nothing changed', async () => {
     const nt = await nextTag({
@@ -27,7 +27,7 @@ describe('when generating next tag with notes', () => {
       tagPrefix: '',
     });
     if (!nt) throw new Error('Shouldnt be null');
-    expect(nt.tagName).toBe('31.0.0');
+    expect(nt.tagName).toBe('346.0.0');
   });
   it('should fail if no commits found touching path', async () => {
     const nt = await nextTag({

@@ -121,25 +121,31 @@ const execAction = async (
 
 const expandDefaults = (args: any): NextTagOptions => {
   const verbose = <boolean>args.verbose;
+
+  let repoDir = <string>args['repo-dir'];
+  if (!repoDir) {
+    repoDir = execCmd(process.cwd(), 'git rev-parse --show-toplevel', verbose);
+  }
+  repoDir = repoDir.trim();
+
   // detect current dir reference to repo
   let path = <string>args.path;
   if (path === 'auto') {
-    const gitRootDir = execCmd(process.cwd(), 'git rev-parse --show-toplevel', verbose);
-    const currentDir = execCmd(process.cwd(), 'pwd', verbose);
-    if (currentDir.includes(gitRootDir)) {
-      path = currentDir.replace(gitRootDir, '');
+    const currentDir = process.cwd();
+    if (currentDir.includes(repoDir)) {
+      path = currentDir.replace(repoDir, '');
     } else {
       path = '';
     }
     if (verbose) {
-      console.log(`Using repo path "${path}"`);
+      console.log(`Using path inside repo "${path}"`);
     }
   }
   if (path && path.startsWith('/')) {
     path = path.substring(1);
   }
   const basicOpts: BasicOptions = {
-    repoDir: <string>args['repo-dir'],
+    repoDir,
     path,
     fromRef: <string>args['from-ref'],
     toRef: <string>args['to-ref'],
@@ -202,7 +208,7 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
       alias: 'g',
       type: 'string',
       describe: 'Git repo dir to run command on. Defaults to current process dir',
-      default: process.cwd(),
+      default: '',
     })
     .option('show-notes', {
       alias: 'n',

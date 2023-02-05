@@ -20,7 +20,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     echo 'test1' > test1
     git add test1
     git commit -m 'feat: adding test1 file to root'
-    git tag 30.0.0
+    git tag 345.2123.143
     git tag abc40.0.0
     git tag nothing
     git tag something

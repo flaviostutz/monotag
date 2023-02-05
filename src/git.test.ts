@@ -24,6 +24,6 @@ describe('when using git', () => {
   });
   it('should get latest tag for empty prefix', async () => {
     const ltag = await lastTagForPrefix(repoDir, '');
-    expect(ltag).toBe('30.0.0');
+    expect(ltag).toBe('345.2123.143');
   });
 });

@@ -24,7 +24,7 @@ describe('when using cli', () => {
     // get next tag
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    expect(stdout).toMatch('31.0.0');
+    expect(stdout).toMatch('346.0.0');
     expect(exitCode).toBe(0);
 
     // get release notes
@@ -37,7 +37,7 @@ describe('when using cli', () => {
     // generate tag in git repo and tag it
     stdout = '';
     exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
-    expect(stdout).toMatch(/.*Creating tag 30.1.0.*Tag created successfully.*/);
+    expect(stdout).toMatch(/.*Creating tag 345.2124.0.*Tag created successfully.*/);
     expect(exitCode).toBe(0);
 
     // these were failing on CI/CD but not locally (maybe due to race conditions)
