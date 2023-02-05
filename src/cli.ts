@@ -135,6 +135,9 @@ const expandDefaults = (args: any): NextTagOptions => {
       console.log(`Using repo path "${path}"`);
     }
   }
+  if (path && path.startsWith('/')) {
+    path = path.substring(1);
+  }
   const basicOpts: BasicOptions = {
     repoDir: <string>args['repo-dir'],
     path,
