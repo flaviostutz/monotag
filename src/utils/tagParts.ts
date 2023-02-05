@@ -1,7 +1,9 @@
 // playground: https://regex101.com/r/DGM8GD/1
 const fullSemverRegex =
   // eslint-disable-next-line max-len
-  /^(([a-zA-Z0-9_\\/-]*[a-zA-Z_\\/-]+)*(([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)))(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
+  /^((([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)\.([0-9]|[1-9][0-9]*)))(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
+
+const semverRegex = /(([0-9]|[1-9][0-9])*\.([0-9]|[1-9][0-9])*\.([0-9]|[1-9][0-9])*)/;
 
 /**
  * Get tag parts in an array from full tag name.
@@ -19,5 +21,29 @@ const fullSemverRegex =
  *  8: build-1234
  */
 export const tagParts = (fullTagName: string): Array<string> | null => {
-  return fullSemverRegex.exec(fullTagName);
+  // we added the "split" step to simplify regex because
+  // it was slow for big prefixes
+  // throw new Error();
+  const version = semverRegex.exec(fullTagName);
+  if (!version) {
+    return null;
+  }
+  const parts = fullTagName.split(version[0]);
+  const prefix = parts[0];
+  const rparts = fullSemverRegex.exec(`${version[0]}${parts[1]}`);
+  if (!rparts) {
+    return null;
+  }
+  return [
+    `${prefix}${rparts[0]}`,
+    `${prefix}${rparts[1]}`,
+    prefix,
+    rparts[2],
+    rparts[3],
+    rparts[4],
+    rparts[5],
+    rparts[6],
+    rparts[7],
+    rparts[8],
+  ];
 };

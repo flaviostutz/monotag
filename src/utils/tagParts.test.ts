@@ -32,6 +32,7 @@ describe('when using tag parsers', () => {
     const rr = tagParts('my-service-prefix/0.1.0-beta+build999');
     if (!rr) throw new Error('Shouldnt be null');
     expect(rr[0]).toBe('my-service-prefix/0.1.0-beta+build999');
+    expect(rr[1]).toBe('my-service-prefix/0.1.0');
     expect(rr[2]).toBe('my-service-prefix/');
     expect(rr[3]).toBe('0.1.0');
     expect(rr[4]).toBe('0');
@@ -39,5 +40,21 @@ describe('when using tag parsers', () => {
     expect(rr[6]).toBe('0');
     expect(rr[7]).toBe('beta');
     expect(rr[8]).toBe('build999');
+  });
+  it('shouldnt take long to reject long invalid tags', async () => {
+    const date1 = new Date();
+    const rr = tagParts('anything-anything-anything-anything-anything-anything-20230118.17');
+    // const rr = tagParts('ground-lease-service-1.0.0');
+    expect(rr).toBeNull();
+    expect(new Date().getTime() - date1.getTime()).toBeLessThan(1000);
+  });
+  it('shouldnt take long to describe long tag parts', async () => {
+    const date1 = new Date();
+    const rr = tagParts(
+      'anything-anything-anything-anything-anything-anything/1.2.3-20230118.17something+anotherthinghereyeah',
+    );
+    if (!rr) throw new Error();
+    expect(rr[3]).toBe('1.2.3');
+    expect(new Date().getTime() - date1.getTime()).toBeLessThan(1000);
   });
 });
