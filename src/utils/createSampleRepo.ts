@@ -21,6 +21,9 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git add test1
     git commit -m 'feat: adding test1 file to root'
     git tag 30.0.0
+    git tag abc40.0.0
+    git tag nothing
+    git tag something
 
     // prefix1 dir
     mkdir -p prefix1
@@ -29,6 +32,8 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git add prefix1/test1
     git commit -m 'feat: 1 prefix1 adding test1 file'
     git tag prefix1/1.0.0
+    git tag prefix1/abracadabra
+    git tag prefix1-abracadabra
 
     echo 'test1b' > prefix1/test1
     git add prefix1/test1
@@ -57,6 +62,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git add prefix2/test1
     git commit -m 'feat(test): 5 prefix2 adding test2 file'
     git tag prefix2/10.0.0
+    git tag prefix2/12av.32.sef
 
     echo 'test1b' > prefix2/test1
     git add prefix2/test1
@@ -129,6 +135,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     echo 'test2' > test2
     git add test2
     git commit -m 'feat: 15 adding test2 file to root'
+    git tag prefix3/shouldbeignored
 
     `,
     false,

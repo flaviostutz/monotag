@@ -94,6 +94,9 @@ const lastTagForPrefix = async (
     console.log('Tags might have been limited to 30 results');
   }
 
+  if (verbose) {
+    console.log(`${tags.length} with prefix '${tagPrefix}' found`);
+  }
   for (let i = 0; i < tags.length; i += 1) {
     const tag = tags[i];
     const tparts = tagParts(tag);
