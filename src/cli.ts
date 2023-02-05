@@ -52,7 +52,9 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const action = <string>args2._[0];
 
-  return execAction(action, expandDefaults(args2), <boolean>args2['show-notes'], yargs2);
+  const showNotes = toBoolean(args2['show-notes']);
+
+  return execAction(action, expandDefaults(args2), showNotes, yargs2);
 };
 
 const execAction = async (
@@ -120,7 +122,7 @@ const execAction = async (
 };
 
 const expandDefaults = (args: any): NextTagOptions => {
-  const verbose = <boolean>args.verbose;
+  const verbose = toBoolean(args.verbose);
 
   let repoDir = <string>args['repo-dir'];
   if (!repoDir) {
@@ -149,7 +151,7 @@ const expandDefaults = (args: any): NextTagOptions => {
     path,
     fromRef: <string>args['from-ref'],
     toRef: <string>args['to-ref'],
-    onlyConvCommit: <boolean>args['conv-commit'],
+    onlyConvCommit: toBoolean(<boolean>args['conv-commit']),
     verbose,
   };
   let tagPrefix = args.prefix;
@@ -241,6 +243,10 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
   }
 
   return y1;
+};
+
+const toBoolean = (value: any): boolean => {
+  return value === 'true';
 };
 
 export { run };
