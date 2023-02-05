@@ -25,18 +25,23 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
     refs = `${opts.fromRef}..${opts.toRef}`;
   }
 
-  // check if command is successfull
-  execCmd(opts.repoDir, `git log ${refs} --pretty=format:"%H"`, opts.verbose);
+  // execute just to test if refs are valid
+  execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
 
-  const out = execCmd(
+  const outCommits = execCmd(
     opts.repoDir,
-    `git log ${refs} --pretty=format:"%H" | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
-    false,
-  );
-
-  const commits = out
+    `git log ${refs} --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    opts.verbose,
+  )
     .trim()
-    .split('COMMIT')
+    .split('COMMIT');
+
+  // this limit (with "head") is a safeguard for large repositories
+  if (outCommits.length === 30) {
+    console.log('Commits might have been limited to 30 results');
+  }
+
+  const commits = outCommits
     .map((celem: string): Commit | null => {
       if (celem.trim().length === 0) {
         return null;
@@ -83,6 +88,11 @@ const lastTagForPrefix = async (
     `git tag --list '${tagPrefix}*' --sort=-v:refname | head -n 30`,
     verbose,
   ).split('\n');
+
+  // this limit (with "head") is a safeguard for large repositories
+  if (tags.length === 30) {
+    console.log('Tags might have been limited to 30 results');
+  }
 
   for (let i = 0; i < tags.length; i += 1) {
     const tag = tags[i];
