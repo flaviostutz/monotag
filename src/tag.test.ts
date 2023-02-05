@@ -147,6 +147,8 @@ describe('when generating next tag with notes', () => {
     expect(clogs).toHaveLength(0);
   });
   it('should fail if git command fails', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    console.log = (): void => {};
     const exec = async (): Promise<void> => {
       await filterCommits({
         repoDir,

@@ -7,7 +7,9 @@ describe('when using git', () => {
     await createSampleRepo(repoDir);
   });
   it('should get latest tag for prefix1', async () => {
-    const ltag = await lastTagForPrefix(repoDir, 'prefix1/');
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    console.log = (): void => {};
+    const ltag = await lastTagForPrefix(repoDir, 'prefix1/', true);
     expect(ltag).toBe('prefix1/3.4.5-alpha');
   });
   it('should get latest tag for prefix2', async () => {
