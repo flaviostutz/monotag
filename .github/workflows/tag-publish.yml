@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Publish new version to NPM
+    name: Check package
     uses: flaviostutz/gh-makefile/.github/workflows/make-ci.yml@main
     with:
       working-directory: ./
@@ -19,8 +19,10 @@ jobs:
       target-unit-tests: true
 
   publish:
+    name: Publish to npmjs.org
     runs-on: ubuntu-latest
     needs: build
+    environment: npmjs-registry
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
