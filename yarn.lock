@@ -838,10 +838,10 @@
   dependencies:
     "@sinonjs/commons" "^2.0.0"
 
-"@stutzlab/eslint-config@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@stutzlab/eslint-config/-/eslint-config-1.1.1.tgz#80825d7d28527f273d98316a2421a1876afc0d19"
-  integrity sha512-ta8mx/ezb7jtbDqTaPQGvEjEVF7WLms9vhU7ccaW+eiNWRCzwzo7uY9mpdt2HWT89TzBnyniqSwcpMJ6OeyR4Q==
+"@stutzlab/eslint-config@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@stutzlab/eslint-config/-/eslint-config-1.2.0.tgz#845e4ab41d5db750e497333a47a4517db7822417"
+  integrity sha512-89/pvN0XEQpf4xSC5IrxrtT2tImxRK2GW2BM9265X16RLZ3jqhRmZ0ByTp3Yu56wvD/LbOhlzi538NclXndkqQ==
   dependencies:
     "@shopify/eslint-plugin" "^42.0.2"
     "@typescript-eslint/eslint-plugin" "^5.47.1"
