@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/flaviostutz/monotag#readme",
   "devDependencies": {
-    "@stutzlab/eslint-config": "^1.1.1",
+    "@stutzlab/eslint-config": "^1.2.0",
     "@tsconfig/node14": "^1.0.3",
     "@types/conventional-commits-parser": "^3.0.3",
     "@types/jest": "^29.4.0",
