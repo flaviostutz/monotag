@@ -49,6 +49,6 @@
   },
   "dependencies": {
     "conventional-commits-parser": "^3.2.4",
-    "yargs": "^17.6.2"
+    "yargs": "^17.7.1"
   }
 }
