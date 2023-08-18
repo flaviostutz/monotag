@@ -90,11 +90,11 @@ const lastTagForPrefix = async (
   ).split('\n');
 
   // this limit (with "head") is a safeguard for large repositories
-  if (tags.length === 30) {
-    console.log('Tags might have been limited to 30 results');
-  }
 
   if (verbose) {
+    if (tags.length === 30) {
+      console.log('Tags might have been limited to 30 results');
+    }
     console.log(`${tags.length} with prefix '${tagPrefix}' found`);
   }
   for (let i = 0; i < tags.length; i += 1) {

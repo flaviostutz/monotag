@@ -24,7 +24,7 @@ describe('when using cli', () => {
     // get next tag
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    expect(stdout).toMatch('346.0.0');
+    expect(stdout).toEqual('346.0.0');
     expect(exitCode).toBe(0);
 
     // get release notes
@@ -32,6 +32,12 @@ describe('when using cli', () => {
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
     expect(stdout).toMatch('Refs: closes #45');
     expect(stdout).toMatch('## Features');
+    expect(exitCode).toBe(0);
+
+    // get latest tag
+    stdout = '';
+    exitCode = await run(['', '', 'latest', `--repo-dir=${repoDir}`]);
+    expect(stdout).toEqual('345.2123.143');
     expect(exitCode).toBe(0);
 
     // generate tag in git repo and tag it
