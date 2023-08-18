@@ -20,4 +20,4 @@ jobs:
         run: |
           git config --global user.email "flaviostutz@gmail.com"
           git config --global user.name "Flávio Stutz"
-          npx -y monotag@latest tag-push
+          npx -y monotag@1.4.4 tag-push
