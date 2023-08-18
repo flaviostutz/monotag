@@ -6,11 +6,17 @@ import { BasicOptions } from './types/BasicOptions';
 import { NextTagOptions } from './types/NextTagOptions';
 import { execCmd } from './utils/execCmd';
 import { lastPathPart } from './utils/lastPathPart';
+import { lastTagForPrefix } from './git';
 
 const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
   const yargs2 = yargs(processArgs.slice(2))
     .scriptName('monotag')
+    .command(
+      'latest',
+      'Show latest tag for path',
+      (y): Argv => addOptions(y, false),
+    )
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
@@ -70,6 +76,17 @@ const execAction = async (
   // NOTES ACTION
   if (action === 'notes') {
     const nt = await releaseNotes(opts);
+    console.log(nt);
+    return 0;
+  }
+
+  // LATEST ACTION
+  if (action === 'latest') {
+    const nt = await lastTagForPrefix(opts.repoDir, opts.path, opts.verbose)
+    if(!nt) {
+      console.log("No tag found")
+      return 1;
+    }
     console.log(nt);
     return 0;
   }

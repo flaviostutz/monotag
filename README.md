@@ -59,6 +59,8 @@ See a complete github actions workflow that publishes libs to NPM with automatic
 monotag [command]
 
 Commands:
+  monotag latest    Show latest tag for path. If path has tags 1.2.0 and 2.1.1,
+                    for example, 2.1.1 will be returned
   monotag tag       Calculate and show next tag, incrementing semver according
                     to detected changes on path
   monotag notes     Calculate and show release notes according to detected
