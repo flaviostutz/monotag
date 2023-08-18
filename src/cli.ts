@@ -69,6 +69,11 @@ const execAction = async (
     console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
   }
 
+  if (!action) {
+    console.log(await yargs2.getHelp());
+    return 1;
+  }
+
   // NOTES ACTION
   if (action === 'notes') {
     const nt = await releaseNotes(opts);
