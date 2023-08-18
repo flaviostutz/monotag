@@ -12,11 +12,7 @@ const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
   const yargs2 = yargs(processArgs.slice(2))
     .scriptName('monotag')
-    .command(
-      'latest',
-      'Show latest tag for path',
-      (y): Argv => addOptions(y, false),
-    )
+    .command('latest', 'Show latest tag for path', (y): Argv => addOptions(y, false))
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
@@ -82,9 +78,9 @@ const execAction = async (
 
   // LATEST ACTION
   if (action === 'latest') {
-    const nt = await lastTagForPrefix(opts.repoDir, opts.path, opts.verbose)
-    if(!nt) {
-      console.log("No tag found")
+    const nt = await lastTagForPrefix(opts.repoDir, opts.path, opts.verbose);
+    if (!nt) {
+      console.log('No tag found');
       return 1;
     }
     console.log(nt);
