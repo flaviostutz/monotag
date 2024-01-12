@@ -27,6 +27,12 @@ describe('when using cli', () => {
     expect(stdout).toEqual('346.0.0');
     expect(exitCode).toBe(0);
 
+    // get next tag prefix2 dir
+    // stdout = '';
+    // exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
+    // expect(stdout).toEqual('prefix2-1.0.0');
+    // expect(exitCode).toBe(0);
+
     // get release notes
     stdout = '';
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);

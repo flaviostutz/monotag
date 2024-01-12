@@ -12,6 +12,12 @@ describe('when using git', () => {
     const ltag = await lastTagForPrefix(repoDir, 'prefix1/', true);
     expect(ltag).toBe('prefix1/3.4.5-alpha');
   });
+  it('should get latest tag for prefix1 -', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    console.log = (): void => {};
+    const ltag = await lastTagForPrefix(repoDir, 'prefix9-', true);
+    expect(ltag).toBe('prefix9-1.0.1');
+  });
   it('should get latest tag for prefix2', async () => {
     const ltag = await lastTagForPrefix(repoDir, 'prefix2/');
     expect(ltag).toBe('prefix2/20.10.0');

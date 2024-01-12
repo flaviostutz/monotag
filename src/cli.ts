@@ -177,7 +177,7 @@ const expandDefaults = (args: any): NextTagOptions => {
   if (tagPrefix === 'auto') {
     tagPrefix = lastPathPart(basicOpts.path);
     if (tagPrefix.length > 0) {
-      tagPrefix += '/';
+      tagPrefix += args.separator;
     }
   }
   return <NextTagOptions>{
@@ -251,6 +251,13 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
         describe:
           'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part',
         default: 'auto',
+      })
+      .option('separator', {
+        alias: 'j',
+        type: 'string',
+        describe:
+          'When prefix is "auto", append this separator to last working dir path to define the tag prefix to use. e.g.: dir "services/myservice" with separator "/" leads to tag prefix "myservice/"',
+        default: '/',
       })
       .option('suffix', {
         alias: 's',

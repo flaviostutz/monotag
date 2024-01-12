@@ -31,6 +31,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     echo 'test1' > prefix1/test1
     git add prefix1/test1
     git commit -m 'feat: 1 prefix1 adding test1 file'
+    git tag prefix9-1.0.0
     git tag prefix1/1.0.0
     git tag prefix1/abracadabra
     git tag prefix1/20230118.17
@@ -40,6 +41,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git add prefix1/test1
     git commit -m 'fix: 2 prefix1 updating test1 file'
     git tag prefix1/1.0.1
+    git tag prefix9-1.0.1
 
     echo 'test2' > prefix1/test2
     git add prefix1/test2
