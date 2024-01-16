@@ -102,6 +102,9 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
 - 'monotag tag --path services/myservice'
   - Generate tag "myservice/1.3.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
 
+- 'monotag tag --path services/myservice --separator=/v'
+  - Generate tag "myservice/v1.3.0" if previous tag was "myservice/v1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
+
 ### Github actions workflow
 
 - Create file .github/workflows/create-next-tag.yml in your repo
