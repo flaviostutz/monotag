@@ -69,6 +69,18 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix1/3.5.0-alphaaaaa');
   });
+  it('should return latest for custom tagPrefix', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix9',
+      tagPrefix: 'prefix9/v',
+      tagSuffix: '',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix9/v1.0.3');
+  });
   it('should return next version if minor changes found in path after last tag', async () => {
     const nt = await nextTag({
       repoDir,

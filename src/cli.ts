@@ -56,7 +56,9 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const showNotes = toBoolean(args2['show-notes']);
 
-  return execAction(action, expandDefaults(args2), showNotes, yargs2);
+  const args = expandDefaults(args2);
+
+  return execAction(action, args, showNotes, yargs2);
 };
 
 const execAction = async (
@@ -83,7 +85,7 @@ const execAction = async (
 
   // LATEST ACTION
   if (action === 'latest') {
-    const nt = await lastTagForPrefix(opts.repoDir, opts.path, opts.verbose);
+    const nt = await lastTagForPrefix(opts.repoDir, opts.tagPrefix, opts.verbose);
     if (!nt) {
       console.log('No tag found');
       return 1;
@@ -256,7 +258,7 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
         alias: 'j',
         type: 'string',
         describe:
-          'When prefix is "auto", append this separator to last working dir path to define the tag prefix to use. e.g.: dir "services/myservice" with separator "/" leads to tag prefix "myservice/"',
+          'When prefix is "auto", append this separator to last working dir path to define the tag prefix to use. e.g.: dir "services/myservice" with separator "/v" leads to tag prefix "myservice/v"',
         default: '/',
       })
       .option('suffix', {

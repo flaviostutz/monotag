@@ -27,6 +27,19 @@ describe('when using cli', () => {
     expect(stdout).toEqual('346.0.0');
     expect(exitCode).toBe(0);
 
+    // get next tag for custom prefix separator
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag',
+      `--repo-dir=${repoDir}`,
+      '--path=prefix9',
+      '--separator=/v',
+    ]);
+    expect(stdout).toEqual('prefix9/v1.0.3');
+    expect(exitCode).toBe(0);
+
     // get next tag prefix2 dir
     // stdout = '';
     // exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
@@ -82,5 +95,24 @@ describe('when using cli', () => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~5']);
     };
     await expect(rr1).rejects.toThrow("fatal: 'origin' does not appear to be a git repository");
+  });
+  it('should use custom separator successfully', async () => {
+    // mock console.log to get results and check them
+    let stdout = '';
+    console.log = (log): void => {
+      stdout += log;
+    };
+
+    stdout = '';
+    const exitCode = await run([
+      '',
+      '',
+      'latest',
+      `--repo-dir=${repoDir}`,
+      '--path=prefix9',
+      '--separator=/v',
+    ]);
+    expect(stdout).toEqual('prefix9/v1.0.3');
+    expect(exitCode).toBe(0);
   });
 });
