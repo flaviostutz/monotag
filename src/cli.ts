@@ -121,7 +121,8 @@ const execAction = async (
       if (nt.releaseNotes) {
         notes = nt.releaseNotes.split('\n').reduce((prev: string, cur: string): string => {
           if (cur.trim().length === 0) return prev;
-          return `${prev} -m "${cur}"`;
+          const curs = cur.replaceAll('"', '');
+          return `${prev} -m "${curs}"`;
         }, '');
       }
 
