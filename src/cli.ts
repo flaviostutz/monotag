@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import yargs, { Argv } from 'yargs';
 
 import { releaseNotes } from './notes';
@@ -12,26 +13,26 @@ const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
   const yargs2 = yargs(processArgs.slice(2))
     .scriptName('monotag')
-    .command('latest', 'Show latest tag for path', (y): Argv => addOptions(y, false))
+    .command('latest', 'Show latest tag for path', (y): Argv => addOptions(y))
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
-      (y): Argv => addOptions(y, false),
+      (y): Argv => addOptions(y),
     )
     .command(
       'notes',
       'Calculate and show release notes according to detected commits in path',
-      (y): Argv => addOptions(y, true),
+      (y): Argv => addOptions(y),
     )
     .command(
       'tag-git',
       'Calculate next tag and tag it in local git repo',
-      (y): Argv => addOptions(y, false),
+      (y): Argv => addOptions(y),
     )
     .command(
       'tag-push',
       'Calculate next tag, git-tag and git-push it to remote',
-      (y): Argv => addOptions(y, false),
+      (y): Argv => addOptions(y),
     )
     .help()
     .example([
@@ -78,8 +79,17 @@ const execAction = async (
 
   // NOTES ACTION
   if (action === 'notes') {
-    const nt = await releaseNotes(opts);
-    console.log(nt);
+    // calculate and show tag
+    const nt = await nextTag(opts);
+    if (nt == null) {
+      console.log('No changes detected and no previous tag found');
+      return 4;
+    }
+    if (nt.releaseNotes) {
+      console.log(nt.releaseNotes);
+    } else {
+      console.log('No changes detected');
+    }
     return 0;
   }
 
@@ -193,7 +203,7 @@ const expandDefaults = (args: any): NextTagOptions => {
   };
 };
 
-const addOptions = (y: Argv, onlyNotes: boolean): any => {
+const addOptions = (y: Argv): any => {
   const y1 = y
     .option('verbose', {
       alias: 'v',
@@ -238,37 +248,34 @@ const addOptions = (y: Argv, onlyNotes: boolean): any => {
       type: 'string',
       describe: 'Show release notes along with the newer version',
       default: true,
-    });
-
-  if (!onlyNotes) {
-    y1.option('semver-level', {
+    })
+    .option('semver-level', {
       alias: 'l',
       type: 'number',
       describe:
         'Increase tag in specific semver level (1,2,3). If not defined, detect automatically based on semantic commit',
       default: null,
     })
-      .option('prefix', {
-        alias: 'p',
-        type: 'string',
-        describe:
-          'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part',
-        default: 'auto',
-      })
-      .option('separator', {
-        alias: 'j',
-        type: 'string',
-        describe:
-          'When prefix is "auto", append this separator to last working dir path to define the tag prefix to use. e.g.: dir "services/myservice" with separator "/v" leads to tag prefix "myservice/v"',
-        default: '/',
-      })
-      .option('suffix', {
-        alias: 's',
-        type: 'string',
-        describe: 'Tag suffix to be added to generated tags',
-        default: '',
-      });
-  }
+    .option('prefix', {
+      alias: 'p',
+      type: 'string',
+      describe:
+        'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part',
+      default: 'auto',
+    })
+    .option('separator', {
+      alias: 'j',
+      type: 'string',
+      describe:
+        'When prefix is "auto", append this separator to last working dir path to define the tag prefix to use. e.g.: dir "services/myservice" with separator "/v" leads to tag prefix "myservice/v"',
+      default: '/',
+    })
+    .option('suffix', {
+      alias: 's',
+      type: 'string',
+      describe: 'Tag suffix to be added to generated tags',
+      default: '',
+    });
 
   return y1;
 };

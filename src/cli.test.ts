@@ -47,6 +47,41 @@ describe('when using cli', () => {
     // expect(exitCode).toBe(0);
 
     // get release notes
+
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'notes',
+      `--repo-dir=${repoDir}`,
+      '--path=SOMETHING_INEXISTENT',
+      '--separator=/v',
+    ]);
+    expect(stdout).toEqual('No changes detected and no previous tag found');
+    expect(exitCode).toBe(4);
+
+    stdout = '';
+    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toMatch('Version 346.0.0');
+    expect(stdout).toMatch('## Features');
+    expect(stdout).toMatch('- 7 prefix2 creating test2 file');
+    expect(stdout).toMatch('## Fixes');
+    expect(stdout).toMatch('user-ui: 9 prefix1');
+    expect(stdout).toMatch('## Info');
+
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'notes',
+      `--repo-dir=${repoDir}`,
+      '--path=prefix9',
+      '--separator=/v',
+    ]);
+    expect(exitCode).toBe(0);
+    expect(stdout).toEqual('No changes detected');
+
     stdout = '';
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
     expect(stdout).toMatch('Refs: closes #45');
