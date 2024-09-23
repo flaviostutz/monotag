@@ -1,7 +1,6 @@
 /* eslint-disable complexity */
 import yargs, { Argv } from 'yargs';
 
-import { releaseNotes } from './notes';
 import { nextTag } from './tag';
 import { BasicOptions } from './types/BasicOptions';
 import { NextTagOptions } from './types/NextTagOptions';
