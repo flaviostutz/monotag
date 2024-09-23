@@ -21,7 +21,7 @@ const run = async (processArgs: string[]): Promise<number> => {
     .command(
       'notes',
       'Calculate and show release notes according to detected commits in path',
-      (y): Argv => addOptions(y),
+      (y): Argv => addOptions(y, true),
     )
     .command(
       'tag-git',
@@ -54,7 +54,7 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const action = <string>args2._[0];
 
-  const showNotes = toBoolean(args2['show-notes']);
+  const showNotes = defaultValueBoolean(args2['show-notes'], false);
 
   const args = expandDefaults(args2);
 
@@ -152,7 +152,7 @@ const execAction = async (
 };
 
 const expandDefaults = (args: any): NextTagOptions => {
-  const verbose = toBoolean(args.verbose);
+  const verbose = defaultValueBoolean(args.verbose, false);
 
   let repoDir = <string>args['repo-dir'];
   if (!repoDir) {
@@ -181,7 +181,7 @@ const expandDefaults = (args: any): NextTagOptions => {
     path,
     fromRef: <string>args['from-ref'],
     toRef: <string>args['to-ref'],
-    onlyConvCommit: toBoolean(<boolean>args['conv-commit']),
+    onlyConvCommit: defaultValueBoolean(args['conv-commit'], true),
     verbose,
   };
   let tagPrefix = args.prefix;
@@ -202,7 +202,7 @@ const expandDefaults = (args: any): NextTagOptions => {
   };
 };
 
-const addOptions = (y: Argv): any => {
+const addOptions = (y: Argv, notes?: boolean): any => {
   const y1 = y
     .option('verbose', {
       alias: 'v',
@@ -242,12 +242,6 @@ const addOptions = (y: Argv): any => {
       describe: 'Git repo dir to run command on. Defaults to current process dir',
       default: '',
     })
-    .option('show-notes', {
-      alias: 'n',
-      type: 'string',
-      describe: 'Show release notes along with the newer version',
-      default: true,
-    })
     .option('semver-level', {
       alias: 'l',
       type: 'number',
@@ -276,11 +270,21 @@ const addOptions = (y: Argv): any => {
       default: '',
     });
 
+  if (!notes) {
+    y1.option('show-notes', {
+      alias: 'n',
+      type: 'boolean',
+      describe: 'Show release notes along with the newer version',
+      default: false,
+    });
+  }
+
   return y1;
 };
 
-const toBoolean = (value: any): boolean => {
-  return value === 'true';
+const defaultValueBoolean = (value: unknown | undefined, defValue: boolean): boolean => {
+  // eslint-disable-next-line no-negated-condition
+  return typeof value !== 'undefined' ? `${value}` === 'true' : defValue;
 };
 
 export { run };
