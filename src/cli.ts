@@ -7,12 +7,19 @@ import { NextTagOptions } from './types/NextTagOptions';
 import { execCmd } from './utils/execCmd';
 import { lastPathPart } from './utils/lastPathPart';
 import { lastTagForPrefix } from './git';
+import { ReleaseOptions } from './types/ReleaseOptions';
+import { getVersionFromTag } from './utils/getVersionFromTag';
 
 const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
   const yargs2 = yargs(processArgs.slice(2))
     .scriptName('monotag')
     .command('latest', 'Show latest tag for path', (y): Argv => addOptions(y))
+    .command(
+      'release',
+      'Calculate next tag, version and changelog and save to files',
+      (y): Argv => addOptions(y),
+    )
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
@@ -74,6 +81,42 @@ const execAction = async (
   if (!action) {
     console.log(await yargs2.getHelp());
     return 1;
+  }
+
+  // RELEASE ACTION
+  if (action === 'release') {
+    const optsRelease = opts as ReleaseOptions;
+    // calculate and save tag, version and changelog to files
+    console.log('Reading git logs and calculating next tag...');
+    const nt = await nextTag(opts);
+    if (nt == null) {
+      console.log('No changes detected and no previous tag found');
+      return 4;
+    }
+    if (nt.releaseNotes) {
+      console.log('Saving results...');
+
+      // save version to file
+      const versionFile = optsRelease.version || 'dist/version.txt';
+      // extract version from tag by matching with version part from tag
+      const version = getVersionFromTag(nt.tagName, opts.tagPrefix);
+
+      execCmd(opts.repoDir, `mkdir -p "$(dirname '${versionFile}')"`, opts.verbose);
+      execCmd(opts.repoDir, `echo ${version} > ${versionFile}`, opts.verbose);
+
+      const changelogFile = optsRelease.changelog || 'dist/changelog.md';
+      execCmd(opts.repoDir, `mkdir -p "$(dirname '${changelogFile}')"`, opts.verbose);
+      execCmd(opts.repoDir, `echo ${nt.releaseNotes} > ${changelogFile}`, opts.verbose);
+
+      const releasetagFile = optsRelease.releasetag || 'dist/releasetag.txt';
+      execCmd(opts.repoDir, `mkdir -p "$(dirname '${releasetagFile}')"`, opts.verbose);
+      execCmd(opts.repoDir, `echo ${nt.tagName} > ${releasetagFile}`, opts.verbose);
+
+      console.log(`Release tag: ${nt.tagName}`);
+    } else {
+      console.log('No changes detected');
+    }
+    return 0;
   }
 
   // NOTES ACTION
@@ -202,7 +245,7 @@ const expandDefaults = (args: any): NextTagOptions => {
   };
 };
 
-const addOptions = (y: Argv, notes?: boolean): any => {
+const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
   const y1 = y
     .option('verbose', {
       alias: 'v',
@@ -275,6 +318,27 @@ const addOptions = (y: Argv, notes?: boolean): any => {
       alias: 'n',
       type: 'boolean',
       describe: 'Show release notes along with the newer version',
+      default: false,
+    });
+  }
+
+  if (release) {
+    y1.option('release-tag', {
+      alias: 'ft',
+      type: 'string',
+      describe: 'File to save the release tag. Defaults to "dist/releasetag.txt"',
+      default: false,
+    });
+    y1.option('version', {
+      alias: 'fv',
+      type: 'string',
+      describe: 'File to save version. Defaults to "dist/version.txt"',
+      default: false,
+    });
+    y1.option('changelog', {
+      alias: 'fc',
+      type: 'string',
+      describe: 'File to save the changelog. Defaults to "dist/changelog.md"',
       default: false,
     });
   }
