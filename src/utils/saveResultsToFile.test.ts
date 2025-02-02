@@ -39,9 +39,9 @@ describe('saveResultsToFile', () => {
       path: '.',
       repoDir,
       tagPrefix: 'v',
-      version: `${repoDir}/dist/versionAA.txt`,
-      changelog: `${repoDir}/dist/changelogAA.md`,
-      releasetag: `${repoDir}/dist/releasetagAA.txt`,
+      versionFile: `${repoDir}/dist/versionAA.txt`,
+      changelogFile: `${repoDir}/dist/changelogAA.md`,
+      releasetagFile: `${repoDir}/dist/releasetagAA.txt`,
     });
 
     const versionStr = fs.readFileSync(`${repoDir}/dist/versionAA.txt`, 'utf8');

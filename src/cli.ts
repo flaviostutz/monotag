@@ -1,3 +1,4 @@
+/* eslint-disable no-undefined */
 /* eslint-disable complexity */
 import yargs, { Argv } from 'yargs';
 
@@ -18,7 +19,7 @@ const run = async (processArgs: string[]): Promise<number> => {
     .command(
       'release',
       'Calculate next tag, version and changelog and save to files',
-      (y): Argv => addOptions(y),
+      (y): Argv => addOptions(y, false, true),
     )
     .command(
       'tag',
@@ -63,9 +64,20 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const showNotes = defaultValueBoolean(args2['show-notes'], false);
 
+  const changelogFile = defaultValueString(args2['changelog-file'], undefined);
+  const versionFile = defaultValueString(args2['version-file'], undefined);
+  const releasetagFile = defaultValueString(args2['releasetag-file'], undefined);
+
   const args = expandDefaults(args2);
 
-  return execAction(action, args, showNotes, yargs2);
+  const args3 = {
+    changelogFile,
+    releasetagFile,
+    versionFile,
+    ...args,
+  };
+
+  return execAction(action, args3, showNotes, yargs2);
 };
 
 const execAction = async (
@@ -311,23 +323,23 @@ const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
   }
 
   if (release) {
-    y1.option('release-tag', {
+    y1.option('releasetag-file', {
       alias: 'ft',
       type: 'string',
       describe: 'File to save the release tag. Defaults to "dist/releasetag.txt"',
-      default: false,
+      default: 'dist/releasetag.txt',
     });
-    y1.option('version', {
+    y1.option('version-file', {
       alias: 'fv',
       type: 'string',
       describe: 'File to save version. Defaults to "dist/version.txt"',
-      default: false,
+      default: 'dist/version-file.txt',
     });
-    y1.option('changelog', {
+    y1.option('changelog-file', {
       alias: 'fc',
       type: 'string',
       describe: 'File to save the changelog. Defaults to "dist/changelog.md"',
-      default: false,
+      default: 'dist/changelog.md',
     });
   }
 
@@ -337,6 +349,14 @@ const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
 const defaultValueBoolean = (value: unknown | undefined, defValue: boolean): boolean => {
   // eslint-disable-next-line no-negated-condition
   return typeof value !== 'undefined' ? `${value}` === 'true' : defValue;
+};
+
+const defaultValueString = (
+  value: unknown | undefined,
+  defValue: string | undefined,
+): string | undefined => {
+  // eslint-disable-next-line no-negated-condition
+  return typeof value !== 'undefined' ? `${value}` : defValue;
 };
 
 export { run };
