@@ -9,7 +9,6 @@ import { getVersionFromTag } from './getVersionFromTag';
 export const saveResultsToFile = (nt: TagNotes, opts: ReleaseOptions): void => {
   // save version to file
   const versionFile = opts.version ?? 'dist/version.txt';
-  console.log(`VVVV=${versionFile}`);
   // extract version from tag by matching with version part from tag
   const version = getVersionFromTag(nt.tagName, opts.tagPrefix);
   fs.mkdirSync(path.dirname(versionFile), { recursive: true });
