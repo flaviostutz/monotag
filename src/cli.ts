@@ -8,7 +8,7 @@ import { execCmd } from './utils/execCmd';
 import { lastPathPart } from './utils/lastPathPart';
 import { lastTagForPrefix } from './git';
 import { ReleaseOptions } from './types/ReleaseOptions';
-import { getVersionFromTag } from './utils/getVersionFromTag';
+import { saveResultsToFile } from './utils/saveResultsToFile';
 
 const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
@@ -85,36 +85,24 @@ const execAction = async (
 
   // RELEASE ACTION
   if (action === 'release') {
-    const optsRelease = opts as ReleaseOptions;
     // calculate and save tag, version and changelog to files
-    console.log('Reading git logs and calculating next tag...');
     const nt = await nextTag(opts);
     if (nt == null) {
       console.log('No changes detected and no previous tag found');
       return 4;
     }
     if (nt.releaseNotes) {
-      console.log('Saving results...');
-
-      // save version to file
-      const versionFile = optsRelease.version || 'dist/version.txt';
-      // extract version from tag by matching with version part from tag
-      const version = getVersionFromTag(nt.tagName, opts.tagPrefix);
-
-      execCmd(opts.repoDir, `mkdir -p "$(dirname '${versionFile}')"`, opts.verbose);
-      execCmd(opts.repoDir, `echo ${version} > ${versionFile}`, opts.verbose);
-
-      const changelogFile = optsRelease.changelog || 'dist/changelog.md';
-      execCmd(opts.repoDir, `mkdir -p "$(dirname '${changelogFile}')"`, opts.verbose);
-      execCmd(opts.repoDir, `echo ${nt.releaseNotes} > ${changelogFile}`, opts.verbose);
-
-      const releasetagFile = optsRelease.releasetag || 'dist/releasetag.txt';
-      execCmd(opts.repoDir, `mkdir -p "$(dirname '${releasetagFile}')"`, opts.verbose);
-      execCmd(opts.repoDir, `echo ${nt.tagName} > ${releasetagFile}`, opts.verbose);
-
-      console.log(`Release tag: ${nt.tagName}`);
+      saveResultsToFile(nt, opts as ReleaseOptions); // we can cast because cli will parse additional args
+      console.log(`${nt.tagName}`);
+      if (showNotes && nt.releaseNotes) {
+        console.log('===============');
+        console.log(nt.releaseNotes);
+        console.log('===============');
+      }
+      console.log('Release info saved to files');
     } else {
       console.log('No changes detected');
+      return 3;
     }
     return 0;
   }

@@ -7,23 +7,35 @@ describe('when creating release notes notes', () => {
     await createSampleRepo(repoDir);
   });
   it('should return release notes for a commit range', async () => {
-    const nt = await releaseNotes({
-      repoDir,
-      fromRef: 'HEAD~3',
-      toRef: 'HEAD',
-      path: 'prefix2',
-    });
-    expect(nt.trim()).toBe(`## Features
+    // get date now in format YYYY-MM-DD, adding 0 if needed
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const versionDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
 
-- 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
+    const nt = await releaseNotes(
+      {
+        repoDir,
+        fromRef: 'HEAD~3',
+        toRef: 'HEAD',
+        path: 'prefix2',
+      },
+      '1.1.0',
+    );
+    expect(nt.trim()).toBe(`## 1.1.0 (${versionDate})
 
-## Maintenance
+### Features
 
-- 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
+* 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
 
-## Info
+### Maintenance
 
-- Refs: closes #45
-- Authors: Flávio Stutz <flaviostutz@gmail.com>`);
+* 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
+
+### Info
+
+* Refs: closes #45
+* Authors: Flávio Stutz <flaviostutz@gmail.com>`);
   });
 });

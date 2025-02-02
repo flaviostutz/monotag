@@ -7,7 +7,7 @@ build: install
 	npx tsc --emitDeclarationOnly --outDir dist
 
 run:
-	npx ts-node src/main.ts tag --repo-dir=/tmp
+	npx ts-node src/main.ts release --repo-dir=testcases/clirepo
 
 lint:
 	npx eslint . --ext .ts

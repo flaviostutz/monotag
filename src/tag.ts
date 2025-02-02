@@ -2,6 +2,7 @@ import { filterCommits, lastTagForPrefix, summarizeCommits } from './git';
 import { formatReleaseNotes } from './notes';
 import { NextTagOptions } from './types/NextTagOptions';
 import { TagNotes } from './types/TagNotes';
+import { getDateFromCommit } from './utils/getDateFromCommit';
 import { incrementTag } from './utils/incrementTag';
 import { tagParts } from './utils/tagParts';
 
@@ -80,7 +81,14 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
     opts.tagSuffix,
   );
 
-  const releaseNotes = formatReleaseNotes(commitsSummary, opts.onlyConvCommit, tagName);
+  const versionDate = getDateFromCommit(commits[0].date);
+
+  const releaseNotes = formatReleaseNotes(
+    commitsSummary,
+    tagName,
+    versionDate,
+    opts.onlyConvCommit,
+  );
 
   return <TagNotes>{
     tagName,

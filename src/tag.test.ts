@@ -54,7 +54,7 @@ describe('when generating next tag with notes', () => {
     expect(
       nt.releaseNotes.includes('updating test1 and test2 files for module prefix1'),
     ).toBeTruthy();
-    expect(nt.releaseNotes.includes('## Fixes')).toBeTruthy();
+    expect(nt.releaseNotes.includes('### Bug Fixes')).toBeTruthy();
     expect(nt.releaseNotes.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
   });
   it('should return latest only with different suffix if nothing changed', async () => {
@@ -103,25 +103,33 @@ describe('when generating next tag with notes', () => {
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix2/21.0.0');
-    expect(nt.releaseNotes.trim()).toBe(`## Version prefix2/21.0.0
 
-## Features
+    // get date now in format YYYY-MM-DD, adding 0 if needed
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const day = now.getDate();
+    const versionDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
 
-- 12 prefix2 adding test3 file for module prefix2
-- 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
+    expect(nt.releaseNotes.trim()).toBe(`## prefix2/21.0.0 (${versionDate})
 
-## Fixes
+### Features
 
-- anyscope: 10 prefix2 updating test1 and test2 files again for module prefix2
+* 12 prefix2 adding test3 file for module prefix2
+* 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
 
-## Maintenance
+### Bug Fixes
 
-- 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
+* anyscope: 10 prefix2 updating test1 and test2 files again for module prefix2
 
-## Info
+### Maintenance
 
-- Refs: closes #45
-- Authors: Flávio Stutz <flaviostutz@gmail.com>`);
+* 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
+
+### Info
+
+* Refs: closes #45
+* Authors: Flávio Stutz <flaviostutz@gmail.com>`);
   });
   it('should simply return latest tag if no new commits found after latest tag in path', async () => {
     const nt = await nextTag({

@@ -29,7 +29,7 @@ describe('when using cli', () => {
 
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--show-notes=true']);
-    expect(stdout).toMatch('346.0.0===============## Version 346.0.0');
+    expect(stdout).toMatch('346.0.0===============## 346.0.0');
     expect(exitCode).toBe(0);
 
     // get next tag for custom prefix separator
@@ -68,12 +68,12 @@ describe('when using cli', () => {
     stdout = '';
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
     expect(exitCode).toBe(0);
-    expect(stdout).toMatch('Version 346.0.0');
-    expect(stdout).toMatch('## Features');
-    expect(stdout).toMatch('- 7 prefix2 creating test2 file');
-    expect(stdout).toMatch('## Fixes');
+    expect(stdout).toMatch('346.0.0 (');
+    expect(stdout).toMatch('### Features');
+    expect(stdout).toMatch('* 7 prefix2 creating test2 file');
+    expect(stdout).toMatch('### Bug Fixes');
     expect(stdout).toMatch('user-ui: 9 prefix1');
-    expect(stdout).toMatch('## Info');
+    expect(stdout).toMatch('### Info');
 
     stdout = '';
     exitCode = await run([
