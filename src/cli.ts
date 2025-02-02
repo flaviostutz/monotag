@@ -58,20 +58,20 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const showNotes = defaultValueBoolean(args2['show-notes'], false);
 
-  const changelogFile = defaultValueString(args2['changelog-file'], undefined);
-  const versionFile = defaultValueString(args2['version-file'], undefined);
-  const releasetagFile = defaultValueString(args2['releasetag-file'], undefined);
+  // const changelogFile = defaultValueString(args2['changelog-file'], undefined);
+  // const versionFile = defaultValueString(args2['version-file'], undefined);
+  // const releasetagFile = defaultValueString(args2['releasetag-file'], undefined);
 
   const args = expandDefaults(args2);
 
-  const args3 = {
-    changelogFile,
-    releasetagFile,
-    versionFile,
-    ...args,
-  };
+  // const args3 = {
+  //   changelogFile,
+  //   releasetagFile,
+  //   versionFile,
+  //   ...args,
+  // };
 
-  return execAction(action, args3, showNotes, yargs2);
+  return execAction(action, args, showNotes, yargs2);
 };
 
 const execAction = async (
@@ -119,6 +119,7 @@ const execAction = async (
   // TAG* ACTIONS
   if (action.startsWith('tag')) {
     // calculate and show tag
+    // console.log(`>>> TAG ${opts.preRelease}`);
     const nt = await nextTag(opts);
     if (nt == null) {
       console.log('No changes detected and no previous tag found');
@@ -199,7 +200,9 @@ const expandDefaults = (args: any): NextTagOptions => {
     onlyConvCommit: defaultValueBoolean(args['conv-commit'], true),
     verbose,
   };
+
   let tagPrefix = args.prefix;
+
   // default tag prefix is relative to path inside repo
   if (tagPrefix === 'auto') {
     tagPrefix = lastPathPart(basicOpts.path);
@@ -207,13 +210,17 @@ const expandDefaults = (args: any): NextTagOptions => {
       tagPrefix += args.separator;
     }
   }
-  return <NextTagOptions>{
+
+  return {
     ...basicOpts,
-    ...{
-      tagPrefix,
-      tagSuffix: args.suffix,
-      semverLevel: <number>args['semver-level'],
-    },
+    tagPrefix,
+    tagSuffix: args.suffix,
+    semverLevel: <number>args['semver-level'],
+    preRelease: defaultValueBoolean(args.prerelease, false),
+    preReleaseIdentifier: defaultValueString(args['pre-identifier'], undefined),
+    versionFile: defaultValueString(args['version-file'], undefined),
+    changelogFile: defaultValueString(args['changelog-file'], undefined),
+    releasetagFile: defaultValueString(args['releasetag-file'], undefined),
   };
 };
 
@@ -285,15 +292,15 @@ const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
       default: '',
     })
     .option('prerelease', {
-      alias: 'p',
+      alias: 'pre',
       type: 'boolean',
-      describe: 'Create tags as pre-release versions. E.g.: 2.1.0-beta',
+      describe: 'Create tags as pre-release versions. E.g.: 2.1.0-beta.0',
       default: false,
     })
     .option('pre-identifier', {
       alias: 'pid',
       type: 'string',
-      describe: 'Pre-release identifier',
+      describe: 'Pre-release identifier. E.g.: beta',
       default: 'beta',
     });
 

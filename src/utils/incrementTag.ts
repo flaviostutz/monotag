@@ -45,14 +45,6 @@ export const incrementTag = (args: {
   // define the increment type
   const incType = getIncType(args.type, args.preRelease ?? false);
 
-  // perform release because this is not an increment
-  // (just remove pre-release suffix from version. e.g: 1.0.0-beta.1 -> 1.0.0)
-  // if (!incType) {
-  //   return `${tparts[2] ? tparts[2] : ''}${curVersion.major}.${curVersion.minor}.${
-  //     curVersion.patch
-  //   }${tagSuffix}`;
-  // }
-
   // increment version
   const incVersion = curVersion.inc(incType, args.preReleaseIdentifier ?? 'beta');
 
