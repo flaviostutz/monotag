@@ -45,7 +45,11 @@ npx monotag tag --path=libs/my-lib1
 
 npx monotag tag --path=services/my-service2
 # will return "my-service2/1.3.0" as tag along with "Features: -new interface to lib2; Fixes: -bug fix according to #43"
-# (if latest tag was my-service2/1.2.9, for example)
+# (if latest tag was my-service2/1.2.9 and a minor change was detected, for example)
+
+npx monotag tag --path=services/my-service2 --prerelease=true
+# will return "my-service2/1.3.0-beta.0" as tag along with "Features: -new interface to lib2; Fixes: -bug fix according to #43"
+# (if latest tag was my-service2/1.2.9 and a minor change was detected, for example)
 
 ```
 
@@ -93,17 +97,20 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
 
 ### CLI example
 
-- 'monotag tag'
+- `monotag tag`
   - Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes
   
-- 'monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice'
+- `monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice`
   - Generate release notes according to changes made in the last 3 commits for changes in dir services/myservice of the repo
 
-- 'monotag tag --path services/myservice'
+- `monotag tag --path services/myservice`
   - Generate tag "myservice/1.3.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
 
-- 'monotag tag --path services/myservice --separator=/v'
+- `monotag tag --path services/myservice --separator=/v`
   - Generate tag "myservice/v1.3.0" if previous tag was "myservice/v1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
+
+- `monotag tag --path services/myservice --prerelease`
+  - Generate tag "myservice/1.3.0-beta.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
 
 ### Github actions workflow
 

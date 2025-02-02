@@ -75,11 +75,15 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
   const commitsSummary = summarizeCommits(commits);
 
   const currentTag = latestTag ?? `${opts.tagPrefix}0.0.0`;
-  const tagName = incrementTag(
-    currentTag,
-    opts.semverLevel ?? commitsSummary.level,
-    opts.tagSuffix,
-  );
+  const tagName = incrementTag({
+    fullTagName: currentTag,
+    type: opts.semverLevel ?? commitsSummary.level,
+    tagSuffix: opts.tagSuffix,
+    minVersion: opts.minVersion,
+    maxVersion: opts.maxVersion,
+    preRelease: opts.preRelease,
+    preReleaseIdentifier: opts.preReleaseIdentifier,
+  });
 
   const versionDate = getDateFromCommit(commits[0].date);
 

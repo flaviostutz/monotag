@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 import { TagNotes } from '../types/TagNotes';
-import { ReleaseOptions } from '../types/ReleaseOptions';
+import { NextTagOptions } from '../types/NextTagOptions';
 
 import { saveResultsToFile } from './saveResultsToFile';
 
@@ -14,11 +14,14 @@ describe('saveResultsToFile', () => {
     changesDetected: 1,
   };
 
-  const releaseOptions: ReleaseOptions = {
+  const releaseOptions: NextTagOptions = {
     repoDir,
     tagPrefix: 'v',
     verbose: true,
     path: '.',
+    versionFile: 'dist/version.txt',
+    changelogFile: 'dist/changelog.md',
+    releasetagFile: 'dist/releasetag.txt',
   };
 
   it('should save version to file', () => {

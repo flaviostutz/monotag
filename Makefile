@@ -7,7 +7,7 @@ build: install
 	npx tsc --emitDeclarationOnly --outDir dist
 
 run:
-	npx ts-node src/main.ts release --repo-dir=.
+	npx ts-node src/main.ts tag --repo-dir=. --prerelease
 
 lint:
 	npx eslint . --ext .ts

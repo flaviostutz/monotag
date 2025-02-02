@@ -99,6 +99,25 @@ describe('when using cli', () => {
     expect(stdout).toEqual('345.2123.143');
     expect(exitCode).toBe(0);
 
+    // get next tag
+    stdout = '';
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
+    expect(stdout).toEqual('346.0.0');
+    expect(exitCode).toBe(0);
+
+    // get next tag as prerelease
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--pre-identifier=alpha',
+    ]);
+    expect(stdout).toEqual('346.0.0-alpha.0');
+    expect(exitCode).toBe(0);
+
     // generate tag in git repo and tag it
     stdout = '';
     exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);

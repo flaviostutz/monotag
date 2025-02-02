@@ -8,7 +8,6 @@ import { NextTagOptions } from './types/NextTagOptions';
 import { execCmd } from './utils/execCmd';
 import { lastPathPart } from './utils/lastPathPart';
 import { lastTagForPrefix } from './git';
-import { ReleaseOptions } from './types/ReleaseOptions';
 import { saveResultsToFile } from './utils/saveResultsToFile';
 
 const run = async (processArgs: string[]): Promise<number> => {
@@ -16,11 +15,6 @@ const run = async (processArgs: string[]): Promise<number> => {
   const yargs2 = yargs(processArgs.slice(2))
     .scriptName('monotag')
     .command('latest', 'Show latest tag for path', (y): Argv => addOptions(y))
-    .command(
-      'release',
-      'Calculate next tag, version and changelog and save to files',
-      (y): Argv => addOptions(y, false, true),
-    )
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
@@ -64,20 +58,20 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const showNotes = defaultValueBoolean(args2['show-notes'], false);
 
-  const changelogFile = defaultValueString(args2['changelog-file'], undefined);
-  const versionFile = defaultValueString(args2['version-file'], undefined);
-  const releasetagFile = defaultValueString(args2['releasetag-file'], undefined);
+  // const changelogFile = defaultValueString(args2['changelog-file'], undefined);
+  // const versionFile = defaultValueString(args2['version-file'], undefined);
+  // const releasetagFile = defaultValueString(args2['releasetag-file'], undefined);
 
   const args = expandDefaults(args2);
 
-  const args3 = {
-    changelogFile,
-    releasetagFile,
-    versionFile,
-    ...args,
-  };
+  // const args3 = {
+  //   changelogFile,
+  //   releasetagFile,
+  //   versionFile,
+  //   ...args,
+  // };
 
-  return execAction(action, args3, showNotes, yargs2);
+  return execAction(action, args, showNotes, yargs2);
 };
 
 const execAction = async (
@@ -93,30 +87,6 @@ const execAction = async (
   if (!action) {
     console.log(await yargs2.getHelp());
     return 1;
-  }
-
-  // RELEASE ACTION
-  if (action === 'release') {
-    // calculate and save tag, version and changelog to files
-    const nt = await nextTag(opts);
-    if (nt == null) {
-      console.log('No changes detected and no previous tag found');
-      return 4;
-    }
-    if (nt.releaseNotes) {
-      saveResultsToFile(nt, opts as ReleaseOptions); // we can cast because cli will parse additional args
-      console.log(`${nt.tagName}`);
-      if (showNotes && nt.releaseNotes) {
-        console.log('===============');
-        console.log(nt.releaseNotes);
-        console.log('===============');
-      }
-      console.log('Release info saved to files');
-    } else {
-      console.log('No changes detected');
-      return 3;
-    }
-    return 0;
   }
 
   // NOTES ACTION
@@ -149,6 +119,7 @@ const execAction = async (
   // TAG* ACTIONS
   if (action.startsWith('tag')) {
     // calculate and show tag
+    // console.log(`>>> TAG ${opts.preRelease}`);
     const nt = await nextTag(opts);
     if (nt == null) {
       console.log('No changes detected and no previous tag found');
@@ -160,6 +131,8 @@ const execAction = async (
       console.log(nt.releaseNotes);
       console.log('===============');
     }
+
+    saveResultsToFile(nt, opts);
 
     if (action === 'tag') {
       return 0;
@@ -227,7 +200,9 @@ const expandDefaults = (args: any): NextTagOptions => {
     onlyConvCommit: defaultValueBoolean(args['conv-commit'], true),
     verbose,
   };
+
   let tagPrefix = args.prefix;
+
   // default tag prefix is relative to path inside repo
   if (tagPrefix === 'auto') {
     tagPrefix = lastPathPart(basicOpts.path);
@@ -235,13 +210,17 @@ const expandDefaults = (args: any): NextTagOptions => {
       tagPrefix += args.separator;
     }
   }
-  return <NextTagOptions>{
+
+  return {
     ...basicOpts,
-    ...{
-      tagPrefix,
-      tagSuffix: args.suffix,
-      semverLevel: <number>args['semver-level'],
-    },
+    tagPrefix,
+    tagSuffix: args.suffix,
+    semverLevel: <number>args['semver-level'],
+    preRelease: defaultValueBoolean(args.prerelease, false),
+    preReleaseIdentifier: defaultValueString(args['pre-identifier'], undefined),
+    versionFile: defaultValueString(args['version-file'], undefined),
+    changelogFile: defaultValueString(args['changelog-file'], undefined),
+    releasetagFile: defaultValueString(args['releasetag-file'], undefined),
   };
 };
 
@@ -311,6 +290,18 @@ const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
       type: 'string',
       describe: 'Tag suffix to be added to generated tags',
       default: '',
+    })
+    .option('prerelease', {
+      alias: 'pre',
+      type: 'boolean',
+      describe: 'Create tags as pre-release versions. E.g.: 2.1.0-beta.0',
+      default: false,
+    })
+    .option('pre-identifier', {
+      alias: 'pid',
+      type: 'string',
+      describe: 'Pre-release identifier. E.g.: beta',
+      default: 'beta',
     });
 
   if (!notes) {

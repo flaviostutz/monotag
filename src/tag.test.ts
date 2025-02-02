@@ -215,4 +215,29 @@ describe('when generating next tag with notes', () => {
     expect(clogs[3].message.includes('13')).toBeTruthy();
     expect(clogs[4].message.includes('14')).toBeTruthy();
   });
+
+  it('should create pre-release correctly', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix1',
+      tagPrefix: 'prefix1/',
+      preRelease: true,
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix1/3.5.0-beta.0');
+  });
+  it('should create release correctly', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      path: 'prefix1',
+      tagPrefix: 'prefix1/',
+      preRelease: false,
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix1/3.5.0');
+  });
 });

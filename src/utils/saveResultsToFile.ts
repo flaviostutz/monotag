@@ -1,38 +1,42 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { ReleaseOptions } from '../types/ReleaseOptions';
 import { TagNotes } from '../types/TagNotes';
+import { NextTagOptions } from '../types/NextTagOptions';
 
 import { getVersionFromTag } from './getVersionFromTag';
 
-export const saveResultsToFile = (nt: TagNotes, opts: ReleaseOptions): void => {
-  // save version to file
-  const versionFile = opts.versionFile ?? 'dist/version.txt';
+export const saveResultsToFile = (nt: TagNotes, opts: NextTagOptions): void => {
   // extract version from tag by matching with version part from tag
-  const version = getVersionFromTag(nt.tagName, opts.tagPrefix);
-  fs.mkdirSync(path.dirname(versionFile), { recursive: true });
-  fs.rmSync(versionFile, { force: true });
-  fs.writeFileSync(versionFile, version, { encoding: 'utf8' });
-  if (opts.verbose) {
-    console.log(`Version saved to file: ${versionFile}`);
+  const version = getVersionFromTag(nt.tagName, opts.tagPrefix, opts.tagSuffix);
+
+  // save version to file
+  if (opts.versionFile) {
+    fs.mkdirSync(path.dirname(opts.versionFile), { recursive: true });
+    fs.rmSync(opts.versionFile, { force: true });
+    fs.writeFileSync(opts.versionFile, version, { encoding: 'utf8' });
+    if (opts.verbose) {
+      console.log(`Version saved to file: ${opts.versionFile}`);
+    }
   }
 
   // save changelog to file
-  const changelogFile = opts.changelogFile ?? 'dist/changelog.md';
-  fs.mkdirSync(path.dirname(changelogFile), { recursive: true });
-  fs.rmSync(changelogFile, { force: true });
-  fs.writeFileSync(changelogFile, nt.releaseNotes, { encoding: 'utf8' });
-  if (opts.verbose) {
-    console.log(`Changelog saved to file: ${changelogFile}`);
+  if (opts.changelogFile) {
+    fs.mkdirSync(path.dirname(opts.changelogFile), { recursive: true });
+    fs.rmSync(opts.changelogFile, { force: true });
+    fs.writeFileSync(opts.changelogFile, nt.releaseNotes, { encoding: 'utf8' });
+    if (opts.verbose) {
+      console.log(`Changelog saved to file: ${opts.changelogFile}`);
+    }
   }
 
   // save releasetag to file
-  const releasetagFile = opts.releasetagFile ?? 'dist/releasetag.txt';
-  fs.mkdirSync(path.dirname(releasetagFile), { recursive: true });
-  fs.rmSync(releasetagFile, { force: true });
-  fs.writeFileSync(releasetagFile, nt.tagName, { encoding: 'utf8' });
-  if (opts.verbose) {
-    console.log(`Release tag saved to file: ${releasetagFile}`);
+  if (opts.releasetagFile) {
+    fs.mkdirSync(path.dirname(opts.releasetagFile), { recursive: true });
+    fs.rmSync(opts.releasetagFile, { force: true });
+    fs.writeFileSync(opts.releasetagFile, nt.tagName, { encoding: 'utf8' });
+    if (opts.verbose) {
+      console.log(`Release tag saved to file: ${opts.releasetagFile}`);
+    }
   }
 };
