@@ -14,4 +14,4 @@ jobs:
       tooling-version: 16
       target-build: true
       target-lint: true
-      target-unit-tests: true
+      target-test: true
