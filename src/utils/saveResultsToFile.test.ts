@@ -24,13 +24,13 @@ describe('saveResultsToFile', () => {
   it('should save version to file', () => {
     saveResultsToFile(tagNotes, releaseOptions);
 
-    const versionStr = fs.readFileSync(`${repoDir}/dist/version.txt`, 'utf8');
+    const versionStr = fs.readFileSync('dist/version.txt', 'utf8');
     expect(versionStr).toBe('1.0.0');
 
-    const releaseTagStr = fs.readFileSync(`${repoDir}/dist/releasetag.txt`, 'utf8');
+    const releaseTagStr = fs.readFileSync('dist/releasetag.txt', 'utf8');
     expect(releaseTagStr).toBe('v1.0.0');
 
-    const changelogStr = fs.readFileSync(`${repoDir}/dist/changelog.md`, 'utf8');
+    const changelogStr = fs.readFileSync('dist/changelog.md', 'utf8');
     expect(changelogStr).toBe('Initial release');
   });
 
