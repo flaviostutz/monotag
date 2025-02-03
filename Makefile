@@ -41,7 +41,8 @@ clean:
 all: build lint unit-tests
 
 install:
-	corepack prepare pnpm@8.9.0 --activate
+	corepack enable
+	corepack prepare pnpm@8.9.0
 	pnpm install --frozen-lockfile --config.dedupe-peer-dependents=false
 
 upgrade-deps:
