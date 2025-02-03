@@ -4,20 +4,20 @@ import { lastTagForPrefix } from './git';
 import { createSampleRepo } from './utils/createSampleRepo';
 
 describe('when using git', () => {
-  const repoDir = './testcases/tagsrepo';
+  const repoDir = './testcases/git-test-repo';
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
   it('should get latest tag for prefix1', async () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     console.log = (): void => {};
-    const ltag = await lastTagForPrefix(repoDir, 'prefix1/', true);
+    const ltag = await lastTagForPrefix(repoDir, 'prefix1/', '', true);
     expect(ltag).toBe('prefix1/3.4.5-alpha');
   });
   it('should get latest tag for prefix1 -', async () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     console.log = (): void => {};
-    const ltag = await lastTagForPrefix(repoDir, 'prefix9-', true);
+    const ltag = await lastTagForPrefix(repoDir, 'prefix9-', '', true);
     expect(ltag).toBe('prefix9-1.0.1');
   });
   it('should get latest tag for prefix2', async () => {

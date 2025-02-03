@@ -52,12 +52,12 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     console.log(nt.releaseNotes);
     expect(nt.tagName).toBe('prefix1/3.5.0');
-    expect(nt.releaseNotes.includes('## Features')).toBeTruthy();
+    expect(nt.releaseNotes?.includes('## Features')).toBeTruthy();
     expect(
-      nt.releaseNotes.includes('updating test1 and test2 files for module prefix1'),
+      nt.releaseNotes?.includes('updating test1 and test2 files for module prefix1'),
     ).toBeTruthy();
-    expect(nt.releaseNotes.includes('### Bug Fixes')).toBeTruthy();
-    expect(nt.releaseNotes.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
+    expect(nt.releaseNotes?.includes('### Bug Fixes')).toBeTruthy();
+    expect(nt.releaseNotes?.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
   });
   it('should return latest only with different suffix if nothing changed', async () => {
     const nt = await nextTag({
@@ -113,7 +113,7 @@ describe('when generating next tag with notes', () => {
     const day = now.getDate();
     const versionDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
 
-    expect(nt.releaseNotes.trim()).toBe(`## prefix2/21.0.0 (${versionDate})
+    expect(nt.releaseNotes?.trim()).toBe(`## prefix2/21.0.0 (${versionDate})
 
 ### Features
 

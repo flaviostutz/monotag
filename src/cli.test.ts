@@ -102,6 +102,12 @@ describe('when using cli', () => {
     expect(stdout).toEqual('345.2123.143');
     expect(exitCode).toBe(0);
 
+    // get current tag
+    stdout = '';
+    exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
+    expect(stdout).toContain('The latest tag is not up to date');
+    expect(exitCode).toBe(5);
+
     // get next tag
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);

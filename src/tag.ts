@@ -7,6 +7,7 @@ import { formatReleaseNotes } from './notes';
 import { NextTagOptions } from './types/NextTagOptions';
 import { TagNotes } from './types/TagNotes';
 import { getDateFromCommit } from './utils/getDateFromCommit';
+import { getVersionFromTag } from './utils/getVersionFromTag';
 import { incrementTag } from './utils/incrementTag';
 import { tagParts } from './utils/tagParts';
 
@@ -28,7 +29,7 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
   }
 
   // current tag
-  const latestTag = await lastTagForPrefix(opts.repoDir, opts.tagPrefix, opts.verbose);
+  const latestTag = await lastTagForPrefix(opts.repoDir, opts.tagPrefix, '', opts.verbose);
 
   if (opts.verbose) {
     console.log(`Using latest tag '${latestTag}' for '${opts.tagPrefix}'`);
@@ -61,13 +62,16 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
     // nothing changed in the commit range
     const tparts = tagParts(latestTag);
     if (opts.tagSuffix && tparts) {
-      return <TagNotes>{
-        tagName: `${tparts[2] ?? ''}${tparts[3]}${opts.tagSuffix}`,
+      const tagName = `${tparts[2] ?? ''}${tparts[3]}${opts.tagSuffix}`;
+      return {
+        tagName,
+        version: getVersionFromTag(tagName),
         changesDetected: 0,
       };
     }
-    return <TagNotes>{
+    return {
       tagName: latestTag,
+      version: getVersionFromTag(latestTag),
       changesDetected: 0,
     };
   }
@@ -98,8 +102,9 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
     opts.onlyConvCommit,
   );
 
-  return <TagNotes>{
+  return {
     tagName,
+    version: getVersionFromTag(tagName),
     releaseNotes,
     changesDetected: commits.length,
   };

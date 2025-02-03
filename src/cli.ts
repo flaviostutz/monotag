@@ -17,26 +17,36 @@ const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
   const yargs2 = yargs(processArgs.slice(2))
     .scriptName('monotag')
-    .command('latest', 'Show latest tag for path', (y): Argv => addOptions(y))
+    .command(
+      'current',
+      "Show the latest tag for the path and fail if it's not up to date",
+      (y): Argv => addOptions(y, false, true),
+    )
+    .command('latest', 'Show the latest tag for the path', (y): Argv => addOptions(y))
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
-      (y): Argv => addOptions(y),
+      (y): Argv => addOptions(y, false, true),
+    )
+    .command(
+      'version',
+      'Calculate and show next version, incrementing semver according to detected changes on path',
+      (y): Argv => addOptions(y, false, true),
     )
     .command(
       'notes',
       'Calculate and show release notes according to detected commits in path',
-      (y): Argv => addOptions(y, true),
+      (y): Argv => addOptions(y, true, true),
     )
     .command(
       'tag-git',
       'Calculate next tag and tag it in local git repo',
-      (y): Argv => addOptions(y),
+      (y): Argv => addOptions(y, false, true),
     )
     .command(
       'tag-push',
       'Calculate next tag, git-tag and git-push it to remote',
-      (y): Argv => addOptions(y),
+      (y): Argv => addOptions(y, false, true),
     )
     .help()
     .example([
@@ -61,18 +71,7 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const showNotes = defaultValueBoolean(args2['show-notes'], false);
 
-  // const changelogFile = defaultValueString(args2['changelog-file'], undefined);
-  // const versionFile = defaultValueString(args2['version-file'], undefined);
-  // const releasetagFile = defaultValueString(args2['releasetag-file'], undefined);
-
   const args = expandDefaults(args2);
-
-  // const args3 = {
-  //   changelogFile,
-  //   releasetagFile,
-  //   versionFile,
-  //   ...args,
-  // };
 
   return execAction(action, args, showNotes, yargs2);
 };
@@ -92,6 +91,53 @@ const execAction = async (
     return 1;
   }
 
+  // CURRENT ACTION
+  if (action === 'current') {
+    const latestTag = await lastTagForPrefix(
+      opts.repoDir,
+      opts.tagPrefix,
+      opts.tagSuffix,
+      opts.verbose,
+    );
+    if (!latestTag) {
+      console.log(`No tag found for prefix '${opts.tagPrefix}'`);
+      return 1;
+    }
+
+    const ntNext = await nextTag(opts);
+    if (!ntNext) throw new Error('A new tag or the latest tag should have been returned');
+
+    if (ntNext.tagName !== latestTag) {
+      console.log(
+        `The latest tag is not up to date. Latest tag is '${latestTag}'. Next tag would be '${ntNext.tagName}'`,
+      );
+      return 5;
+    }
+
+    console.log(latestTag);
+    saveResultsToFile(ntNext, opts);
+
+    return 0;
+  }
+
+  // LATEST ACTION
+  if (action === 'latest') {
+    const latestTag = await lastTagForPrefix(
+      opts.repoDir,
+      opts.tagPrefix,
+      opts.tagSuffix,
+      opts.verbose,
+    );
+    if (!latestTag) {
+      console.log(`No tag found for prefix '${opts.tagPrefix}'`);
+      return 1;
+    }
+
+    console.log(latestTag);
+
+    return 0;
+  }
+
   // NOTES ACTION
   if (action === 'notes') {
     // calculate and show tag
@@ -105,17 +151,20 @@ const execAction = async (
     } else {
       console.log('No changes detected');
     }
+    saveResultsToFile(nt, opts);
     return 0;
   }
 
-  // LATEST ACTION
-  if (action === 'latest') {
-    const nt = await lastTagForPrefix(opts.repoDir, opts.tagPrefix, opts.verbose);
-    if (!nt) {
-      console.log('No tag found');
-      return 1;
+  // VERSION ACTION
+  if (action === 'version') {
+    // calculate and show version
+    const nt = await nextTag(opts);
+    if (nt === undefined) {
+      console.log('No changes detected and no previous tag found');
+      return 4;
     }
-    console.log(nt);
+    console.log(nt.version);
+    saveResultsToFile(nt, opts);
     return 0;
   }
 
@@ -229,7 +278,7 @@ const expandDefaults = (args: any): NextTagOptions => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
+const addOptions = (y: Argv, notes?: boolean, saveToFile?: boolean): any => {
   const y1 = y
     .option('verbose', {
       alias: 'v',
@@ -318,24 +367,24 @@ const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
     });
   }
 
-  if (release) {
+  if (saveToFile) {
     y1.option('releasetag-file', {
       alias: 'ft',
       type: 'string',
       describe: 'File to save the release tag. Defaults to "dist/releasetag.txt"',
-      default: 'dist/releasetag.txt',
+      default: undefined,
     });
     y1.option('version-file', {
       alias: 'fv',
       type: 'string',
       describe: 'File to save version. Defaults to "dist/version.txt"',
-      default: 'dist/version-file.txt',
+      default: undefined,
     });
     y1.option('changelog-file', {
       alias: 'fc',
       type: 'string',
       describe: 'File to save the changelog. Defaults to "dist/changelog.md"',
-      default: 'dist/changelog.md',
+      default: undefined,
     });
   }
 
