@@ -11,7 +11,7 @@ jobs:
     with:
       working-directory: ./
       tooling: node
-      tooling-version: 20
+      tooling-version: 18
       target-build: true
       target-lint: true
       target-test: true
