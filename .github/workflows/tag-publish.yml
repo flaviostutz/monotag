@@ -12,7 +12,7 @@ jobs:
     with:
       working-directory: ./
       tooling: node
-      tooling-version: 16
+      tooling-version: 20
       stage: prd
       target-build: true
       target-lint: true
@@ -24,10 +24,10 @@ jobs:
     needs: build
     environment: npmjs-registry
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16.x'
+          node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
       - run: make build
       - run: make publish

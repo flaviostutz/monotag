@@ -1,3 +1,6 @@
+/* eslint-disable no-console */
+/* eslint-disable functional/immutable-data */
+/* eslint-disable functional/no-let */
 import { run } from './cli';
 import { createSampleRepo } from './utils/createSampleRepo';
 

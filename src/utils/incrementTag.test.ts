@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-let */
 import { SemverLevel } from '../types/SemverLevel';
 
 import { incrementTag } from './incrementTag';
@@ -43,7 +44,7 @@ describe('when using tag incrementer', () => {
     expect(rr).toBe('25.0.0');
   });
 
-  it('should increment minor and zero other parts', async () => {
+  it('should increment minor and zero other parts 1', async () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: SemverLevel.MINOR,
@@ -63,7 +64,7 @@ describe('when using tag incrementer', () => {
     expect(rr).toBe('24.23.0');
   });
 
-  it('should increment minor and zero other parts', async () => {
+  it('should increment patch and zero other parts', async () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: SemverLevel.PATCH,
@@ -78,7 +79,7 @@ describe('when using tag incrementer', () => {
     rr = incrementTag({ fullTagName: '24.22.5-beta+build999', type: SemverLevel.PATCH });
     expect(rr).toBe('24.22.5');
   });
-  it('should increment minor and zero other parts -', async () => {
+  it('should increment patch and zero other parts 2', async () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix-0.1.0-beta+build999',
       type: SemverLevel.PATCH,

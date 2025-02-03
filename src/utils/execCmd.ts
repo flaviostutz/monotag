@@ -1,4 +1,5 @@
-import { execSync } from 'child_process';
+/* eslint-disable no-console */
+import { execSync } from 'node:child_process';
 
 export const execCmd = (baseDir: string, commands: string, verbose?: boolean): string => {
   const lines = commands.split('\n');

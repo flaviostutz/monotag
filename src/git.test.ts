@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable functional/immutable-data */
 import { lastTagForPrefix } from './git';
 import { createSampleRepo } from './utils/createSampleRepo';
 
@@ -28,11 +30,11 @@ describe('when using git', () => {
   });
   it('should return null if no tag found', async () => {
     const ltag = await lastTagForPrefix(repoDir, 'pref');
-    expect(ltag).toBeNull();
+    expect(ltag).toBeUndefined();
   });
   it('should return null if no tag found for prefix99', async () => {
     const ltag = await lastTagForPrefix(repoDir, 'prefix99/');
-    expect(ltag).toBeNull();
+    expect(ltag).toBeUndefined();
   });
   it('should get latest tag for empty prefix', async () => {
     const ltag = await lastTagForPrefix(repoDir, '');

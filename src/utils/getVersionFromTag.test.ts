@@ -40,11 +40,11 @@ describe('getVersionFromTag', () => {
     const result = getVersionFromTag('v1.2.3+build.1', 'v');
     expect(result).toBe('1.2.3+build.1');
   });
-  it('should return the version when prefix is empty', () => {
+  it('should return the version when prefix is empty 2', () => {
     const result = getVersionFromTag('test/1.2.3', '');
     expect(result).toBe('1.2.3');
   });
-  it('should return the version when prefix is empty', () => {
+  it('should return the version when prefix is empty with suffix', () => {
     const result = getVersionFromTag('test/1.2.3-abc', '');
     expect(result).toBe('1.2.3-abc');
   });

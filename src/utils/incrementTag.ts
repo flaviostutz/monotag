@@ -31,7 +31,7 @@ export const incrementTag = (args: {
   preRelease?: boolean;
   preReleaseIdentifier?: string;
 }): string => {
-  const tagSuffix = args.tagSuffix ? args.tagSuffix : '';
+  const tagSuffix = args.tagSuffix ?? '';
   const tparts = tagParts(args.fullTagName);
   if (!tparts) {
     throw new Error(`Tag '${args.fullTagName}' is not valid`);
@@ -51,7 +51,7 @@ export const incrementTag = (args: {
   // check min
   const minVersionSemver = semver.coerce(args.minVersion);
   if (minVersionSemver && incVersion.compare(minVersionSemver) === -1) {
-    return `${tparts[2] ? tparts[2] : ''}${minVersionSemver}${tagSuffix}`;
+    return `${tparts[2] ?? ''}${minVersionSemver}${tagSuffix}`;
   }
 
   // check max
@@ -60,7 +60,7 @@ export const incrementTag = (args: {
     throw new Error(`Generated tag version ${incVersion} is greater than ${args.maxVersion}`);
   }
 
-  return `${tparts[2] ? tparts[2] : ''}${incVersion}${tagSuffix}`;
+  return `${tparts[2] ?? ''}${incVersion}${tagSuffix}`;
 };
 
 const getIncType = (type: SemverLevel, preRelease: boolean): ReleaseType => {
@@ -69,12 +69,14 @@ const getIncType = (type: SemverLevel, preRelease: boolean): ReleaseType => {
       return 'premajor';
     }
     return 'major';
-  } else if (type === SemverLevel.MINOR) {
+  }
+  if (type === SemverLevel.MINOR) {
     if (preRelease) {
       return 'preminor';
     }
     return 'minor';
-  } else if (type === SemverLevel.PATCH) {
+  }
+  if (type === SemverLevel.PATCH) {
     if (preRelease) {
       return 'prepatch';
     }
@@ -84,6 +86,6 @@ const getIncType = (type: SemverLevel, preRelease: boolean): ReleaseType => {
     return 'prerelease';
   }
 
-  // @ts-ignore this type is not on the @type definition, but present on the library
+  // @ts-expect-error this type is not on the @type definition, but present on the library
   return 'release';
 };
