@@ -368,22 +368,22 @@ const addOptions = (y: Argv, notes?: boolean, saveToFile?: boolean): any => {
   }
 
   if (saveToFile) {
-    y1.option('releasetag-file', {
+    y1.option('tag-file', {
       alias: 'ft',
       type: 'string',
-      describe: 'File to save the release tag. Defaults to "dist/releasetag.txt"',
+      describe: 'File to save the release tag',
       default: undefined,
     });
     y1.option('version-file', {
       alias: 'fv',
       type: 'string',
-      describe: 'File to save version. Defaults to "dist/version.txt"',
+      describe: 'File to save version',
       default: undefined,
     });
-    y1.option('changelog-file', {
-      alias: 'fc',
+    y1.option('notes-file', {
+      alias: 'fn',
       type: 'string',
-      describe: 'File to save the changelog. Defaults to "dist/changelog.md"',
+      describe: 'File to save the notes with a changelog',
       default: undefined,
     });
   }

@@ -98,7 +98,14 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
 ### CLI example
 
 - `monotag tag`
-  - Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes
+  - Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes. If
+  there are not changes since the last tag, the latest tag will be returned.
+
+- `monotag tag --version-file=dist/version.txt --notes-file=dist/changelog.md --tag-file=dist/versiontag.txt`
+  - Same as previous, but saves the version part of the tag in version.txt, the full tag name in versiontag.txt and the change notes in changelog.md
+
+- `monotag current`
+  - Will get the latest tag for current path and check if it's the latest possible tag in the repo. It will fail if there are changes in the repo that would lead to the creation of a new tag. If the latest tag is the latest possible (current), then it will be returned.
   
 - `monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice`
   - Generate release notes according to changes made in the last 3 commits for changes in dir services/myservice of the repo
