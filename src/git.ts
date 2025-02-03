@@ -1,4 +1,11 @@
-import conventionalCommitsParser from 'conventional-commits-parser';
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-continue */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable functional/no-let */
+/* eslint-disable functional/immutable-data */
+/* eslint-disable no-undefined */
+/* eslint-disable no-console */
+import * as conventionalCommitsParser from 'conventional-commits-parser';
 
 import { BasicOptions } from './types/BasicOptions';
 import { Commit } from './types/Commit';
@@ -42,9 +49,9 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
   }
 
   const commits = outCommits
-    .map((celem: string): Commit | null => {
+    .map((celem: string): Commit | undefined => {
       if (celem.trim().length === 0) {
-        return null;
+        return undefined;
       }
       const fields = celem.trim().split(';');
       const com: Commit = {
@@ -56,8 +63,8 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
       };
       return com;
     })
-    .filter((cm: Commit | null): boolean => {
-      if (cm === null) {
+    .filter((cm: Commit | undefined): boolean => {
+      if (!cm) {
         return false;
       }
       // only keep commits that have touched any file inside "path"
@@ -81,7 +88,7 @@ const lastTagForPrefix = async (
   repoDir: string,
   tagPrefix: string,
   verbose?: boolean,
-): Promise<string | null> => {
+): Promise<string | undefined> => {
   // list tags by semver in descending order
   const tags = execCmd(
     repoDir,
@@ -97,8 +104,7 @@ const lastTagForPrefix = async (
     }
     console.log(`${tags.length} with prefix '${tagPrefix}' found`);
   }
-  for (let i = 0; i < tags.length; i += 1) {
-    const tag = tags[i];
+  for (const tag of tags) {
     const tparts = tagParts(tag);
     if (!tparts) {
       continue;
@@ -113,7 +119,7 @@ const lastTagForPrefix = async (
     }
   }
   // tag with prefix not found
-  return null;
+  return undefined;
 };
 
 /**
@@ -132,6 +138,7 @@ const summarizeCommits = (commits: Commit[]): CommitsSummary => {
     authors: <string[]>[],
     references: <string[]>[],
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   commits.reduce((summary, clog): any => {
     // remove ! from type because the parser doesn't support it
     // (but it's valid for conventional commit)
@@ -163,27 +170,29 @@ const summarizeCommits = (commits: Commit[]): CommitsSummary => {
     // breaking changes/major level
     if (clog.message.includes('!:')) {
       if (summary.level > SemverLevel.MAJOR) summary.level = SemverLevel.MAJOR;
-    } else if (convLog.notes.some((note) => note.title.includes('BREAKING CHANGE'))) {
-      if (summary.level > SemverLevel.MAJOR) summary.level = SemverLevel.MAJOR;
-    }
+    } else if (
+      convLog.notes.some((note) => note.title.includes('BREAKING CHANGE')) &&
+      summary.level > SemverLevel.MAJOR
+    )
+      summary.level = SemverLevel.MAJOR;
 
     // notes
-    convLog.notes.forEach((note) => {
+    for (const note of convLog.notes) {
       summary.notes.push(`${note.title}: ${note.text}`);
-    });
+    }
 
     // references
-    convLog.references.forEach((reference) => {
+    for (const reference of convLog.references) {
       summary.references.push(`${reference.action} ${reference.raw}`);
-    });
+    }
 
     return summary;
   }, sum);
 
   // authors
-  commits.forEach((com) => {
+  for (const com of commits) {
     sum.authors.push(com.author);
-  });
+  }
 
   return sum;
 };

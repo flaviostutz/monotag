@@ -1,33 +1,39 @@
 build: install
 	rm -rf dist
 	# lib build
-	npx esbuild src/index.ts --bundle --platform=node --minify --outfile=dist/index.js
+	pnpm exec esbuild src/index.ts --bundle --platform=node --minify --outfile=dist/index.js
 	# cli build
-	npx esbuild src/main.ts --bundle --platform=node --minify --outfile=dist/main.js
-	npx tsc --emitDeclarationOnly --outDir dist
+	pnpm exec esbuild src/main.ts --bundle --platform=node --minify --outfile=dist/main.js
+	pnpm exec tsc --emitDeclarationOnly --outDir dist
 
 run:
 	npx ts-node src/main.ts tag --repo-dir=. --prerelease
 
 lint:
-	npx eslint . --ext .ts
-	npx tsc -noEmit --skipLibCheck
-	yarn audit; [[ $? -ge 16 ]] && exit 1 || exit 0
+	pnpm exec eslint ./src --ext .ts
+	pnpm tsc -noEmit --skipLibCheck
+	pnpm audit --audit-level high
 
 lint-fix:
-	npx eslint . --ext .ts --fix
+	pnpm exec eslint . --ext .ts --fix
 
-test: unit-tests
-
-unit-tests:
-	npx jest --verbose
+test:
+	@# can't be in parallel because we use nock that has shared contexts
+	pnpm exec jest -i --verbose
 
 publish:
+	@if [ "$${NPM_ACCESS_TOKEN}" == "" ]; then \
+		echo "env NPM_ACCESS_TOKEN is required"; \
+		exit 1; \
+	fi
+
 	git config --global user.email "flaviostutz@gmail.com"
 	git config --global user.name "Flávio Stutz"
 	npm version from-git --no-git-tag-version
-	echo "//registry.npmjs.org/:_authToken=${NPM_ACCESS_TOKEN}" > .npmrc
-	yarn publish
+
+	echo "" >> .npmrc
+	echo "//registry.npmjs.org/:_authToken=$${NPM_ACCESS_TOKEN}" >> .npmrc
+	pnpm publish --no-git-checks
 
 clean:
 	rm -rf node_modules
@@ -35,7 +41,11 @@ clean:
 all: build lint unit-tests
 
 install:
-	yarn install --frozen-lockfile
+	corepack enable pnpm
+	corepack use pnpm@8.9.0
+	# https://github.com/nodejs/corepack/issues/612
+	COREPACK_INTEGRITY_KEYS=0 pnpm --version
+	pnpm install --frozen-lockfile --config.dedupe-peer-dependents=false
 
 upgrade-deps:
 	npx npm-check-updates -u

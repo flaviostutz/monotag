@@ -1,5 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
+/* eslint-disable no-console */
+import * as fs from 'node:fs';
+import path from 'node:path';
 
 import { TagNotes } from '../types/TagNotes';
 import { NextTagOptions } from '../types/NextTagOptions';

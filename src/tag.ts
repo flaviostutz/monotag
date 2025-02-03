@@ -1,3 +1,7 @@
+/* eslint-disable no-undefined */
+/* eslint-disable no-param-reassign */
+/* eslint-disable functional/immutable-data */
+/* eslint-disable no-console */
 import { filterCommits, lastTagForPrefix, summarizeCommits } from './git';
 import { formatReleaseNotes } from './notes';
 import { NextTagOptions } from './types/NextTagOptions';
@@ -15,7 +19,7 @@ import { tagParts } from './utils/tagParts';
  * @returns {TagNotes}
  */
 // eslint-disable-next-line complexity
-const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
+const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
   if (!opts.fromRef) {
     throw new Error("'fromRef' is required. Use 'auto' so it will use the latest tag");
   }
@@ -51,14 +55,14 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | null> => {
       console.log('No changes detected in commit range');
     }
     if (!latestTag) {
-      return null;
+      return undefined;
     }
 
     // nothing changed in the commit range
     const tparts = tagParts(latestTag);
     if (opts.tagSuffix && tparts) {
       return <TagNotes>{
-        tagName: `${tparts[2] ? tparts[2] : ''}${tparts[3]}${opts.tagSuffix}`,
+        tagName: `${tparts[2] ?? ''}${tparts[3]}${opts.tagSuffix}`,
         changesDetected: 0,
       };
     }

@@ -1,4 +1,8 @@
 export const lastPathPart = (path: string): string => {
   const pathParts = path.split('/');
-  return pathParts[pathParts.length - 1];
+  const part = pathParts.at(-1);
+  if (!part) {
+    return path;
+  }
+  return part;
 };

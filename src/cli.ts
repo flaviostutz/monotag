@@ -1,3 +1,6 @@
+/* eslint-disable unicorn/no-useless-undefined */
+/* eslint-disable functional/no-let */
+/* eslint-disable no-console */
 /* eslint-disable no-undefined */
 /* eslint-disable complexity */
 import yargs, { Argv } from 'yargs';
@@ -93,7 +96,7 @@ const execAction = async (
   if (action === 'notes') {
     // calculate and show tag
     const nt = await nextTag(opts);
-    if (nt == null) {
+    if (nt === undefined) {
       console.log('No changes detected and no previous tag found');
       return 4;
     }
@@ -121,7 +124,7 @@ const execAction = async (
     // calculate and show tag
     // console.log(`>>> TAG ${opts.preRelease}`);
     const nt = await nextTag(opts);
-    if (nt == null) {
+    if (nt === undefined) {
       console.log('No changes detected and no previous tag found');
       return 4;
     }
@@ -167,6 +170,7 @@ const execAction = async (
   return 1;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const expandDefaults = (args: any): NextTagOptions => {
   const verbose = defaultValueBoolean(args.verbose, false);
 
@@ -190,7 +194,7 @@ const expandDefaults = (args: any): NextTagOptions => {
     }
   }
   if (path && path.startsWith('/')) {
-    path = path.substring(1);
+    path = path.slice(1);
   }
   const basicOpts: BasicOptions = {
     repoDir,
@@ -224,6 +228,7 @@ const expandDefaults = (args: any): NextTagOptions => {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
   const y1 = y
     .option('verbose', {
@@ -269,7 +274,7 @@ const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
       type: 'number',
       describe:
         'Increase tag in specific semver level (1,2,3). If not defined, detect automatically based on semantic commit',
-      default: null,
+      default: undefined,
     })
     .option('prefix', {
       alias: 'p',
@@ -339,7 +344,7 @@ const addOptions = (y: Argv, notes?: boolean, release?: boolean): any => {
 
 const defaultValueBoolean = (value: unknown | undefined, defValue: boolean): boolean => {
   // eslint-disable-next-line no-negated-condition
-  return typeof value !== 'undefined' ? `${value}` === 'true' : defValue;
+  return value !== undefined ? `${value}` === 'true' : defValue;
 };
 
 const defaultValueString = (
@@ -347,7 +352,7 @@ const defaultValueString = (
   defValue: string | undefined,
 ): string | undefined => {
   // eslint-disable-next-line no-negated-condition
-  return typeof value !== 'undefined' ? `${value}` : defValue;
+  return value !== undefined ? `${value}` : defValue;
 };
 
 export { run };

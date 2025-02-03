@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable functional/immutable-data */
 import { filterCommits } from './git';
 import { nextTag } from './tag';
 import { createSampleRepo } from './utils/createSampleRepo';
@@ -37,7 +39,7 @@ describe('when generating next tag with notes', () => {
       path: 'inexistentModule',
       tagPrefix: 'inexistentModule/',
     });
-    expect(nt).toBeNull();
+    expect(nt).toBeUndefined();
   });
   it('should return next version if minor changes found in path after last tag', async () => {
     const nt = await nextTag({
@@ -81,7 +83,7 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix9/v1.0.3');
   });
-  it('should return next version if minor changes found in path after last tag', async () => {
+  it('should return next version with suffix', async () => {
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',

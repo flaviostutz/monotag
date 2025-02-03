@@ -1,6 +1,7 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
+/* eslint-disable functional/no-let */
 
-// eslint-disable-next-line node/shebang
 import { run } from './cli';
 
 // eslint-disable-next-line no-void
@@ -9,7 +10,7 @@ void (async (): Promise<void> => {
     const errs = `${err}`;
     let i = errs.indexOf('\n');
     if (i === -1) i = errs.length;
-    console.log(errs.substring(0, i));
+    console.log(errs.slice(0, Math.max(0, i)));
     process.exit(3);
   });
   const exitCode = await run(process.argv);

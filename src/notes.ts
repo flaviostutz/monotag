@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-let */
 import { filterCommits, summarizeCommits } from './git';
 import { BasicOptions } from './types/BasicOptions';
 import { CommitsSummary } from './types/CommitsSummary';
@@ -68,14 +69,12 @@ const formatReleaseNotes = (
   }
 
   // misc (non conventional commits)
-  if (!onlyConvCommit) {
-    if (commitsSummary.nonConventional.length > 0) {
-      notes += '### Misc\n\n';
-      notes = commitsSummary.nonConventional.reduce((pv, nonConventional) => {
-        return `${pv}* ${nonConventional}\n`;
-      }, notes);
-      notes += '\n';
-    }
+  if (!onlyConvCommit && commitsSummary.nonConventional.length > 0) {
+    notes += '### Misc\n\n';
+    notes = commitsSummary.nonConventional.reduce((pv, nonConventional) => {
+      return `${pv}* ${nonConventional}\n`;
+    }, notes);
+    notes += '\n';
   }
 
   // notes
@@ -100,8 +99,8 @@ const formatReleaseNotes = (
     notes += `* Refs: ${JSON.stringify(references)
       .replace('[', '')
       .replace(']', '')
-      .replace(/"/g, '')
-      .replace(/,/g, ', ')}`;
+      .replaceAll('"', '')
+      .replaceAll(',', ', ')}`;
     notes += '\n';
   }
 
@@ -114,8 +113,8 @@ const formatReleaseNotes = (
     notes += `* Authors: ${JSON.stringify(authors)
       .replace('[', '')
       .replace(']', '')
-      .replace(/"/g, '')
-      .replace(/,/g, ', ')}`;
+      .replaceAll('"', '')
+      .replaceAll(',', ', ')}`;
     notes += '\n';
   }
 
