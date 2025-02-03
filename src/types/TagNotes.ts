@@ -1,5 +1,6 @@
 export type TagNotes = {
   tagName: string;
-  releaseNotes: string;
+  version: string;
+  releaseNotes?: string;
   changesDetected: number;
 };

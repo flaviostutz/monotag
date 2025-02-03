@@ -23,6 +23,7 @@ export const saveResultsToFile = (nt: TagNotes, opts: NextTagOptions): void => {
 
   // save changelog to file
   if (opts.changelogFile) {
+    if (!nt.releaseNotes) throw new Error('Release notes are required');
     fs.mkdirSync(path.dirname(opts.changelogFile), { recursive: true });
     fs.rmSync(opts.changelogFile, { force: true });
     fs.writeFileSync(opts.changelogFile, nt.releaseNotes, { encoding: 'utf8' });

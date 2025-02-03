@@ -7,7 +7,7 @@ build: install
 	pnpm exec tsc --emitDeclarationOnly --outDir dist
 
 run:
-	npx ts-node src/main.ts tag --repo-dir=. --prerelease
+	npx ts-node src/main.ts current --repo-dir=. --version-file='dist/version.txt' 
 
 lint:
 	pnpm exec eslint ./src --ext .ts
@@ -38,7 +38,7 @@ publish:
 clean:
 	rm -rf node_modules
 
-all: build lint unit-tests
+all: build lint test
 
 install:
 	corepack enable pnpm

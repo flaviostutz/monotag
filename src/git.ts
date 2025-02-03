@@ -6,6 +6,7 @@
 /* eslint-disable no-undefined */
 /* eslint-disable no-console */
 import * as conventionalCommitsParser from 'conventional-commits-parser';
+import semver from 'semver';
 
 import { BasicOptions } from './types/BasicOptions';
 import { Commit } from './types/Commit';
@@ -13,6 +14,7 @@ import { CommitsSummary } from './types/CommitsSummary';
 import { SemverLevel } from './types/SemverLevel';
 import { execCmd } from './utils/execCmd';
 import { tagParts } from './utils/tagParts';
+import { getVersionFromTag } from './utils/getVersionFromTag';
 
 /**
  * Looks for commits that touched a certain path
@@ -78,7 +80,7 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
 
 /**
  * Get last tag in repository for a certain prefix according to semantic versioning
- * Ex.: Existing tags 'myservice/1.1.2', 'myservice/1.4.2' and 'yourservice/3.4.1'
+ * Ex.: Existing tags 'myservice/1.1.2', 'myservice/1.4.2', 'myservice/1.4.2-beta.0' and 'yourservice/3.4.1'
  *      If you query for tag prefix 'myservice/', it will return 'myservice/1.4.2'
  * @param {string} repoDir directory of the git repo
  * @param {string} tagPrefix tag prefix for looking for last tag and for generating the next tag
@@ -87,37 +89,58 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
 const lastTagForPrefix = async (
   repoDir: string,
   tagPrefix: string,
+  tagSuffix?: string,
   verbose?: boolean,
 ): Promise<string | undefined> => {
   // list tags by semver in descending order
   const tags = execCmd(
     repoDir,
-    `git tag --list '${tagPrefix}*' --sort=-v:refname | head -n 50`,
+    `git tag --list '${tagPrefix}*' --sort=-v:refname | head -n 100`,
     verbose,
   ).split('\n');
 
   // this limit (with "head") is a safeguard for large repositories
 
   if (verbose) {
-    if (tags.length === 30) {
-      console.log('Tags might have been limited to 30 results');
+    if (tags.length === 100) {
+      console.log('Tags analysis ight have been limited to last 100 results');
     }
     console.log(`${tags.length} with prefix '${tagPrefix}' found`);
   }
-  for (const tag of tags) {
-    const tparts = tagParts(tag);
+
+  // remove tags that don't match the prefix
+  const filteredTags = tags.filter((t: string): boolean => {
+    const tparts = tagParts(t);
+    // doesn't seem like a valid tag
     if (!tparts) {
-      continue;
+      return false;
     }
+    // we are looking for a tag with a prefix
     if (tagPrefix) {
+      // it's a tag for the desired prefix
       if (tparts[2] === tagPrefix) {
-        return tag;
-        // return tparts[1];
+        return true;
       }
+      // it's a tag without prefix and the desired prefix is empty
     } else if (!tparts[2]) {
-      return tag;
+      return true;
     }
+    return false;
+  });
+
+  // git tag sort returns pre-released version after releases (1.0.0-alpha after 1.0.0)
+  // which is semantically incorrect (first we prerelease with -alpha, then without identifier),
+  // so we need to sort it again
+  const orderedTags = filteredTags.sort((a: string, b: string): number => {
+    const versionA = getVersionFromTag(a, tagPrefix, tagSuffix);
+    const versionB = getVersionFromTag(b, tagPrefix, tagSuffix);
+    return semver.rcompare(versionA, versionB);
+  });
+
+  if (orderedTags.length > 0) {
+    return orderedTags[0];
   }
+
   // tag with prefix not found
   return undefined;
 };

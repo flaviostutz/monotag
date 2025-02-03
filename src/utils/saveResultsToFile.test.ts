@@ -10,6 +10,7 @@ describe('saveResultsToFile', () => {
 
   const tagNotes: TagNotes = {
     tagName: 'v1.0.0',
+    version: '1.0.0',
     releaseNotes: 'Initial release',
     changesDetected: 1,
   };
