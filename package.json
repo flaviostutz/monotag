@@ -54,5 +54,10 @@
     "conventional-commits-parser": "^5.0.0",
     "semver": "^7.7.0",
     "yargs": "^17.6.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "braces@<3.0.3": ">=3.0.3"
+    }
   }
 }
