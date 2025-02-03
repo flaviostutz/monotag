@@ -6,8 +6,9 @@ import { TagNotes } from '../types/TagNotes';
 import { NextTagOptions } from '../types/NextTagOptions';
 
 import { getVersionFromTag } from './getVersionFromTag';
+import { appendChangelog } from './appendChangelog';
 
-export const saveResultsToFile = (nt: TagNotes, opts: NextTagOptions): void => {
+export const saveResultsToFiles = (nt: TagNotes, opts: NextTagOptions): void => {
   // extract version from tag by matching with version part from tag
   const version = getVersionFromTag(nt.tagName, opts.tagPrefix, opts.tagSuffix);
 
@@ -21,24 +22,29 @@ export const saveResultsToFile = (nt: TagNotes, opts: NextTagOptions): void => {
     }
   }
 
-  // save changelog to file
-  if (opts.changelogFile) {
+  // save notes to file
+  if (opts.notesFile) {
     if (!nt.releaseNotes) throw new Error('Release notes are required');
-    fs.mkdirSync(path.dirname(opts.changelogFile), { recursive: true });
-    fs.rmSync(opts.changelogFile, { force: true });
-    fs.writeFileSync(opts.changelogFile, nt.releaseNotes, { encoding: 'utf8' });
+    fs.mkdirSync(path.dirname(opts.notesFile), { recursive: true });
+    fs.rmSync(opts.notesFile, { force: true });
+    fs.writeFileSync(opts.notesFile, nt.releaseNotes, { encoding: 'utf8' });
     if (opts.verbose) {
-      console.log(`Changelog saved to file: ${opts.changelogFile}`);
+      console.log(`Notes saved to file: ${opts.notesFile}`);
     }
   }
 
-  // save releasetag to file
-  if (opts.releasetagFile) {
-    fs.mkdirSync(path.dirname(opts.releasetagFile), { recursive: true });
-    fs.rmSync(opts.releasetagFile, { force: true });
-    fs.writeFileSync(opts.releasetagFile, nt.tagName, { encoding: 'utf8' });
+  // save tag name to file
+  if (opts.tagFile) {
+    fs.mkdirSync(path.dirname(opts.tagFile), { recursive: true });
+    fs.rmSync(opts.tagFile, { force: true });
+    fs.writeFileSync(opts.tagFile, nt.tagName, { encoding: 'utf8' });
     if (opts.verbose) {
-      console.log(`Release tag saved to file: ${opts.releasetagFile}`);
+      console.log(`Tag saved to file: ${opts.tagFile}`);
     }
+  }
+
+  // save changelog to file
+  if (opts.changelogFile) {
+    appendChangelog(opts.changelogFile, nt);
   }
 };

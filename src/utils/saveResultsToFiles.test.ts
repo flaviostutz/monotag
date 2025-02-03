@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import { TagNotes } from '../types/TagNotes';
 import { NextTagOptions } from '../types/NextTagOptions';
 
-import { saveResultsToFile } from './saveResultsToFile';
+import { saveResultsToFiles } from './saveResultsToFiles';
 
 describe('saveResultsToFile', () => {
   const repoDir = './testcases/test-saveResultsToFile';
@@ -21,12 +21,12 @@ describe('saveResultsToFile', () => {
     verbose: true,
     path: '.',
     versionFile: 'dist/version.txt',
-    changelogFile: 'dist/changelog.md',
-    releasetagFile: 'dist/releasetag.txt',
+    notesFile: 'dist/changelog.md',
+    tagFile: 'dist/releasetag.txt',
   };
 
   it('should save version to file', () => {
-    saveResultsToFile(tagNotes, releaseOptions);
+    saveResultsToFiles(tagNotes, releaseOptions);
 
     const versionStr = fs.readFileSync('dist/version.txt', 'utf8');
     expect(versionStr).toBe('1.0.0');
@@ -39,13 +39,13 @@ describe('saveResultsToFile', () => {
   });
 
   it('should save version to file with custom opts', () => {
-    saveResultsToFile(tagNotes, {
+    saveResultsToFiles(tagNotes, {
       path: '.',
       repoDir,
       tagPrefix: 'v',
       versionFile: `${repoDir}/dist/versionAA.txt`,
-      changelogFile: `${repoDir}/dist/changelogAA.md`,
-      releasetagFile: `${repoDir}/dist/releasetagAA.txt`,
+      notesFile: `${repoDir}/dist/changelogAA.md`,
+      tagFile: `${repoDir}/dist/releasetagAA.txt`,
     });
 
     const versionStr = fs.readFileSync(`${repoDir}/dist/versionAA.txt`, 'utf8');
