@@ -7,7 +7,7 @@ build: install
 	pnpm exec tsc --emitDeclarationOnly --outDir dist
 
 run:
-	npx ts-node src/main.ts current --repo-dir=. --version-file='dist/version.txt' 
+	npx ts-node src/main.ts tag --repo-dir=. --changelog-file=CHANGELOG.md --verbose
 
 lint:
 	pnpm exec eslint ./src --ext .ts

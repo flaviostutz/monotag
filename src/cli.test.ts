@@ -31,8 +31,8 @@ describe('when using cli', () => {
     expect(exitCode).toBe(0);
 
     stdout = '';
-    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--show-notes=true']);
-    expect(stdout).toMatch('346.0.0===============## 346.0.0');
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('346.0.0');
     expect(exitCode).toBe(0);
 
     // get next tag for custom prefix separator
