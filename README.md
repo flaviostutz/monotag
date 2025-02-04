@@ -107,6 +107,9 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
 - `monotag tag --changelog-file=docs/changelog.md`
   - Calculates next tag and add the release notes of the version to the existing docs/changelog.md file by appending the contents of the version notes to the top of the file so that this file will contain a history of versions.
 
+- `monotag tag --min-version=2.0.0 --max-version=2.999.999`
+  - Limit the generated versions to 1.x. If the calculated version is lower than 2.x, force to 2.0.0. If the generated version is higher than 2.x (due to a major change), fail. Useful when controlling versioning on specific major release branches (e.g.: branch 2.x).
+
 - `monotag current`
   - Will get the latest tag for current path and check if it's the latest possible tag in the repo. It will fail if there are changes in the repo that would lead to the creation of a new tag. If the latest tag is the latest possible (current), then it will be returned.
   
