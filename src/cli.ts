@@ -169,7 +169,6 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
   // TAG* ACTIONS
   if (action.startsWith('tag')) {
     // calculate and show tag
-    // console.log(`>>> TAG ${opts.preRelease}`);
     const nt = await nextTag(opts);
     if (nt === undefined) {
       console.log('No changes detected and no previous tag found');
@@ -375,7 +374,8 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
     y1.option('changelog-file', {
       alias: 'fc',
       type: 'string',
-      describe: 'Changelog file to append the new version/release notes',
+      describe:
+        'Changelog file that will be appended with new version/release notes. Disabled for prerelease versions',
       default: undefined,
     });
   }

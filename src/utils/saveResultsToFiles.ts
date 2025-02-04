@@ -44,7 +44,7 @@ export const saveResultsToFiles = (nt: TagNotes, opts: NextTagOptions): void => 
   }
 
   // save changelog to file
-  if (opts.changelogFile) {
+  if (!opts.preRelease && opts.changelogFile) {
     appendChangelog(opts.changelogFile, nt);
   }
 };
