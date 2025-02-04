@@ -268,6 +268,8 @@ const expandDefaults = (args: any): NextTagOptions => {
     notesFile: defaultValueString(args['notes-file'], undefined),
     tagFile: defaultValueString(args['tag-file'], undefined),
     changelogFile: defaultValueString(args['changelog-file'], undefined),
+    minVersion: defaultValueString(args['min-version'], undefined),
+    maxVersion: defaultValueString(args['max-version'], undefined),
   };
 };
 
@@ -376,6 +378,20 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       type: 'string',
       describe:
         'Changelog file that will be appended with new version/release notes. Disabled for prerelease versions',
+      default: undefined,
+    });
+    y1.option('min-version', {
+      alias: 'lv',
+      type: 'string',
+      describe:
+        'Minimum version to be considered when calculating next version. If calculated version is lower, this value will be used instead',
+      default: undefined,
+    });
+    y1.option('max-version', {
+      alias: 'uv',
+      type: 'string',
+      describe:
+        'Maximum version to be considered when calculating next version. If calculated version is higher, the process will fail',
       default: undefined,
     });
   }
