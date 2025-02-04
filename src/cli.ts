@@ -3,6 +3,11 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undefined */
 /* eslint-disable complexity */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+
 import yargs, { Argv } from 'yargs';
 
 import { nextTag } from './tag';
@@ -11,7 +16,7 @@ import { NextTagOptions } from './types/NextTagOptions';
 import { execCmd } from './utils/execCmd';
 import { lastPathPart } from './utils/lastPathPart';
 import { lastTagForPrefix } from './git';
-import { saveResultsToFile } from './utils/saveResultsToFile';
+import { saveResultsToFiles } from './utils/saveResultsToFiles';
 
 const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
@@ -20,33 +25,33 @@ const run = async (processArgs: string[]): Promise<number> => {
     .command(
       'current',
       "Show the latest tag for the path and fail if it's not up to date",
-      (y): Argv => addOptions(y, false, true),
+      (y): Argv => addOptions(y, true),
     )
-    .command('latest', 'Show the latest tag for the path', (y): Argv => addOptions(y))
+    .command('latest', 'Show the latest tag for the path', (y): Argv => addOptions(y, false))
     .command(
       'tag',
       'Calculate and show next tag, incrementing semver according to detected changes on path',
-      (y): Argv => addOptions(y, false, true),
+      (y): Argv => addOptions(y, true),
     )
     .command(
       'version',
       'Calculate and show next version, incrementing semver according to detected changes on path',
-      (y): Argv => addOptions(y, false, true),
+      (y): Argv => addOptions(y, true),
     )
     .command(
       'notes',
       'Calculate and show release notes according to detected commits in path',
-      (y): Argv => addOptions(y, true, true),
+      (y): Argv => addOptions(y, true),
     )
     .command(
       'tag-git',
       'Calculate next tag and tag it in local git repo',
-      (y): Argv => addOptions(y, false, true),
+      (y): Argv => addOptions(y, true),
     )
     .command(
       'tag-push',
       'Calculate next tag, git-tag and git-push it to remote',
-      (y): Argv => addOptions(y, false, true),
+      (y): Argv => addOptions(y, true),
     )
     .help()
     .example([
@@ -69,19 +74,12 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const action = <string>args2._[0];
 
-  const showNotes = defaultValueBoolean(args2['show-notes'], false);
-
   const args = expandDefaults(args2);
 
-  return execAction(action, args, showNotes, yargs2);
+  return execAction(action, args, yargs2);
 };
 
-const execAction = async (
-  action: string,
-  opts: NextTagOptions,
-  showNotes: boolean,
-  yargs2: Argv,
-): Promise<number> => {
+const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): Promise<number> => {
   if (opts.verbose) {
     console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
   }
@@ -115,7 +113,7 @@ const execAction = async (
     }
 
     console.log(latestTag);
-    saveResultsToFile(ntNext, opts);
+    saveResultsToFiles(ntNext, opts);
 
     return 0;
   }
@@ -151,7 +149,7 @@ const execAction = async (
     } else {
       console.log('No changes detected');
     }
-    saveResultsToFile(nt, opts);
+    saveResultsToFiles(nt, opts);
     return 0;
   }
 
@@ -164,27 +162,21 @@ const execAction = async (
       return 4;
     }
     console.log(nt.version);
-    saveResultsToFile(nt, opts);
+    saveResultsToFiles(nt, opts);
     return 0;
   }
 
   // TAG* ACTIONS
   if (action.startsWith('tag')) {
     // calculate and show tag
-    // console.log(`>>> TAG ${opts.preRelease}`);
     const nt = await nextTag(opts);
     if (nt === undefined) {
       console.log('No changes detected and no previous tag found');
       return 4;
     }
     console.log(nt.tagName);
-    if (showNotes && nt.releaseNotes) {
-      console.log('===============');
-      console.log(nt.releaseNotes);
-      console.log('===============');
-    }
 
-    saveResultsToFile(nt, opts);
+    saveResultsToFiles(nt, opts);
 
     if (action === 'tag') {
       return 0;
@@ -193,17 +185,18 @@ const execAction = async (
     if (action === 'tag-git' || action === 'tag-push') {
       console.log(`Creating tag ${nt.tagName}`);
 
-      // transform notes into a single line
-      let notes = '';
-      if (nt.releaseNotes) {
-        notes = nt.releaseNotes.split('\n').reduce((prev: string, cur: string): string => {
-          if (cur.trim().length === 0) return prev;
-          const curs = cur.replaceAll('"', '');
-          return `${prev} -m "${curs}"`;
-        }, '');
+      if (!nt.releaseNotes) {
+        throw new Error('No release notes found');
       }
+      // create temp notes file to be used during git tag creation
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'monotag-'));
+      const tmpNotesFile = path.join(tmpDir, 'notes.txt');
+      fs.writeFileSync(tmpNotesFile, nt.releaseNotes, { encoding: 'utf8' });
 
-      execCmd(opts.repoDir, `git tag ${nt.tagName} ${notes}`, opts.verbose);
+      // tag commit with release notes
+      execCmd(opts.repoDir, `git tag ${nt.tagName} -a -F ${tmpNotesFile}`, opts.verbose);
+
+      fs.rmSync(tmpDir, { recursive: true });
       console.log('Tag created successfully');
 
       if (action === 'tag-push') {
@@ -230,24 +223,24 @@ const expandDefaults = (args: any): NextTagOptions => {
   repoDir = repoDir.trim();
 
   // detect current dir reference to repo
-  let path = <string>args.path;
-  if (path === 'auto') {
+  let pathRepo = <string>args.path;
+  if (pathRepo === 'auto') {
     const currentDir = process.cwd();
     if (currentDir.includes(repoDir)) {
-      path = currentDir.replace(repoDir, '');
+      pathRepo = currentDir.replace(repoDir, '');
     } else {
-      path = '';
+      pathRepo = '';
     }
     if (verbose) {
-      console.log(`Using path inside repo "${path}"`);
+      console.log(`Using path inside repo "${pathRepo}"`);
     }
   }
-  if (path && path.startsWith('/')) {
-    path = path.slice(1);
+  if (pathRepo && pathRepo.startsWith('/')) {
+    pathRepo = pathRepo.slice(1);
   }
   const basicOpts: BasicOptions = {
     repoDir,
-    path,
+    path: pathRepo,
     fromRef: <string>args['from-ref'],
     toRef: <string>args['to-ref'],
     onlyConvCommit: defaultValueBoolean(args['conv-commit'], true),
@@ -272,13 +265,14 @@ const expandDefaults = (args: any): NextTagOptions => {
     preRelease: defaultValueBoolean(args.prerelease, false),
     preReleaseIdentifier: defaultValueString(args['pre-identifier'], undefined),
     versionFile: defaultValueString(args['version-file'], undefined),
+    notesFile: defaultValueString(args['notes-file'], undefined),
+    tagFile: defaultValueString(args['tag-file'], undefined),
     changelogFile: defaultValueString(args['changelog-file'], undefined),
-    releasetagFile: defaultValueString(args['releasetag-file'], undefined),
   };
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const addOptions = (y: Argv, notes?: boolean, saveToFile?: boolean): any => {
+const addOptions = (y: Argv, saveToFile?: boolean): any => {
   const y1 = y
     .option('verbose', {
       alias: 'v',
@@ -358,15 +352,6 @@ const addOptions = (y: Argv, notes?: boolean, saveToFile?: boolean): any => {
       default: 'beta',
     });
 
-  if (!notes) {
-    y1.option('show-notes', {
-      alias: 'n',
-      type: 'boolean',
-      describe: 'Show release notes along with the newer version',
-      default: false,
-    });
-  }
-
   if (saveToFile) {
     y1.option('tag-file', {
       alias: 'ft',
@@ -384,6 +369,13 @@ const addOptions = (y: Argv, notes?: boolean, saveToFile?: boolean): any => {
       alias: 'fn',
       type: 'string',
       describe: 'File to save the notes with a changelog',
+      default: undefined,
+    });
+    y1.option('changelog-file', {
+      alias: 'fc',
+      type: 'string',
+      describe:
+        'Changelog file that will be appended with new version/release notes. Disabled for prerelease versions',
       default: undefined,
     });
   }

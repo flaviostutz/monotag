@@ -46,17 +46,26 @@ export type NextTagOptions = BasicOptions & {
    */
   preReleaseIdentifier?: string;
   /**
-   * File that will be written with the release tag
+   * File that will be written with the tag name (e.g.: myservice/1.2.3-beta.0)
    * Won't be written if not provided
    */
-  releasetagFile?: string;
+  tagFile?: string;
   /**
-   * File that will be written with the version
+   * File that will be written with the version (e.g.: 1.2.3-beta.0)
    * Won't be written if not provided
    */
   versionFile?: string;
   /**
-   * File that will be written with the changelog
+   * File that will be written with the notes with the changes detected
+   * The content will be a markdown with a list of commits
+   * Won't be written if not provided
+   */
+  notesFile?: string;
+  /**
+   * File with the changelog that will be updated with the new version
+   * During update, this will check if the version is already present in the changelog
+   * and skip generation if it's already there.
+   * Normally this file is named CHANGELOG.md
    * Won't be written if not provided
    */
   changelogFile?: string;
