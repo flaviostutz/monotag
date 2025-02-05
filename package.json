@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "conventional-commits-parser": "^5.0.0",
-    "semver": "^7.7.0",
+    "semver": "^7.7.1",
     "yargs": "^17.6.2"
   },
   "pnpm": {
