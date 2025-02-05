@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-try-statements */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-continue */
 /* eslint-disable no-restricted-syntax */
@@ -73,9 +74,15 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
       return cm.files.some((fn: string): boolean => {
         return fn.startsWith(opts.path);
       });
+    })
+    .map((cm: Commit | undefined): Commit => {
+      if (!cm) {
+        throw new Error('Unexpected undefined commit');
+      }
+      return cm;
     });
 
-  return <Commit[]>commits.reverse();
+  return commits.reverse();
 };
 
 /**
@@ -83,32 +90,37 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
  * Ex.: Existing tags 'myservice/1.1.2', 'myservice/1.4.2', 'myservice/1.4.2-beta.0' and 'yourservice/3.4.1'
  *      If you query for tag prefix 'myservice/', it will return 'myservice/1.4.2'
  * @param {string} repoDir directory of the git repo
- * @param {string} tagPrefix tag prefix for looking for last tag and for generating the next tag
- * @returns {string} The tag with the same prefix that has the greatest semantic version
+ * @param {string} tagPrefix tag prefix for looking for lastest tag
+ * @param {string} tagSuffix tag suffix while looking for the lastest tag
+ * @param {boolean} verbose verbose mode
+ * @param {number} nth nth tag to return from the latest one
+ * @returns {string} The tag with the same prefix/suffix that has the greatest semantic version
  */
-const lastTagForPrefix = async (
-  repoDir: string,
-  tagPrefix: string,
-  tagSuffix?: string,
-  verbose?: boolean,
-): Promise<string | undefined> => {
+const lastTagForPrefix = async (args: {
+  repoDir: string;
+  tagPrefix: string;
+  tagSuffix?: string;
+  verbose?: boolean;
+  nth?: number;
+}): Promise<string | undefined> => {
   // list tags by semver in descending order
   const tags = execCmd(
-    repoDir,
-    `git tag --list '${tagPrefix}*' --sort=-v:refname | head -n 100`,
-    verbose,
+    args.repoDir,
+    `git tag --list '${args.tagPrefix}*' --sort=-v:refname | head -n 100`,
+    args.verbose,
   ).split('\n');
 
   // this limit (with "head") is a safeguard for large repositories
 
-  if (verbose) {
+  if (args.verbose) {
     if (tags.length === 100) {
       console.log('Tags analysis ight have been limited to last 100 results');
     }
-    console.log(`${tags.length} with prefix '${tagPrefix}' found`);
+    console.log(`${tags.length} with prefix '${args.tagPrefix}' found`);
   }
 
   // remove tags that don't match the prefix
+  // or are excluded by the exceptTag parameter
   const filteredTags = tags.filter((t: string): boolean => {
     const tparts = tagParts(t);
     // doesn't seem like a valid tag
@@ -116,9 +128,9 @@ const lastTagForPrefix = async (
       return false;
     }
     // we are looking for a tag with a prefix
-    if (tagPrefix) {
+    if (args.tagPrefix) {
       // it's a tag for the desired prefix
-      if (tparts[2] === tagPrefix) {
+      if (tparts[2] === args.tagPrefix) {
         return true;
       }
       // it's a tag without prefix and the desired prefix is empty
@@ -132,13 +144,13 @@ const lastTagForPrefix = async (
   // which is semantically incorrect (first we prerelease with -alpha, then without identifier),
   // so we need to sort it again
   const orderedTags = filteredTags.sort((a: string, b: string): number => {
-    const versionA = getVersionFromTag(a, tagPrefix, tagSuffix);
-    const versionB = getVersionFromTag(b, tagPrefix, tagSuffix);
+    const versionA = getVersionFromTag(a, args.tagPrefix, args.tagSuffix);
+    const versionB = getVersionFromTag(b, args.tagPrefix, args.tagSuffix);
     return semver.rcompare(versionA, versionB);
   });
 
   if (orderedTags.length > 0) {
-    return orderedTags[0];
+    return orderedTags[args.nth ?? 0];
   }
 
   // tag with prefix not found
@@ -151,13 +163,13 @@ const lastTagForPrefix = async (
  * @returns {CommitsSummary} Summary
  */
 const summarizeCommits = (commits: Commit[]): CommitsSummary => {
-  const sum = <CommitsSummary>{
+  const sum: CommitsSummary = {
     features: <string[]>[],
     fixes: <string[]>[],
     maintenance: <string[]>[],
     nonConventional: <string[]>[],
     notes: <string[]>[],
-    level: SemverLevel.PATCH,
+    level: SemverLevel.NONE,
     authors: <string[]>[],
     references: <string[]>[],
   };
@@ -231,4 +243,13 @@ const pushItem = (pushTo: string[], convLog: conventionalCommitsParser.Commit): 
   pushTo.push(`${convLog.subject.trim()}`);
 };
 
-export { filterCommits, lastTagForPrefix, summarizeCommits };
+const tagExistsInRepo = (repoDir: string, tagName: string): boolean => {
+  try {
+    execCmd(repoDir, `git rev-parse ${tagName}`, false);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export { filterCommits, lastTagForPrefix, summarizeCommits, tagExistsInRepo };

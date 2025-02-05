@@ -51,6 +51,7 @@ describe('when generating next tag with notes', () => {
     });
     if (!nt) throw new Error('Shouldnt be null');
     console.log(nt.releaseNotes);
+    expect(nt.existingTag).toBeFalsy();
     expect(nt.tagName).toBe('prefix1/3.5.0');
     expect(nt.releaseNotes?.includes('## Features')).toBeTruthy();
     expect(
@@ -81,6 +82,7 @@ describe('when generating next tag with notes', () => {
       tagSuffix: '',
     });
     if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.existingTag).toBeTruthy();
     expect(nt.tagName).toBe('prefix9/v1.0.3');
   });
   it('should return next version with suffix', async () => {
@@ -113,6 +115,7 @@ describe('when generating next tag with notes', () => {
     const day = now.getDate();
     const versionDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
 
+    expect(nt.existingTag).toBeFalsy();
     expect(nt.releaseNotes?.trim()).toBe(`## prefix2/21.0.0 (${versionDate})
 
 ### Features
@@ -140,12 +143,15 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD',
       path: 'prefix3',
       tagPrefix: 'prefix3/',
+      tagSuffix: '-alpha',
     });
     if (!nt) throw new Error('Shoulnt be null');
     expect(nt.tagName).toBe('prefix3/1.0.0-alpha');
-    expect(nt.releaseNotes).toBeUndefined();
+    expect(nt.existingTag).toBeTruthy();
+    expect(nt.releaseNotes).toContain('## prefix3/1.0.0');
+    expect(nt.releaseNotes).toContain('* test: 88 prefix3 adding test1 file');
   });
-  it('should return latest tag version with new prefix if no new commits found after latest tag in path', async () => {
+  it('should return latest tag version with new suffix if no new commits found after latest tag in path', async () => {
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
@@ -154,9 +160,11 @@ describe('when generating next tag with notes', () => {
       tagPrefix: 'prefix3/',
       tagSuffix: '-rc1.0-all',
     });
-    if (!nt) throw new Error('Shoulnt be null');
+    if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix3/1.0.0-rc1.0-all');
-    expect(nt.releaseNotes).toBeUndefined();
+    expect(nt.existingTag).toBeFalsy();
+    expect(nt.releaseNotes).toContain('## prefix3/1.0.0 (');
+    expect(nt.releaseNotes).toContain('* test: 88 prefix3 adding test1 file');
   });
 
   it('should return zero commits for inexisting path', async () => {

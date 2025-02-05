@@ -91,12 +91,12 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
 
   // CURRENT ACTION
   if (action === 'current') {
-    const latestTag = await lastTagForPrefix(
-      opts.repoDir,
-      opts.tagPrefix,
-      opts.tagSuffix,
-      opts.verbose,
-    );
+    const latestTag = await lastTagForPrefix({
+      repoDir: opts.repoDir,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      verbose: opts.verbose,
+  });
     if (!latestTag) {
       console.log(`No tag found for prefix '${opts.tagPrefix}'`);
       return 1;
@@ -120,12 +120,12 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
 
   // LATEST ACTION
   if (action === 'latest') {
-    const latestTag = await lastTagForPrefix(
-      opts.repoDir,
-      opts.tagPrefix,
-      opts.tagSuffix,
-      opts.verbose,
-    );
+    const latestTag = await lastTagForPrefix({
+      repoDir: opts.repoDir,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix:opts.tagSuffix,
+      verbose: opts.verbose,
+  });
     if (!latestTag) {
       console.log(`No tag found for prefix '${opts.tagPrefix}'`);
       return 1;
