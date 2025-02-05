@@ -101,11 +101,30 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
       console.log(`No tag found for prefix '${opts.tagPrefix}'`);
       return 1;
     }
+    if (opts.verbose) {
+      console.log(`Latest tag is ${latestTag}`);
+    }
 
-    const ntNext = await nextTag(opts);
+    const ntNext = await nextTag({ ...opts, preRelease: false });
     if (!ntNext) throw new Error('A new tag or the latest tag should have been returned');
+    if (opts.verbose) {
+      console.log(`Next tag would be ${ntNext.tagName}`);
+    }
 
-    if (ntNext.tagName !== latestTag) {
+    const ntNextPre = await nextTag({
+      ...opts,
+      preRelease: true,
+      // avoid increasing pre-release version if no changes are detected
+      // so we can compare the latest tag with the next tag
+      preReleaseAlwaysIncrement: false,
+    });
+    if (!ntNextPre) throw new Error('A new tag or the latest tag (pre) should have been returned');
+    if (opts.verbose) {
+      console.log(`Next tag (pre) would be ${ntNextPre.tagName}`);
+    }
+
+    // either the next tag for pre-release or the next tag for final should match the latest tag
+    if (ntNext.tagName !== latestTag && ntNextPre.tagName !== latestTag) {
       console.log(
         `The latest tag is not up to date. Latest tag is '${latestTag}'. Next tag would be '${ntNext.tagName}'`,
       );
@@ -270,7 +289,8 @@ const expandDefaults = (args: any): NextTagOptions => {
     tagSuffix: args.suffix,
     semverLevel: <number>args['semver-level'],
     preRelease: defaultValueBoolean(args.prerelease, false),
-    preReleaseIdentifier: defaultValueString(args['pre-identifier'], undefined),
+    preReleaseIdentifier: defaultValueString(args['prerelease-identifier'], undefined),
+    preReleaseAlwaysIncrement: defaultValueBoolean(args['prerelease-increment'], false),
     versionFile: defaultValueString(args['version-file'], undefined),
     notesFile: defaultValueString(args['notes-file'], undefined),
     tagFile: defaultValueString(args['tag-file'], undefined),
@@ -354,11 +374,17 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       describe: 'Create tags as pre-release versions. E.g.: 2.1.0-beta.0',
       default: false,
     })
-    .option('pre-identifier', {
+    .option('prerelease-identifier', {
       alias: 'pid',
       type: 'string',
       describe: 'Pre-release identifier. E.g.: beta',
       default: 'beta',
+    })
+    .option('prerelease-increment', {
+      alias: 'pai',
+      type: 'boolean',
+      describe: 'Increment pre-release number even if no changes are detected',
+      default: false,
     });
 
   if (saveToFile) {

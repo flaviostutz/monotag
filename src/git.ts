@@ -6,13 +6,10 @@
 /* eslint-disable functional/immutable-data */
 /* eslint-disable no-undefined */
 /* eslint-disable no-console */
-import * as conventionalCommitsParser from 'conventional-commits-parser';
 import semver from 'semver';
 
 import { BasicOptions } from './types/BasicOptions';
 import { Commit } from './types/Commit';
-import { CommitsSummary } from './types/CommitsSummary';
-import { SemverLevel } from './types/SemverLevel';
 import { execCmd } from './utils/execCmd';
 import { tagParts } from './utils/tagParts';
 import { getVersionFromTag } from './utils/getVersionFromTag';
@@ -149,107 +146,22 @@ const lastTagForPrefix = async (args: {
     return semver.rcompare(versionA, versionB);
   });
 
-  if (orderedTags.length > 0) {
-    return orderedTags[args.nth ?? 0];
+  const i = args.nth ?? 0;
+  if (orderedTags.length > i) {
+    return orderedTags[i];
   }
 
   // tag with prefix not found
   return undefined;
 };
 
-/**
- * Summarize commit according to semantic versioning
- * @param {Commit[]} commits Collection of commits
- * @returns {CommitsSummary} Summary
- */
-const summarizeCommits = (commits: Commit[]): CommitsSummary => {
-  const sum: CommitsSummary = {
-    features: <string[]>[],
-    fixes: <string[]>[],
-    maintenance: <string[]>[],
-    nonConventional: <string[]>[],
-    notes: <string[]>[],
-    level: SemverLevel.NONE,
-    authors: <string[]>[],
-    references: <string[]>[],
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  commits.reduce((summary, clog): any => {
-    // remove ! from type because the parser doesn't support it
-    // (but it's valid for conventional commit)
-    const convLog = conventionalCommitsParser.sync(clog.message.replace('!', ''));
-    if (!convLog.header) {
-      return summary;
-    }
-
-    // feat
-    if (convLog.type === 'feat') {
-      pushItem(summary.features, convLog);
-      if (summary.level > SemverLevel.MINOR) summary.level = SemverLevel.MINOR;
-
-      // fix
-    } else if (convLog.type === 'fix') {
-      pushItem(summary.fixes, convLog);
-      if (summary.level > SemverLevel.PATCH) summary.level = SemverLevel.PATCH;
-
-      // chore
-    } else if (convLog.type === 'chore') {
-      pushItem(summary.maintenance, convLog);
-      if (summary.level > SemverLevel.PATCH) summary.level = SemverLevel.PATCH;
-
-      // non conventional commits
-    } else {
-      summary.nonConventional.push(convLog.header.trim());
-    }
-
-    // breaking changes/major level
-    if (clog.message.includes('!:')) {
-      if (summary.level > SemverLevel.MAJOR) summary.level = SemverLevel.MAJOR;
-    } else if (
-      convLog.notes.some((note) => note.title.includes('BREAKING CHANGE')) &&
-      summary.level > SemverLevel.MAJOR
-    )
-      summary.level = SemverLevel.MAJOR;
-
-    // notes
-    for (const note of convLog.notes) {
-      summary.notes.push(`${note.title}: ${note.text}`);
-    }
-
-    // references
-    for (const reference of convLog.references) {
-      summary.references.push(`${reference.action ?? ''} ${reference.raw ?? ''}`.trim());
-    }
-
-    return summary;
-  }, sum);
-
-  // authors
-  for (const com of commits) {
-    sum.authors.push(com.author);
-  }
-
-  return sum;
-};
-
-const pushItem = (pushTo: string[], convLog: conventionalCommitsParser.Commit): void => {
-  if (!convLog.subject) {
-    return;
-  }
-  if (convLog.scope) {
-    pushTo.push(`${convLog.scope}: ${convLog.subject.trim()}`);
-    return;
-  }
-  pushTo.push(`${convLog.subject.trim()}`);
-};
-
-const tagExistsInRepo = (repoDir: string, tagName: string): boolean => {
+const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {
   try {
-    execCmd(repoDir, `git rev-parse ${tagName}`, false);
+    execCmd(repoDir, `git rev-parse --count "${tagName}"`, verbose);
     return true;
   } catch {
     return false;
   }
 };
 
-export { filterCommits, lastTagForPrefix, summarizeCommits, tagExistsInRepo };
+export { filterCommits, lastTagForPrefix, tagExistsInRepo };

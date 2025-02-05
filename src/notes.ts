@@ -1,8 +1,9 @@
 /* eslint-disable functional/no-let */
-import { filterCommits, summarizeCommits } from './git';
+import { filterCommits } from './git';
 import { CommitsSummary } from './types/CommitsSummary';
 import { NextTagOptions } from './types/NextTagOptions';
 import { getDateFromCommit } from './utils/getDateFromCommit';
+import { summarizeCommits } from './utils/summarizeCommits';
 import { tagParts } from './utils/tagParts';
 
 /**
@@ -26,7 +27,7 @@ const releaseNotes = async (opts: NextTagOptions, tagName: string): Promise<stri
   const commitsSummary = summarizeCommits(commits);
   const versionDate = getDateFromCommit(commits[0].date);
 
-  const rn = formatReleaseNotes({
+  const rn = renderReleaseNotes({
     commitsSummary,
     tagName,
     versionDate,
@@ -35,7 +36,7 @@ const releaseNotes = async (opts: NextTagOptions, tagName: string): Promise<stri
   return rn;
 };
 
-const formatReleaseNotes = (args: {
+const renderReleaseNotes = (args: {
   commitsSummary: CommitsSummary;
   tagName: string;
   versionDate: string;
@@ -52,8 +53,8 @@ const formatReleaseNotes = (args: {
   // features
   if (args.commitsSummary.features.length > 0) {
     notes += '### Features\n\n';
-    notes = args.commitsSummary.features.reduce((pv, feat) => {
-      return `${pv}* ${feat}\n`;
+    notes = args.commitsSummary.features.reduce((pn, feat) => {
+      return `${pn}* ${feat}\n`;
     }, notes);
     notes += '\n';
   }
@@ -129,4 +130,4 @@ const formatReleaseNotes = (args: {
   return notes;
 };
 
-export { formatReleaseNotes, releaseNotes };
+export { renderReleaseNotes as formatReleaseNotes, releaseNotes };

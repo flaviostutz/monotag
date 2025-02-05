@@ -46,6 +46,13 @@ export type NextTagOptions = BasicOptions & {
    */
   preReleaseIdentifier?: string;
   /**
+   * If true, the pre-release version will always be incremented
+   * even if no changes are detected
+   * So subsequent calls to 'nextTag' will always increment the pre-release version
+   * @default false
+   */
+  preReleaseAlwaysIncrement?: boolean;
+  /**
    * File that will be written with the tag name (e.g.: myservice/1.2.3-beta.0)
    * Won't be written if not provided
    */

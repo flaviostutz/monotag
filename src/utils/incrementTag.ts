@@ -29,6 +29,7 @@ export const incrementTag = (args: {
   maxVersion?: string;
   preRelease?: boolean;
   preReleaseIdentifier?: string;
+  preReleaseAlwaysIncrement?: boolean;
 }): string => {
   const tagPrefix = args.tagPrefix ?? '';
   const tagSuffix = args.tagSuffix ?? '';
@@ -50,23 +51,69 @@ export const incrementTag = (args: {
   // @ts-expect-error this type is not on the @type definition, but present on the library
   if (curVersion.prerelease.length === 0 && incType === 'release') {
     incVersion = curVersion;
+
+    // "pre-prerelease" shouldn't be incremented when there is no change detected
+    // the normal behaviour is for semver to increment the prerelease number every time it is called
+    // for a pre-release version, and we want to avoid it sometimes
+  } else if (
+    !args.preReleaseAlwaysIncrement &&
+    curVersion.prerelease.length > 0 &&
+    args.type === SemverLevel.NONE &&
+    args.preRelease
+  ) {
+    incVersion = curVersion;
   } else {
+    // be aware of some inconsistencies of how inc() works in regard
+    // to pre-release -> major/minor/patch increments
+    // it seems likely to be a bug
+    // https://github.com/npm/node-semver/issues/751
     incVersion = curVersion.inc(incType, args.preReleaseIdentifier ?? 'beta');
   }
 
+  const fversion = versionMinMax(
+    incVersion,
+    args.tagPrefix,
+    args.tagSuffix,
+    args.minVersion,
+    args.maxVersion,
+  );
+  if (!fversion) {
+    throw new Error("Coudln't generate a valid version");
+  }
+
+  return `${tagPrefix}${fversion}${tagSuffix}`;
+};
+
+const versionMinMax = (
+  incVersion: semver.SemVer,
+  tagPrefix?: string,
+  tagSuffix?: string,
+  minVersion?: string,
+  maxVersion?: string,
+): semver.SemVer | null => {
   // check min
-  const minVersionSemver = semver.coerce(args.minVersion);
-  if (minVersionSemver && incVersion.compare(minVersionSemver) === -1) {
-    return `${tagPrefix}${minVersionSemver}${tagSuffix}`;
+  if (minVersion) {
+    const minVersionSemver = semver.coerce(minVersion);
+    if (minVersionSemver === null) {
+      throw new Error(`Invalid minVersion: ${minVersion}`);
+    }
+    if (minVersion && semver.lt(incVersion, minVersionSemver)) {
+      return semver.coerce(`${tagPrefix}${minVersionSemver.format()}${tagSuffix}`);
+    }
   }
 
   // check max
-  const maxVersionSemver = semver.coerce(args.maxVersion);
-  if (maxVersionSemver && incVersion.compare(maxVersionSemver) === 1) {
-    throw new Error(`Generated tag version ${incVersion} is greater than ${args.maxVersion}`);
+  if (maxVersion) {
+    const maxVersionSemver = semver.coerce(maxVersion);
+    if (maxVersionSemver === null) {
+      throw new Error(`Invalid maxVersion: ${maxVersion}`);
+    }
+    if (maxVersion && semver.gt(incVersion, maxVersionSemver)) {
+      throw new Error(`Generated tag version ${incVersion} is greater than ${maxVersionSemver}`);
+    }
   }
 
-  return `${tagPrefix}${incVersion}${tagSuffix}`;
+  return incVersion;
 };
 
 const getIncType = (type: SemverLevel, preRelease: boolean): ReleaseType => {
@@ -88,6 +135,8 @@ const getIncType = (type: SemverLevel, preRelease: boolean): ReleaseType => {
     }
     return 'patch';
   }
+
+  // SemverLevel is NONE
   if (preRelease) {
     return 'prerelease';
   }

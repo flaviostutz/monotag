@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable no-console */
-import { filterCommits, lastTagForPrefix, summarizeCommits, tagExistsInRepo } from './git';
+import { filterCommits, lastTagForPrefix, tagExistsInRepo } from './git';
 import { formatReleaseNotes } from './notes';
 import { NextTagOptions } from './types/NextTagOptions';
 import { SemverLevel } from './types/SemverLevel';
@@ -10,8 +10,8 @@ import { TagNotes } from './types/TagNotes';
 import { getDateFromCommit } from './utils/getDateFromCommit';
 import { getVersionFromTag } from './utils/getVersionFromTag';
 import { incrementTag } from './utils/incrementTag';
-import { lookForCommitsInPreviousTags } from './utils/lookForCommitsInPreviousTags';
 import { notesForLatestTag } from './utils/notesForLatestTag';
+import { summarizeCommits } from './utils/summarizeCommits';
 
 /**
  * Checks latest tag for a certain prefix, checks a range of commit and calculates
@@ -82,7 +82,7 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
       version: getVersionFromTag(latestTag, opts.tagPrefix, opts.tagSuffix),
       releaseNotes: releaseNotes ?? '',
       changesDetected: 0,
-      existingTag: tagExistsInRepo(opts.repoDir, tagName),
+      existingTag: tagExistsInRepo(opts.repoDir, tagName, opts.verbose),
     };
   }
 
@@ -102,11 +102,11 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
   // look for a previous tag that actually has commits to compose the release notes
   // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
   // which doesn't generate a release note. In this case we need to go back in history and find the latest commit that touched the path
-  const commitsForNotes = await lookForCommitsInPreviousTags(opts, 0);
-  const relevantCommitsSummary = summarizeCommits(commitsForNotes);
+  // const commitsForNotes = await lookForCommitsInPreviousTags(opts, 0);
+  // const relevantCommitsSummary = summarizeCommits(commitsForNotes);
   const versionDate = getDateFromCommit(commits[0].date);
   const releaseNotes = formatReleaseNotes({
-    commitsSummary: relevantCommitsSummary,
+    commitsSummary,
     tagName,
     versionDate,
     onlyConvCommit: opts.onlyConvCommit,
@@ -117,7 +117,7 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
     version: getVersionFromTag(tagName, opts.tagPrefix, opts.tagSuffix),
     releaseNotes,
     changesDetected: commits.length,
-    existingTag: tagExistsInRepo(opts.repoDir, tagName),
+    existingTag: tagExistsInRepo(opts.repoDir, tagName, opts.verbose),
   };
 };
 

@@ -135,15 +135,67 @@ describe('when using cli', () => {
       'tag',
       `--repo-dir=${repoDir}`,
       '--prerelease=true',
-      '--pre-identifier=alpha',
+      '--prerelease-identifier=alpha',
     ]);
     expect(stdout).toEqual('346.0.0-alpha.0');
     expect(exitCode).toBe(0);
 
-    // generate tag in git repo and tag it
+    // git tag as prerelease
     stdout = '';
-    exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
-    expect(stdout).toMatch(/.*Creating tag 345.2124.0.*Tag created successfully.*/);
+    exitCode = await run([
+      '',
+      '',
+      'tag-git',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+    ]);
+    expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.0.*Tag created successfully.*/);
+    expect(exitCode).toBe(0);
+
+    // git tag as prerelease again without changes to see
+    // if its idempodent (should be the same)
+    // auto increment of pre-release is deactivated by default
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag-git',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+    ]);
+    expect(stdout).toEqual('346.0.0-alpha.0Tag already exists in repo');
+    expect(exitCode).toBe(0);
+
+    // git tag prerelease again without changes
+    // but this time forcing the increment
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag-git',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+      '--prerelease-increment',
+    ]);
+    expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.1.*Tag created successfully.*/);
+    expect(exitCode).toBe(0);
+
+    // get current tag
+    stdout = '';
+    exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('346.0.0-alpha.1');
+    expect(exitCode).toBe(0);
+
+    // check if notes were generated getting inherating
+    // commits from previous tags that had actual changes
+    stdout = '';
+    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('## 346.0.0 (');
+    expect(stdout).toMatch('15 adding test2 file to root');
+    expect(stdout).toMatch('**Breaking:** 4 prefix1 creating test3 file');
     expect(exitCode).toBe(0);
 
     // these were failing on CI/CD but not locally (maybe due to race conditions)
