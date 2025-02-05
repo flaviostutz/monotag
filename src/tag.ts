@@ -2,14 +2,16 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable no-console */
-import { filterCommits, lastTagForPrefix, summarizeCommits } from './git';
+import { filterCommits, lastTagForPrefix, summarizeCommits, tagExistsInRepo } from './git';
 import { formatReleaseNotes } from './notes';
 import { NextTagOptions } from './types/NextTagOptions';
+import { SemverLevel } from './types/SemverLevel';
 import { TagNotes } from './types/TagNotes';
 import { getDateFromCommit } from './utils/getDateFromCommit';
 import { getVersionFromTag } from './utils/getVersionFromTag';
 import { incrementTag } from './utils/incrementTag';
-import { tagParts } from './utils/tagParts';
+import { lookForCommitsInPreviousTags } from './utils/lookForCommitsInPreviousTags';
+import { notesForLatestTag } from './utils/notesForLatestTag';
 
 /**
  * Checks latest tag for a certain prefix, checks a range of commit and calculates
@@ -29,7 +31,12 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
   }
 
   // current tag
-  const latestTag = await lastTagForPrefix(opts.repoDir, opts.tagPrefix, '', opts.verbose);
+  const latestTag = await lastTagForPrefix({
+    repoDir: opts.repoDir,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
+    verbose: opts.verbose,
+  });
 
   if (opts.verbose) {
     console.log(`Using latest tag '${latestTag}' for '${opts.tagPrefix}'`);
@@ -51,6 +58,9 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
   }
 
   const commits = await filterCommits(opts);
+
+  // no changes detected
+  // define new tag by using the latest tag as a reference
   if (commits.length === 0) {
     if (opts.verbose) {
       console.log('No changes detected in commit range');
@@ -59,54 +69,55 @@ const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
       return undefined;
     }
 
-    // nothing changed in the commit range
-    const tparts = tagParts(latestTag);
-    if (opts.tagSuffix && tparts) {
-      const tagName = `${tparts[2] ?? ''}${tparts[3]}${opts.tagSuffix}`;
-      return {
-        tagName,
-        version: getVersionFromTag(tagName),
-        changesDetected: 0,
-      };
-    }
+    const releaseNotes = await notesForLatestTag(opts);
+
+    const tagName = incrementTag({
+      fullTagName: latestTag,
+      type: SemverLevel.NONE,
+      ...opts,
+    });
+
     return {
-      tagName: latestTag,
-      version: getVersionFromTag(latestTag),
+      tagName,
+      version: getVersionFromTag(latestTag, opts.tagPrefix, opts.tagSuffix),
+      releaseNotes: releaseNotes ?? '',
       changesDetected: 0,
+      existingTag: tagExistsInRepo(opts.repoDir, tagName),
     };
   }
 
   if (opts.verbose) {
-    console.log(`${commits.length} relevant commits found`);
+    console.log(`${commits.length} commits found`);
   }
 
   const commitsSummary = summarizeCommits(commits);
 
-  const currentTag = latestTag ?? `${opts.tagPrefix}0.0.0`;
+  const currentTag = latestTag ?? `${opts.tagPrefix}0.0.0${opts.tagSuffix}`;
   const tagName = incrementTag({
     fullTagName: currentTag,
     type: opts.semverLevel ?? commitsSummary.level,
-    tagSuffix: opts.tagSuffix,
-    minVersion: opts.minVersion,
-    maxVersion: opts.maxVersion,
-    preRelease: opts.preRelease,
-    preReleaseIdentifier: opts.preReleaseIdentifier,
+    ...opts,
   });
 
+  // look for a previous tag that actually has commits to compose the release notes
+  // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
+  // which doesn't generate a release note. In this case we need to go back in history and find the latest commit that touched the path
+  const commitsForNotes = await lookForCommitsInPreviousTags(opts, 0);
+  const relevantCommitsSummary = summarizeCommits(commitsForNotes);
   const versionDate = getDateFromCommit(commits[0].date);
-
-  const releaseNotes = formatReleaseNotes(
-    commitsSummary,
+  const releaseNotes = formatReleaseNotes({
+    commitsSummary: relevantCommitsSummary,
     tagName,
     versionDate,
-    opts.onlyConvCommit,
-  );
+    onlyConvCommit: opts.onlyConvCommit,
+  });
 
   return {
     tagName,
-    version: getVersionFromTag(tagName),
+    version: getVersionFromTag(tagName, opts.tagPrefix, opts.tagSuffix),
     releaseNotes,
     changesDetected: commits.length,
+    existingTag: tagExistsInRepo(opts.repoDir, tagName),
   };
 };
 

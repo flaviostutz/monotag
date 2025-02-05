@@ -2,7 +2,6 @@ import semver, { ReleaseType } from 'semver';
 
 import { SemverLevel } from '../types/SemverLevel';
 
-import { tagParts } from './tagParts';
 import { getVersionFromTag } from './getVersionFromTag';
 
 /**
@@ -31,11 +30,9 @@ export const incrementTag = (args: {
   preRelease?: boolean;
   preReleaseIdentifier?: string;
 }): string => {
+  const tagPrefix = args.tagPrefix ?? '';
   const tagSuffix = args.tagSuffix ?? '';
-  const tparts = tagParts(args.fullTagName);
-  if (!tparts) {
-    throw new Error(`Tag '${args.fullTagName}' is not valid`);
-  }
+
   const versionFromTag = getVersionFromTag(args.fullTagName, args.tagPrefix, args.tagSuffix);
   const curVersion = semver.coerce(versionFromTag, { loose: true, includePrerelease: true });
   if (!curVersion) {
@@ -46,12 +43,21 @@ export const incrementTag = (args: {
   const incType = getIncType(args.type, args.preRelease ?? false);
 
   // increment version
-  const incVersion = curVersion.inc(incType, args.preReleaseIdentifier ?? 'beta');
+  // eslint-disable-next-line functional/no-let
+  let incVersion = curVersion;
+
+  // "release" doesn't work with non-prerelease versions, so skip it
+  // @ts-expect-error this type is not on the @type definition, but present on the library
+  if (curVersion.prerelease.length === 0 && incType === 'release') {
+    incVersion = curVersion;
+  } else {
+    incVersion = curVersion.inc(incType, args.preReleaseIdentifier ?? 'beta');
+  }
 
   // check min
   const minVersionSemver = semver.coerce(args.minVersion);
   if (minVersionSemver && incVersion.compare(minVersionSemver) === -1) {
-    return `${tparts[2] ?? ''}${minVersionSemver}${tagSuffix}`;
+    return `${tagPrefix}${minVersionSemver}${tagSuffix}`;
   }
 
   // check max
@@ -60,7 +66,7 @@ export const incrementTag = (args: {
     throw new Error(`Generated tag version ${incVersion} is greater than ${args.maxVersion}`);
   }
 
-  return `${tparts[2] ?? ''}${incVersion}${tagSuffix}`;
+  return `${tagPrefix}${incVersion}${tagSuffix}`;
 };
 
 const getIncType = (type: SemverLevel, preRelease: boolean): ReleaseType => {

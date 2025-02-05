@@ -1,0 +1,23 @@
+name: create-next-tag
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # this is needed if you want the tag push to trigger another workflow
+          # create a personal token and set a secret with name GH_PERSONAL_TOKEN
+          # https://github.com/orgs/community/discussions/27028
+          token: ${{ secrets.GH_PERSONAL_TOKEN }}
+      - name: Create tag and push to repo
+        run: |
+          git config --global user.email "flaviostutz@gmail.com"
+          git config --global user.name "Flávio Stutz"
+          npx -y monotag@1.10.0 tag-push --prerelease

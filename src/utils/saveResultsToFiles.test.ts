@@ -13,6 +13,7 @@ describe('saveResultsToFile', () => {
     version: '1.0.0',
     releaseNotes: 'Initial release',
     changesDetected: 1,
+    existingTag: false,
   };
 
   const releaseOptions: NextTagOptions = {
