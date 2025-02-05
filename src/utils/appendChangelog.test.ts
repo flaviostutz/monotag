@@ -9,6 +9,7 @@ import { appendChangelog } from './appendChangelog';
 
 describe('appendChangelog', () => {
   const tag1: TagNotes = {
+    existingTag: false,
     tagName: 'v1.0.0',
     releaseNotes: `## v1.0.0 (2015-01-01)
     
@@ -20,6 +21,7 @@ describe('appendChangelog', () => {
   };
 
   const tag2: TagNotes = {
+    existingTag: false,
     tagName: 'v1.1.0',
     releaseNotes: `## v1.1.0 (2015-01-02)
     
@@ -31,6 +33,7 @@ describe('appendChangelog', () => {
   };
 
   const tag3: TagNotes = {
+    existingTag: false,
     tagName: 'v1.2.0',
     releaseNotes: `## v1.2.0 (2015-01-03)
     
@@ -102,8 +105,4 @@ ${tag1.releaseNotes}
 
 `);
   });
-
-  it('should not append release notes if they already exist in the changelog file', () => {});
-
-  it('should throw an error if release notes are not provided', () => {});
 });

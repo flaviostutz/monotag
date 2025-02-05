@@ -91,12 +91,12 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
 
   // CURRENT ACTION
   if (action === 'current') {
-    const latestTag = await lastTagForPrefix(
-      opts.repoDir,
-      opts.tagPrefix,
-      opts.tagSuffix,
-      opts.verbose,
-    );
+    const latestTag = await lastTagForPrefix({
+      repoDir: opts.repoDir,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      verbose: opts.verbose,
+    });
     if (!latestTag) {
       console.log(`No tag found for prefix '${opts.tagPrefix}'`);
       return 1;
@@ -120,12 +120,12 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
 
   // LATEST ACTION
   if (action === 'latest') {
-    const latestTag = await lastTagForPrefix(
-      opts.repoDir,
-      opts.tagPrefix,
-      opts.tagSuffix,
-      opts.verbose,
-    );
+    const latestTag = await lastTagForPrefix({
+      repoDir: opts.repoDir,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      verbose: opts.verbose,
+    });
     if (!latestTag) {
       console.log(`No tag found for prefix '${opts.tagPrefix}'`);
       return 1;
@@ -144,11 +144,7 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
       console.log('No changes detected and no previous tag found');
       return 4;
     }
-    if (nt.releaseNotes) {
-      console.log(nt.releaseNotes);
-    } else {
-      console.log('No changes detected');
-    }
+    console.log(nt.releaseNotes);
     saveResultsToFiles(nt, opts);
     return 0;
   }
@@ -183,6 +179,17 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
     }
 
     if (action === 'tag-git' || action === 'tag-push') {
+      if (nt.existingTag) {
+        console.log('Tag already exists in repo');
+        return 0;
+      }
+
+      if (opts.changelogFile) {
+        console.log('Commiting changelog file');
+        execCmd(opts.repoDir, `git add ${opts.changelogFile}`, opts.verbose);
+        execCmd(opts.repoDir, `git commit -m "chore(release): ${nt.tagName}"`, opts.verbose);
+      }
+
       console.log(`Creating tag ${nt.tagName}`);
 
       if (!nt.releaseNotes) {
@@ -199,7 +206,7 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
       fs.rmSync(tmpDir, { recursive: true });
       console.log('Tag created successfully');
 
-      if (action === 'tag-push') {
+      if (action === 'tag-push' && !nt.existingTag) {
         console.log("Pushing tag to remote 'origin'");
         execCmd(opts.repoDir, `git push origin ${nt.tagName}`, opts.verbose);
         console.log('Tag pushed to origin successfully');
@@ -268,6 +275,8 @@ const expandDefaults = (args: any): NextTagOptions => {
     notesFile: defaultValueString(args['notes-file'], undefined),
     tagFile: defaultValueString(args['tag-file'], undefined),
     changelogFile: defaultValueString(args['changelog-file'], undefined),
+    minVersion: defaultValueString(args['min-version'], undefined),
+    maxVersion: defaultValueString(args['max-version'], undefined),
   };
 };
 
@@ -376,6 +385,20 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       type: 'string',
       describe:
         'Changelog file that will be appended with new version/release notes. Disabled for prerelease versions',
+      default: undefined,
+    });
+    y1.option('min-version', {
+      alias: 'lv',
+      type: 'string',
+      describe:
+        'Minimum version to be considered when calculating next version. If calculated version is lower, this value will be used instead',
+      default: undefined,
+    });
+    y1.option('max-version', {
+      alias: 'uv',
+      type: 'string',
+      describe:
+        'Maximum version to be considered when calculating next version. If calculated version is higher, the process will fail',
       default: undefined,
     });
   }

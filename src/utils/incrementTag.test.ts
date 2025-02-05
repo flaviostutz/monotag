@@ -8,12 +8,14 @@ describe('when using tag incrementer', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: SemverLevel.MAJOR,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/1.0.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix/14.22.5-beta+build999',
       type: SemverLevel.MAJOR,
       tagSuffix: '-beta',
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/15.0.0-beta');
     rr = incrementTag({
@@ -28,12 +30,14 @@ describe('when using tag incrementer', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix-0.1.0-beta+build999',
       type: SemverLevel.MAJOR,
+      tagPrefix: 'my-service-prefix-',
     });
     expect(rr).toBe('my-service-prefix-1.0.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix-14.22.5-beta+build999',
       type: SemverLevel.MAJOR,
       tagSuffix: '-beta',
+      tagPrefix: 'my-service-prefix-',
     });
     expect(rr).toBe('my-service-prefix-15.0.0-beta');
     rr = incrementTag({
@@ -48,12 +52,14 @@ describe('when using tag incrementer', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: SemverLevel.MINOR,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/0.1.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix/14.22.5-beta+build999',
       type: SemverLevel.MINOR,
       tagSuffix: '-beta',
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/14.23.0-beta');
     rr = incrementTag({
@@ -68,12 +74,14 @@ describe('when using tag incrementer', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: SemverLevel.PATCH,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/0.1.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix/14.22.5-beta+build999',
       type: SemverLevel.PATCH,
       tagSuffix: '-beta',
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/14.22.5-beta');
     rr = incrementTag({ fullTagName: '24.22.5-beta+build999', type: SemverLevel.PATCH });
@@ -83,12 +91,14 @@ describe('when using tag incrementer', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix-0.1.0-beta+build999',
       type: SemverLevel.PATCH,
+      tagPrefix: 'my-service-prefix-',
     });
     expect(rr).toBe('my-service-prefix-0.1.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix-14.22.5-beta+build999',
       type: SemverLevel.PATCH,
       tagSuffix: '-win64',
+      tagPrefix: 'my-service-prefix-',
     });
     expect(rr).toBe('my-service-prefix-14.22.5-win64');
     rr = incrementTag({
@@ -103,6 +113,7 @@ describe('when using tag incrementer', () => {
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: SemverLevel.MAJOR,
       tagSuffix: '',
+      tagPrefix: 'my-service-prefix/',
       minVersion: '2.0.0',
     });
     expect(rr).toBe('my-service-prefix/2.0.0');
@@ -119,6 +130,7 @@ describe('when using tag incrementer', () => {
       fullTagName: 'my-service-prefix/14.22.5-abraca+build999',
       type: SemverLevel.MINOR,
       tagSuffix: '-beta',
+      tagPrefix: 'my-service-prefix/',
       maxVersion: '14.23.1',
     });
     expect(rr).toBe('my-service-prefix/14.23.0-beta');
@@ -150,30 +162,35 @@ describe('when using tag incrementer', () => {
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: SemverLevel.PATCH,
       preRelease: true,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/0.1.1-beta.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix/14.22.5',
       type: SemverLevel.MINOR,
       preRelease: true,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/14.23.0-beta.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.5',
       type: SemverLevel.MAJOR,
       preRelease: true,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/1.0.0-beta.0');
     rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.5-beta',
       type: SemverLevel.NONE,
       preRelease: false,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/0.1.5');
     rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.5-beta',
       type: SemverLevel.NONE,
       preRelease: false,
+      tagPrefix: 'my-service-prefix/',
     });
     expect(rr).toBe('my-service-prefix/0.1.5');
     rr = incrementTag({ fullTagName: '24.22.5-beta.0', type: SemverLevel.NONE, preRelease: true });

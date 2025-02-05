@@ -78,6 +78,19 @@ describe('when using cli', () => {
     expect(stdout).toMatch('user-ui: 9 prefix1');
     expect(stdout).toMatch('### Info');
 
+    // min version
+    stdout = '';
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--min-version=400.1']);
+    expect(exitCode).toBe(0);
+    expect(stdout).toMatch('400.1.0');
+
+    // max version (should fail if more than max version)
+    stdout = '';
+    const mvc = async (): Promise<void> => {
+      await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--max-version=1']);
+    };
+    await expect(mvc).rejects.toThrow('Generated tag version 346.0.0 is greater than 1');
+
     stdout = '';
     exitCode = await run([
       '',
@@ -88,7 +101,7 @@ describe('when using cli', () => {
       '--separator=/v',
     ]);
     expect(exitCode).toBe(0);
-    expect(stdout).toEqual('No changes detected');
+    expect(stdout).toEqual('');
 
     stdout = '';
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
