@@ -9,9 +9,35 @@ describe('when using cli', () => {
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
+
+  /**
+   * RUN ONLY ONE TEST AT A TIME
+   * TO AVOID CONCURRENCY AT THE GIT
+   * REPO LEVEL BECAUSE WE ARE MUTATTING
+   * THE REPO
+   */
+
   it('should execute cli tests successfuly', async () => {
     // mock console.log to get results and check them
     let stdout = '';
+    console.log = (log): void => {
+      stdout += log;
+    };
+
+    stdout = '';
+    let exitCode = await run([
+      '',
+      '',
+      'latest',
+      `--repo-dir=${repoDir}`,
+      '--path=prefix9',
+      '--separator=/v',
+    ]);
+    expect(stdout).toEqual('prefix9/v1.0.3');
+    expect(exitCode).toBe(0);
+
+    // mock console.log to get results and check them
+    stdout = '';
     console.log = (log): void => {
       stdout += log;
     };
@@ -20,7 +46,7 @@ describe('when using cli', () => {
 
     // invalid action
     stdout = '';
-    let exitCode = await run(['', '', 'invalidaction', '-v']);
+    exitCode = await run(['', '', 'invalidaction', '-v']);
     expect(stdout).toMatch(/help/);
     expect(exitCode).toBe(1);
 
@@ -228,24 +254,5 @@ describe('when using cli', () => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~5']);
     };
     await expect(rr1).rejects.toThrow("fatal: 'origin' does not appear to be a git repository");
-  });
-  it('should use custom separator successfully', async () => {
-    // mock console.log to get results and check them
-    let stdout = '';
-    console.log = (log): void => {
-      stdout += log;
-    };
-
-    stdout = '';
-    const exitCode = await run([
-      '',
-      '',
-      'latest',
-      `--repo-dir=${repoDir}`,
-      '--path=prefix9',
-      '--separator=/v',
-    ]);
-    expect(stdout).toEqual('prefix9/v1.0.3');
-    expect(exitCode).toBe(0);
   });
 });
