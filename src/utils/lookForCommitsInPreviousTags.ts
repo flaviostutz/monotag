@@ -43,5 +43,6 @@ export const lookForCommitsInPreviousTags = async (
       break;
     }
   }
+
   return commits;
 };

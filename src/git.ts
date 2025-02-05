@@ -218,7 +218,7 @@ const summarizeCommits = (commits: Commit[]): CommitsSummary => {
 
     // references
     for (const reference of convLog.references) {
-      summary.references.push(`${reference.action} ${reference.raw}`);
+      summary.references.push(`${reference.action ?? ''} ${reference.raw ?? ''}`.trim());
     }
 
     return summary;

@@ -101,7 +101,7 @@ describe('when using cli', () => {
       '--separator=/v',
     ]);
     expect(exitCode).toBe(0);
-    expect(stdout).toEqual('No changes detected');
+    expect(stdout).toEqual('');
 
     stdout = '';
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);

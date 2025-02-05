@@ -17,6 +17,7 @@ describe('when creating release notes notes', () => {
     const nt = await releaseNotes(
       {
         repoDir,
+        tagPrefix: '',
         fromRef: 'HEAD~3',
         toRef: 'HEAD',
         path: 'prefix2',
