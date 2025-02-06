@@ -157,7 +157,7 @@ const lastTagForPrefix = async (args: {
 
 const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {
   try {
-    execCmd(repoDir, `git rev-parse --count "${tagName}"`, verbose);
+    execCmd(repoDir, `git show-ref --tags --quiet --verify -- "refs/tags/${tagName}"`, verbose);
     return true;
   } catch {
     return false;
