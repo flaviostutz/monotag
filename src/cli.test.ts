@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable functional/no-let */
-import { execSync } from 'node:child_process';
+import { exec, execSync } from 'node:child_process';
 
 import { run } from './cli';
 import { createSampleRepo } from './utils/createSampleRepo';
@@ -202,7 +202,15 @@ describe('when using cli', () => {
     ]);
 
     // check if note files were generated and are the same
+    originalLog('>>>>>>>>>>AAAAA111 notes');
     originalLog(stdout);
+    originalLog('>>>>>>>>>>AAAAA222');
+    originalLog('>>>>>>>>>>BBBBB111 notes1.md');
+    originalLog(execSync('cat dist/notes1.md'));
+    originalLog('>>>>>>>>>>BBBBB222');
+    originalLog('>>>>>>>>>>CCCCC111 notes2.md');
+    originalLog(execSync('cat dist/notes2.md'));
+    originalLog('>>>>>>>>>>CCCCC222');
     await execSync('diff dist/notes1.md dist/notes2.md');
 
     stdout = '';
