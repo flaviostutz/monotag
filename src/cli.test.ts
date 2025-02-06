@@ -188,7 +188,12 @@ describe('when using cli', () => {
     expect(exitCode).toBe(0);
 
     originalLog('>>>>>>>>>>git log1');
-    originalLog(execSync('git log > log1.txt && cat log1.txt', { cwd: repoDir }).toString());
+    originalLog(
+      execSync(
+        'git log --no-walk --tags --pretty="%h %d %s" --decorate=full > log1.txt && cat log1.txt',
+        { cwd: repoDir },
+      ).toString(),
+    );
     originalLog('>>>>>>>>>>git log1');
 
     // git tag as prerelease again without changes to see
@@ -207,7 +212,12 @@ describe('when using cli', () => {
 
     // check if note files were generated and are the same
     originalLog('>>>>>>>>>>git log2');
-    originalLog(execSync('git log > log2.txt && cat log2.txt', { cwd: repoDir }).toString());
+    originalLog(
+      execSync(
+        'git log --no-walk --tags --pretty="%h %d %s" --decorate=full > log2.txt && cat log2.txt',
+        { cwd: repoDir },
+      ).toString(),
+    );
     originalLog('>>>>>>>>>>git log2');
     originalLog('>>>>>>>>>>notes1.md');
     originalLog(execSync('cat dist/notes1.md').toString());
