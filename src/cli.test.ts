@@ -196,6 +196,13 @@ describe('when using cli', () => {
         { cwd: repoDir },
       ).toString(),
     );
+    originalLog('>>>>>>>>>>git log1 XXX');
+    originalLog(
+      execSync(
+        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;`,
+        { cwd: repoDir },
+      ).toString(),
+    );
     originalLog('>>>>>>>>>>git log1');
 
     // git tag as prerelease again without changes to see
@@ -217,6 +224,20 @@ describe('when using cli', () => {
     originalLog(
       execSync(
         'git log --no-walk --tags --pretty="%h %d %s" --decorate=full > log2.txt && cat log2.txt',
+        { cwd: repoDir },
+      ).toString(),
+    );
+    originalLog('>>>>>>>>>>git log2 XXX');
+    originalLog(
+      execSync(
+        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;`,
+        { cwd: repoDir },
+      ).toString(),
+    );
+    originalLog('>>>>>>>>>>git log2 YYY');
+    originalLog(
+      execSync(
+        `git log --topo-order --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;`,
         { cwd: repoDir },
       ).toString(),
     );

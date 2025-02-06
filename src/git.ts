@@ -37,7 +37,7 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
 
   const outCommits = execCmd(
     opts.repoDir,
-    `git log ${refs} --topo-order --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    `git log ${refs} --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
     opts.verbose,
   )
     .trim()
