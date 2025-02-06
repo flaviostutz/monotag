@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable functional/no-let */
-import { exec, execSync } from 'node:child_process';
+import { execSync } from 'node:child_process';
 
 import { run } from './cli';
 import { createSampleRepo } from './utils/createSampleRepo';
