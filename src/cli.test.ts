@@ -199,14 +199,14 @@ describe('when using cli', () => {
     originalLog('>>>>>>>>>>git log1 XXX');
     originalLog(
       execSync(
-        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;`,
+        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
         { cwd: repoDir },
       ).toString(),
     );
     originalLog('>>>>>>>>>>git log1');
 
     // git tag as prerelease again without changes to see
-    // if its idempodent (should be the same)
+    // if its idempodent (should return the same tag)
     // auto increment of pre-release is deactivated by default
     stdout = '';
     exitCode = await run([
@@ -230,14 +230,14 @@ describe('when using cli', () => {
     originalLog('>>>>>>>>>>git log2 XXX');
     originalLog(
       execSync(
-        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;`,
+        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
         { cwd: repoDir },
       ).toString(),
     );
     originalLog('>>>>>>>>>>git log2 YYY');
     originalLog(
       execSync(
-        `git log --topo-order --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;`,
+        `git log --topo-order --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
         { cwd: repoDir },
       ).toString(),
     );
