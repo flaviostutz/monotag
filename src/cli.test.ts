@@ -206,10 +206,10 @@ describe('when using cli', () => {
     originalLog(stdout);
     originalLog('>>>>>>>>>>AAAAA222');
     originalLog('>>>>>>>>>>BBBBB111 notes1.md');
-    originalLog(execSync('cat dist/notes1.md'));
+    originalLog(execSync('cat dist/notes1.md').toString());
     originalLog('>>>>>>>>>>BBBBB222');
     originalLog('>>>>>>>>>>CCCCC111 notes2.md');
-    originalLog(execSync('cat dist/notes2.md'));
+    originalLog(execSync('cat dist/notes2.md').toString());
     originalLog('>>>>>>>>>>CCCCC222');
     await execSync('diff dist/notes1.md dist/notes2.md');
 
