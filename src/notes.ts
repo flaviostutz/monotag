@@ -1,40 +1,10 @@
+/* eslint-disable no-undefined */
 /* eslint-disable functional/no-let */
-import { filterCommits } from './git';
+import { lastTagForPrefix, lookForCommitsInPreviousTags } from './git';
 import { CommitsSummary } from './types/CommitsSummary';
 import { NextTagOptions } from './types/NextTagOptions';
-import { getDateFromCommit } from './utils/getDateFromCommit';
-import { summarizeCommits } from './utils/summarizeCommits';
-import { tagParts } from './utils/tagParts';
-
-/**
- * Filters commits according to opts and creates a formatted string with release notes
- * @param {BasicOptions} opts parameters for getting commits and creating the release notes
- * @returns {string} Release notes
- */
-const releaseNotes = async (opts: NextTagOptions, tagName: string): Promise<string> => {
-  if (!opts.fromRef || opts.fromRef === 'auto') {
-    throw new Error("'fromRef' is required");
-  }
-  if (!opts.toRef) {
-    throw new Error("'toRef' is required");
-  }
-
-  const commits = await filterCommits(opts);
-  if (commits.length === 0) {
-    throw new Error(`No commits found touching path '${opts.path}'`);
-  }
-
-  const commitsSummary = summarizeCommits(commits);
-  const versionDate = getDateFromCommit(commits[0].date);
-
-  const rn = renderReleaseNotes({
-    commitsSummary,
-    tagName,
-    versionDate,
-    onlyConvCommit: opts.onlyConvCommit,
-  });
-  return rn;
-};
+import { getDateFromCommit, summarizeCommits } from './commits';
+import { tagParts } from './utils/tags';
 
 const renderReleaseNotes = (args: {
   commitsSummary: CommitsSummary;
@@ -130,4 +100,37 @@ const renderReleaseNotes = (args: {
   return notes;
 };
 
-export { renderReleaseNotes as formatReleaseNotes, releaseNotes };
+const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefined> => {
+  const latestTag = await lastTagForPrefix({
+    repoDir: opts.repoDir,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
+    verbose: opts.verbose,
+  });
+
+  if (!latestTag) {
+    return undefined;
+  }
+
+  // look for a previous tag that actually has commits
+  // to compose the release notes
+  const commits = await lookForCommitsInPreviousTags(opts, 1);
+  if (commits.length === 0) {
+    return undefined;
+  }
+
+  const commitsSummary = summarizeCommits(commits);
+
+  const versionDate = getDateFromCommit(commits[0].date);
+
+  const formattedReleaseNotes = renderReleaseNotes({
+    commitsSummary,
+    tagName: latestTag,
+    versionDate,
+    onlyConvCommit: opts.onlyConvCommit,
+  });
+
+  return formattedReleaseNotes;
+};
+
+export { notesForLatestTag, renderReleaseNotes };

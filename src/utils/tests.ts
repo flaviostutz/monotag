@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { execCmd } from './execCmd';
+import { execCmd } from './os';
 
 const createSampleRepo = async (repoDir: string): Promise<void> => {
   fs.rmSync(repoDir, { recursive: true, force: true });

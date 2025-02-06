@@ -13,10 +13,9 @@ import yargs, { Argv } from 'yargs';
 import { nextTag } from './tag';
 import { BasicOptions } from './types/BasicOptions';
 import { NextTagOptions } from './types/NextTagOptions';
-import { execCmd } from './utils/execCmd';
-import { lastPathPart } from './utils/lastPathPart';
+import { execCmd } from './utils/os';
 import { lastTagForPrefix } from './git';
-import { saveResultsToFiles } from './utils/saveResultsToFiles';
+import { saveResultsToFiles } from './files';
 
 const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
@@ -443,6 +442,15 @@ const defaultValueString = (
 ): string | undefined => {
   // eslint-disable-next-line no-negated-condition
   return value !== undefined ? `${value}` : defValue;
+};
+
+const lastPathPart = (fullpath: string): string => {
+  const pathParts = fullpath.split('/');
+  const part = pathParts.at(-1);
+  if (!part) {
+    return fullpath;
+  }
+  return part;
 };
 
 export { run };

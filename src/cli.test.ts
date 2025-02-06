@@ -4,7 +4,7 @@
 import { execSync } from 'node:child_process';
 
 import { run } from './cli';
-import { createSampleRepo } from './utils/createSampleRepo';
+import { createSampleRepo } from './utils/tests';
 
 describe('when using cli', () => {
   const repoDir = './testcases/clirepo';

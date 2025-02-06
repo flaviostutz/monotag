@@ -10,9 +10,9 @@ import semver from 'semver';
 
 import { BasicOptions } from './types/BasicOptions';
 import { Commit } from './types/Commit';
-import { execCmd } from './utils/execCmd';
-import { tagParts } from './utils/tagParts';
-import { getVersionFromTag } from './utils/getVersionFromTag';
+import { execCmd } from './utils/os';
+import { NextTagOptions } from './types/NextTagOptions';
+import { getVersionFromTag, tagParts } from './utils/tags';
 
 /**
  * Looks for commits that touched a certain path
@@ -153,6 +153,50 @@ const lastTagForPrefix = async (args: {
 
   // tag with prefix not found
   return undefined;
+};
+
+export const lookForCommitsInPreviousTags = async (
+  opts: NextTagOptions,
+  nth: number,
+): Promise<Commit[]> => {
+  const latestTag =
+    // if nth is 0, it means we want the HEAD commit (without tags)
+    nth === 0
+      ? opts.toRef
+      : await lastTagForPrefix({
+          repoDir: opts.repoDir,
+          tagPrefix: opts.tagPrefix,
+          tagSuffix: opts.tagSuffix,
+          verbose: opts.verbose,
+        });
+
+  // go back in history to find a previous tag that actually
+  // has commits with the latest
+  // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
+  let commits: Commit[] = [];
+  for (let i = nth; i < 10; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const previousTag = await lastTagForPrefix({
+      repoDir: opts.repoDir,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      verbose: opts.verbose,
+      nth: i,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
+    commits = await filterCommits({
+      ...opts,
+      fromRef: previousTag,
+      toRef: latestTag,
+    });
+
+    if (commits.length > 0) {
+      break;
+    }
+  }
+
+  return commits;
 };
 
 const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {

@@ -1,11 +1,66 @@
 /* eslint-disable functional/no-let */
-import fs from 'node:fs';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
 import path from 'node:path';
-import os from 'node:os';
 
-import { TagNotes } from '../types/TagNotes';
+import { TagNotes } from './types/TagNotes';
+import { NextTagOptions } from './types/NextTagOptions';
+import { appendChangelog, saveResultsToFiles } from './files';
 
-import { appendChangelog } from './appendChangelog';
+describe('saveResultsToFile', () => {
+  const repoDir = './testcases/test-saveResultsToFile';
+
+  const tagNotes: TagNotes = {
+    tagName: 'v1.0.0',
+    version: '1.0.0',
+    releaseNotes: 'Initial release',
+    changesDetected: 1,
+    existingTag: false,
+  };
+
+  const releaseOptions: NextTagOptions = {
+    repoDir,
+    tagPrefix: 'v',
+    verbose: true,
+    path: '.',
+    versionFile: 'dist/version.txt',
+    notesFile: 'dist/changelog.md',
+    tagFile: 'dist/releasetag.txt',
+  };
+
+  it('should save version to file', () => {
+    saveResultsToFiles(tagNotes, releaseOptions);
+
+    const versionStr = fs.readFileSync('dist/version.txt', 'utf8');
+    expect(versionStr).toBe('1.0.0');
+
+    const releaseTagStr = fs.readFileSync('dist/releasetag.txt', 'utf8');
+    expect(releaseTagStr).toBe('v1.0.0');
+
+    const changelogStr = fs.readFileSync('dist/changelog.md', 'utf8');
+    expect(changelogStr).toBe('Initial release');
+  });
+
+  it('should save version to file with custom opts', () => {
+    saveResultsToFiles(tagNotes, {
+      path: '.',
+      repoDir,
+      tagPrefix: 'v',
+      versionFile: `${repoDir}/dist/versionAA.txt`,
+      notesFile: `${repoDir}/dist/changelogAA.md`,
+      tagFile: `${repoDir}/dist/releasetagAA.txt`,
+    });
+
+    const versionStr = fs.readFileSync(`${repoDir}/dist/versionAA.txt`, 'utf8');
+    expect(versionStr).toBe('1.0.0');
+
+    const releaseTagStr = fs.readFileSync(`${repoDir}/dist/releasetagAA.txt`, 'utf8');
+    expect(releaseTagStr).toBe('v1.0.0');
+
+    const changelogStr = fs.readFileSync(`${repoDir}/dist/changelogAA.md`, 'utf8');
+    expect(changelogStr).toBe('Initial release');
+  });
+});
 
 describe('appendChangelog', () => {
   const tag1: TagNotes = {
