@@ -165,6 +165,8 @@ describe('when using cli', () => {
 
     /**
      * MUTATING COMMANDS ARE FAILING ONLY ON CI/CD (but works on dev machine)
+     * We discovered that the git log command returns the same list of commits in
+     * gh actions, but in a different order (probably becuse the commits are generated in the same second or minute). This is probably why the tests are failing.
      */
     // TODO [2025-06-01] re-enable these tests on CI/CD
     // eslint-disable-next-line no-process-env
