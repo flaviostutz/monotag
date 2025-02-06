@@ -194,7 +194,7 @@ describe('when using cli', () => {
     exitCode = await run([
       '',
       '',
-      'tag-git',
+      'notes',
       `--repo-dir=${repoDir}`,
       '--prerelease=true',
       '--prerelease-identifier=alpha',
@@ -202,8 +202,19 @@ describe('when using cli', () => {
     ]);
 
     // check if note files were generated and are the same
-    await execSync('diff dist/notes1.md dist/notes2.md');
     originalLog(stdout);
+    await execSync('diff dist/notes1.md dist/notes2.md');
+
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag-git',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+      '--notes-file=dist/notes2.md',
+    ]);
 
     expect(stdout).toEqual('346.0.0-alpha.0Tag already exists in repo');
     expect(exitCode).toBe(0);
