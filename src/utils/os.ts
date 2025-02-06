@@ -1,20 +1,12 @@
 /* eslint-disable no-console */
 import { execSync } from 'node:child_process';
 
-export const execCmd = (baseDir: string, commands: string, verbose?: boolean): string => {
-  const lines = commands.split('\n');
-  const cmd = lines.reduce((cur: string, line: string): string => {
-    if (line.trim().startsWith('//') || line.trim() === '') {
-      return cur;
-    }
-    return `${cur} && ${line}`;
-  }, `cd ${baseDir}`);
-
+export const execCmd = (baseDir: string, shellScript: string, verbose?: boolean): string => {
   if (verbose) {
     console.log(`${new Date().toISOString()}: Executing on baseDir=${baseDir}`);
-    console.log(`${new Date().toISOString()}: ${cmd}`);
+    console.log(`${new Date().toISOString()}: ${shellScript}`);
   }
-  const result = execSync(cmd).toString();
+  const result = execSync(shellScript, { cwd: baseDir, shell: '/bin/bash' }).toString();
   if (verbose) {
     console.log(`${new Date().toISOString()}: ${result}`);
   }
