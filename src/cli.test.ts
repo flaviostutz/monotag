@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable functional/no-let */
+import { execSync } from 'node:child_process';
+
 import { run } from './cli';
 import { createSampleRepo } from './utils/createSampleRepo';
 
@@ -73,12 +75,6 @@ describe('when using cli', () => {
     ]);
     expect(stdout).toEqual('prefix9/v1.0.3');
     expect(exitCode).toBe(0);
-
-    // get next tag prefix2 dir
-    // stdout = '';
-    // exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    // expect(stdout).toEqual('prefix2-1.0.0');
-    // expect(exitCode).toBe(0);
 
     // get release notes
 
@@ -166,6 +162,16 @@ describe('when using cli', () => {
     expect(stdout).toEqual('346.0.0-alpha.0');
     expect(exitCode).toBe(0);
 
+    /**
+     * MUTATING COMMANDS ARE FAILING ONLY ON CI/CD (but works on dev machine)
+     */
+    // TODO [2025-06-01] re-enable these tests on CI/CD
+    // eslint-disable-next-line no-process-env
+    // if (process.env.CI) {
+    //   console.log("Skipping tests that mutate the repo because they're failing on CI/CD");
+    //   return;
+    // }
+
     // git tag as prerelease
     stdout = '';
     exitCode = await run([
@@ -175,6 +181,7 @@ describe('when using cli', () => {
       `--repo-dir=${repoDir}`,
       '--prerelease=true',
       '--prerelease-identifier=alpha',
+      '--notes-file=dist/notes1.md',
     ]);
     expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.0.*Tag created successfully.*/);
     expect(exitCode).toBe(0);
@@ -190,9 +197,18 @@ describe('when using cli', () => {
       `--repo-dir=${repoDir}`,
       '--prerelease=true',
       '--prerelease-identifier=alpha',
+      '--notes-file=dist/notes2.md',
     ]);
     expect(stdout).toEqual('346.0.0-alpha.0Tag already exists in repo');
     expect(exitCode).toBe(0);
+
+    // check if note files were generated and are the same
+    await execSync('diff dist/notes1.md dist/notes2.md');
+
+    // get notes from latest generated version (alpha)
+    stdout = '';
+    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
+    const notesAlpha = stdout;
 
     // git tag prerelease again without changes
     // but this time forcing the increment
@@ -215,7 +231,7 @@ describe('when using cli', () => {
     expect(stdout).toMatch('346.0.0-alpha.1');
     expect(exitCode).toBe(0);
 
-    // check if notes were generated getting inherating
+    // check if notes were generated getting inherated
     // commits from previous tags that had actual changes
     stdout = '';
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
@@ -224,21 +240,9 @@ describe('when using cli', () => {
     expect(stdout).toMatch('**Breaking:** 4 prefix1 creating test3 file');
     expect(exitCode).toBe(0);
 
-    // these were failing on CI/CD but not locally (maybe due to race conditions)
-    // // generate tag in git repo and tag it
-    // stdout = '';
-    // exitCode = await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);
-    // expect(stdout).toMatch(/.*Creating tag 30.0.1-alpha.*Tag created successfully.*/);
-    // expect(exitCode).toBe(0);
-
-    // // generate tag in git repo and tag it
-    // stdout = '';
-    // const rr2 = async (): Promise<void> => {
-    //   await run(['', '', 'tag-git', `--repo-dir=${repoDir}`, '--suffix=-alpha']);
-    // };
-    // await expect(rr2).rejects.toThrow('already exists');
-
-    // generate tag in git repo and tag it
+    // check if notes were generated exactly with the same contents
+    // from previous tags with the same actual changes (related to the same commitid)
+    expect(notesAlpha).toEqual(stdout);
 
     stdout = '';
     const rr = async (): Promise<void> => {
