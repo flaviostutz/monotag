@@ -21,6 +21,7 @@ describe('when using cli', () => {
 
   it('should execute cli tests successfuly', async () => {
     // mock console.log to get results and check them
+    const originalLog = console.log;
     let stdout = '';
     console.log = (log): void => {
       stdout += log;
@@ -202,6 +203,7 @@ describe('when using cli', () => {
 
     // check if note files were generated and are the same
     await execSync('diff dist/notes1.md dist/notes2.md');
+    originalLog(stdout);
 
     expect(stdout).toEqual('346.0.0-alpha.0Tag already exists in repo');
     expect(exitCode).toBe(0);
