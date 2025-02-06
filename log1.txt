@@ -1,0 +1,799 @@
+commit abd82414b0faf0fd020ffdbcae080e3d13d19ebe
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 14:08:55 2025 +0100
+
+    chore: refactor utils folder by grouping and reorganizing
+
+commit 5e386714d67849f0d625ddda56cac2ef683f0a7f
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 13:14:58 2025 +0100
+
+    chore: test
+
+commit 1a9171b3802926196753e04f3bd7b45289875f4a
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 11:38:20 2025 +0100
+
+    chore: test
+
+commit 30907bd6028eb4c7b33073731be1e997b4c8e63e
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 11:34:31 2025 +0100
+
+    chore: test
+
+commit 1b040c1a931d4b880f000a17a4d186fe9d0ece2e
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 11:23:26 2025 +0100
+
+    chore: test
+
+commit 816a0a7897f920072edf4623dcd38a034f902c19
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 11:21:03 2025 +0100
+
+    chore: test
+
+commit 5650cdcb66a3da60cb76003a70cd72f29c96a1f4
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 11:18:10 2025 +0100
+
+    chore: test
+
+commit 6c470ce19992e933200b7cd3e4dc9a0abbf2ab75
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 11:15:32 2025 +0100
+
+    chore: testing workflow
+
+commit d228383495d55b8ff210e2cbd7ca7b5e487752df
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Thu Feb 6 10:21:51 2025 +0100
+
+    chore: remove output info from tag check when it's invalid
+
+commit d74f2176de6c012d0f9f0d3dda716c0cff352e4f
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 23:57:03 2025 +0100
+
+    chore: runinband for jest
+
+commit a4158d35186c846b07f600519bc8a9509a4da23d
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 20:27:11 2025 +0100
+
+    chore: upgrade semver
+
+commit 9fa6a7a7898c3c9ce5f36447b207ef29093eb873
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 20:23:46 2025 +0100
+
+    chore: fix tests
+
+commit 11d2d0e1e498816c5d3ae5687f3a3170859289e6
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 20:18:32 2025 +0100
+
+    feat: prerelease increment option; enhance changelog generation with ordering
+
+commit dd05a183e5592dfd4a4b6b1e5987fc390fcfadb3
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 11:56:21 2025 +0100
+
+    chore: exporting types
+
+commit 9bcd3e05f9579739570189ca6e173fdf0c90b614
+Merge: d34eb4d 0fce3bc
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 04:10:49 2025 +0100
+
+    Merge branch 'main' of https://github.com/flaviostutz/monotag
+
+commit d34eb4debfa646da3de18ada831def52f4c4d45f
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 04:10:20 2025 +0100
+
+    chore: rename prerelease pipeline
+
+commit 0fce3bccd0b907fac587ce8e8ba370d1d860d4b8
+Merge: acad706 f27ec27
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 04:07:28 2025 +0100
+
+    Merge pull request #36 from flaviostutz/feat/notes-existing-tag
+    
+    feat: notes generation for existing tags
+
+commit f27ec27aac14fb7c0e8a5f51a1b1d2293bba7e75
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 04:04:39 2025 +0100
+
+    chore: fixing tests
+
+commit 585ac3bba29725802c9160abec1b5d5964e4bf39
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Wed Feb 5 03:18:53 2025 +0100
+
+    feat: return notes for existing tags
+
+commit 4596f8bd8d9f60d6015f76e652bb0686a3fb5a84
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 17:59:27 2025 +0100
+
+    chore: pre-release pipeline
+
+commit acad7065d4a721a78b86356949e26f3339d4118f
+Merge: 5401d0b af47bb3
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 17:56:03 2025 +0100
+
+    Merge pull request #35 from flaviostutz/feat/min-max-version
+    
+    feat: min and max version limitation
+
+commit af47bb33606a46a9c33259ffcb1f0ab422e7c92b
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 17:52:47 2025 +0100
+
+    chore: enhance documentation
+
+commit 62d699887961705fea5e2025934e5180c11af208
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 17:45:16 2025 +0100
+
+    feat: min and max version limitation
+
+commit 5401d0b121816c3b66d18e29e7a72895c1a14bdf
+Merge: 6ec12a7 d886a3e
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 12:12:42 2025 +0100
+
+    Merge branch 'main' of https://github.com/flaviostutz/monotag
+
+commit 6ec12a7e88b73c72806d873a626444d336cce346
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 08:58:15 2025 +0100
+
+    chore: bump monotag version in workflows
+
+commit d886a3e2c8113e0d11e265cf3f225679f669a63e
+Merge: af3ec9e 611ddfb
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 02:15:24 2025 +0100
+
+    Merge pull request #34 from flaviostutz/feat/changelog
+    
+    feat: changelog appender
+
+commit 611ddfbbc68bfddbc01c1b38a492c90b2b4be4bc
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 01:04:04 2025 +0100
+
+    feat: disable changelog for prereleases
+
+commit f38193cb517a481a8bdbb67fcc412c808f8a3f99
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Feb 4 00:54:29 2025 +0100
+
+    feat: appending/creating changelog file; removing show-notes option to simplify
+
+commit af3ec9e262bd814a42260bc985fc28384dbf7ef3
+Merge: ee10749 28b05f3
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 21:35:44 2025 +0100
+
+    Merge pull request #33 from flaviostutz/feat/version
+    
+    feat: adding "current" action to cli; enhancing sorting of versions
+
+commit 28b05f3072953720a2586d2f22f566d4e8557644
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 21:27:40 2025 +0100
+
+    chore: enhancing documentation; renaming file save options
+
+commit 405eb591e1efa8e48249869d364c5c8df4fe229c
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 21:11:19 2025 +0100
+
+    feat: adding current action to cli; enhancing sorting of versions
+
+commit ee10749b204e6474727f9a00e3fec3400dd3b1a5
+Merge: 09cd572 2c53d70
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 19:04:12 2025 +0100
+
+    Merge pull request #32 from flaviostutz/chore/bump
+    
+    feat: migrate to PNPM, bump old dependencies and fix lint and ts issues
+
+commit 2c53d7033d3cf55101d7788a7eb641c8d9dbc897
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:55:26 2025 +0100
+
+    chore: remove critical finding
+
+commit a3a6e40b26f693849761ee5a3946dc63e29c6595
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:52:20 2025 +0100
+
+    chore: test
+
+commit ebb640ed55fb3aa9aeee04f844af9b99d259add0
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:51:15 2025 +0100
+
+    chore: test
+
+commit 382defe2beccf959672d5dd186885ecdd9f9fed4
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:49:40 2025 +0100
+
+    chore: test
+
+commit 91c2932167f8c115624aaebaea083bf85c08b9f5
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:47:31 2025 +0100
+
+    chore: pin pnpm
+
+commit d1f59b6c7fcf3828898fb01472ea7c7b6d00da2f
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:44:46 2025 +0100
+
+    chore: try to get pnpm working pinned
+
+commit 9301f37ac3a6a2340b84024e3ad0957343e2a1da
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:42:38 2025 +0100
+
+    chore: pin pnpm version
+
+commit e8648ac6a82cda0c38979e368c79ffbb6d5bd388
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 09:40:30 2025 +0100
+
+    chore: use specific version of pnpm
+
+commit 16b57c994ed10ae95a9441c48cfee90259f04d4f
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 02:09:47 2025 +0100
+
+    chore: change ver
+
+commit 8304cb3d556c1821e9cfc968afe3f1ca0022ab23
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 02:03:02 2025 +0100
+
+    chore: change pipeline tooling
+
+commit b7960cfc7dd427a15cbbe42e6b170e5cf6998d32
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 01:55:47 2025 +0100
+
+    chore: bump old dependencies and fix lint and ts issues
+
+commit 09cd572cac7c2b6d9542d7be36a697739becd104
+Merge: ad37d15 f4c0a09
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 00:50:05 2025 +0100
+
+    Merge pull request #31 from flaviostutz/feat/prerelease
+    
+    feat: pre release of versions
+
+commit f4c0a0969ca46cc88323432eb12760a240ee3cce
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 00:27:40 2025 +0100
+
+    chore: enhance example in readme
+
+commit e6031bacbc5d5fe69800143ee67f533a51175abb
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Mon Feb 3 00:12:15 2025 +0100
+
+    chore: enhancing cli and tests
+
+commit 6315fd891dcbc9b0a0e90cd827c917316bd26c66
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Feb 2 23:26:02 2025 +0100
+
+    feat: prerelease capabilities for tag versioning
+
+commit ad37d15b0f61cb1a97576fdfbe6f0da4e45953e0
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Feb 2 02:09:22 2025 +0100
+
+    fix: release file cli
+
+commit c5c3d202e9de8e6fccaf412ba52213467e00af64
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Feb 2 01:47:55 2025 +0100
+
+    chore: removing console
+
+commit 96e5fdb08e9b45a6fd55486bf7778c10980707ad
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Feb 2 01:39:39 2025 +0100
+
+    chore: fix unit tests
+
+commit aba85e31c2b0a5c500857c54a4103564d8c382ae
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Feb 2 01:27:46 2025 +0100
+
+    chore: renaming workflow attribute
+
+commit 3f174d3c857417be1744e72d93714f58f8f61b56
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Feb 2 01:26:09 2025 +0100
+
+    chore: remove console log
+
+commit f3a5561121adf5eb38a7a6f4d5161881e7deff9c
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Feb 2 01:24:30 2025 +0100
+
+    feat: enhancing changelog (#30)
+
+commit 0a76cde6e723aecd0e4313becaead7e59b1bff98
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sat Feb 1 23:04:23 2025 +0100
+
+    feat: adding release for saving in file (no tests yet)
+
+commit 00ed589a925f6a2c45204ac6628d8c0c1c2177b9
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Mon Sep 23 23:16:38 2024 +0200
+
+    chore: fix notes cli
+
+commit 49b838a9a4d67c94e3235ddd369f345c1c8afd04
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Mon Sep 23 22:46:10 2024 +0200
+
+    chore: fix lint issues
+
+commit 2fe6544d6e220067d8d07e69891ace896cabf8cf
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Mon Sep 23 22:43:41 2024 +0200
+
+    feat: fixing notes command
+
+commit e86676d9c87b757469548bf8f1f5e01e23bfe36c
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Sun Jan 21 04:01:21 2024 +0100
+
+    fix: fail when certain chars present in commit log (#25)
+
+commit d25e74f4e0143556241c1ce9c4d8d2d57124ed2d
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Jan 16 19:29:11 2024 +0100
+
+    chore: updating readme
+
+commit da08df167d4a8b0a92dbd97cdce111ced139dc7b
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Tue Jan 16 13:56:07 2024 +0100
+
+    fix: enhancing tests and fixing custom separator for tagging
+
+commit 129bf2880ecd51997e1a3580181fe64795d03c9e
+Author: flaviostutz <flaviostutz@gmail.com>
+Date:   Fri Jan 12 23:47:02 2024 +0100
+
+    feat: add separator parameter for auto definition of tagprefix. closes #23
+
+commit 2915145ae99528ca71dac40528e0e320f9ef2f80
+Author: Flavio Stutz <flavio.stutz@nn.nl>
+Date:   Fri Aug 18 17:20:55 2023 +0200
+
+    chore: adding error when no action is passed
+
+commit 7106d710477ffefd7329dfb44e6488e4e6c734f1
+Author: Flavio Stutz <flavio.stutz@nn.nl>
+Date:   Fri Aug 18 16:32:59 2023 +0200
+
+    feat: adding "latest" cli command
+
+commit 0f4a232c9772134403b271212fd839a8740c4762
+Author: Flavio Stutz <flavio.stutz@nn.nl>
+Date:   Fri Aug 18 16:29:50 2023 +0200
+
+    enhancing tests
+
+commit 3c6e6195ea0f1c0ed2384439d1366a13508ccd4a
+Author: Flavio Stutz <flavio.stutz@nn.nl>
+Date:   Fri Aug 18 16:16:36 2023 +0200
+
+    fix linting issues
+
+commit 513b16fc23756d5531b11777d8322d58b9851970
+Author: Flavio Stutz <flavio.stutz@nn.nl>
+Date:   Fri Aug 18 16:11:20 2023 +0200
+
+    adding command for getting latest tag for path
+
+commit c152816e516229ccc166e7ccde323b7318fcb626
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Feb 11 14:27:11 2023 +0100
+
+    chore: bumping all deps
+
+commit 7860faf56064c028ee28636a5fadb2f68b7f1ff8
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Tue Feb 7 01:04:42 2023 +0100
+
+    chore: adding environment to publish task
+
+commit 435fffe813bf1b130df749575d764c93d72ff364
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 19:15:48 2023 +0100
+
+    chore: unit test coverage
+
+commit b2ab694c16486f8e6f427914e38ab3488cf7c631
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 18:45:22 2023 +0100
+
+    fix: boolean conversion for cli options
+
+commit df3e22bd29d1b5a0bac17a0312378b40daf90227
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 17:37:39 2023 +0100
+
+    fix: use current dir as prefix and path by default
+
+commit 3d4c81c15ac0ca47389f56b07b5e5c3a304101c4
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 16:13:00 2023 +0100
+
+    fix: comma with spaces
+
+commit c649fe35c5aedfdb3125d78e8706a8eb636e8716
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 16:10:27 2023 +0100
+
+    fix: performance issue with long prefixes
+
+commit de203927fa1fa46c02c1f60b5f2e91e84647068d
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 13:14:42 2023 +0100
+
+    chore: adding verbosity
+
+commit ef08c521b7d23a334391ae95d9ca80c40fbc6f7f
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 13:05:23 2023 +0100
+
+    feat: make path works with '/'
+
+commit 536ecb39d3b3e28862a4c680d6a51b5bf35ec9eb
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Feb 5 12:56:50 2023 +0100
+
+    performance improvements
+
+commit 90833ac376ac9bacb025d2e3490ba926e357fc9f
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Feb 4 12:59:05 2023 +0100
+
+    feat: improving performance for repos with lots of tags
+
+commit c275fc654a2f8ed2a7d9518846d247ad6937c71d
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Wed Feb 1 12:37:29 2023 +0100
+
+    fix: adding limits to tag list to handle large repos
+
+commit f16705414c87e106460994b71afc2a3d06db3c6f
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Jan 29 11:57:30 2023 +0100
+
+    feat: Change git, tag, push logic to make it more similar
+
+commit bc37d21e860ad5330eeffbaea6a375fd26cf38a1
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Jan 29 00:22:51 2023 +0100
+
+    feat: testing minor increment
+
+commit b61e187767169389aeeaa459f703c6d5c108c6d6
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Jan 29 00:19:38 2023 +0100
+
+    fix: cli fixing semver level bug
+
+commit 6b7652317a0a795bb155148930892c6b05c05834
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sun Jan 29 00:01:45 2023 +0100
+
+    feat: test minor increment
+
+commit 74588fc31c7bee915eabccdb321321f23a802faa
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 23:52:22 2023 +0100
+
+    feat: testing minor increment
+
+commit 6393acf9423f8f32ca40ba86cfbc59bd538fba9d
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 23:42:54 2023 +0100
+
+    chore: adding suffix capability
+
+commit acb1d4b465b8571009c0cf6d2d410d3c3b650ed4
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 23:42:27 2023 +0100
+
+    feat: adding tag suffix capability
+
+commit 2fd31babf766e7934609d18eade20759a3a1e3d8
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 22:09:32 2023 +0100
+
+    feat: removing aspersand from notes version
+
+commit f2d45c85af44e9b28abc114df1b53b8bb853d863
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 22:07:33 2023 +0100
+
+    fix: notes info
+
+commit 53fd90950fcddf0b70bf5e5a6cbae2f932c47347
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 22:01:47 2023 +0100
+
+    feat: adding release notes to tag in multiple items
+
+commit ca53f5ae286705b2dae0cee083e4b5e9491ec88a
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 21:55:23 2023 +0100
+
+    chore: enhancing readme
+
+commit 1b17deb42a037c01719ce26688f25ccf83470676
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 21:45:40 2023 +0100
+
+    chore: set correct token in tag workflow
+
+commit 63db7f7e603e7e000d126dcfb129922150e62e03
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 21:34:50 2023 +0100
+
+    fix: tsc lint
+
+commit 3a9fa5a23951779712a87604deb0d4f7e735cb48
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 21:33:03 2023 +0100
+
+    adding token so tags triggers another build
+
+commit 13406cbff41353f72dca1c949a16a6417663bcb3
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 20:01:25 2023 +0100
+
+    chore: adding permissions and changing name
+
+commit 65362d6cd02251f9521fcd66659acaeee85d6fe7
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 19:59:15 2023 +0100
+
+    chore: adding identity to git
+
+commit 899f1f0d419af540d8881bd857f353e7b7f4d9c0
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 19:57:19 2023 +0100
+
+    chore: adding fetch-depth to get tags from repo
+
+commit 7705a75361327fd81af84b4f32693ecef44eba4c
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 19:54:28 2023 +0100
+
+    chore: adding checkout to create tag
+
+commit 6f6094ab58ad5410c077eda4ac69cdf46090d253
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 19:46:04 2023 +0100
+
+    chore: create-tag workflow
+
+commit dcbb2f1d8f02aab0f113cc160b546e5a99784868
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 15:28:29 2023 -0300
+
+    Create release.yml
+
+commit 163c167185a9987bdfd722298488a44249610a8a
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 14:49:12 2023 +0100
+
+    chore: enhancing readme with diagrams
+
+commit 7bc4138220160b95d9b8959131f0b13fce46c268
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 13:57:07 2023 +0100
+
+    fix: unit test for cli
+
+commit 8571792d42b988ddaee0d8eb247338f3146b4626
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 13:50:37 2023 +0100
+
+    chore: optimize bundle size
+
+commit 8471b33dc9a8095e6893770d14abfff30bec55c9
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 13:46:47 2023 +0100
+
+    fix: enhancing error handling and verbosity
+
+commit 08fb766eb411867352b66f0325f5111a1c58dbed
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 13:09:49 2023 +0100
+
+    fix: adding env node instruction to main
+
+commit f2d9e075e374a2c80c59d8c9567f1020b50486cb
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 13:05:16 2023 +0100
+
+    fix: adding main to package dist
+
+commit 2215e7b452796f00354a4ee9364a907c387c917c
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 12:57:47 2023 +0100
+
+    fix: package bin
+
+commit bd94734136451f0a8de8599e102eb35efb0efc90
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 00:30:14 2023 +0100
+
+    adding files to package dist
+
+commit de5aa85a2465d17682da14b4a28bf44bf24c7ce2
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 00:26:24 2023 +0100
+
+    adding cli build
+
+commit 8cfb053068d47c5543782fe478703f5afe884e94
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 00:21:59 2023 +0100
+
+    adding env to main bin
+
+commit 5f7cde3a3710ea742f56a182870cd4a3e6b540dc
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 00:17:04 2023 +0100
+
+    updating token
+
+commit 7559f7f69a461be24bb13a686faed044f56040a1
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 00:12:53 2023 +0100
+
+    remove release-drafter
+
+commit 95934898c75325106a1f49ac63a868d88eef501d
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 00:07:34 2023 +0100
+
+    adding release-drafter config
+
+commit dc5dede53c9437c8f6d57caeee967cdd7cc8e739
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 28 00:03:14 2023 +0100
+
+    adding release-drafter
+
+commit 0fd05e4dc7a3fa63905dd22fb472b0d804aa1b7f
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 23:49:34 2023 +0100
+
+    fixing git name for tests
+
+commit 51b606b8a96bbc78c8e5822dd403df307cd907c5
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 23:46:16 2023 +0100
+
+    setting name to git testcase
+
+commit efbd0ebf02bb46923f2c524372c6d33ce3c0287b
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 19:26:47 2023 +0100
+
+    fix readme
+
+commit 19344a627c625828472beb3a95e041413c538931
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 19:25:05 2023 +0100
+
+    fix readme
+
+commit 075f447054a3e9b6110b22df4fa6cd71084c00db
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 19:23:57 2023 +0100
+
+    adding examples to readme
+
+commit cbafd9ea989df9a8f00a8373ce481c62d85f9dce
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 18:59:04 2023 +0100
+
+    adding documentation
+
+commit 0ee82542f8df1b3e765a5a02d5c207b236b2ee90
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 18:42:49 2023 +0100
+
+    fixing messages on error
+
+commit 9b7a640927689239a89e3acc3c369e38cbbd6d56
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Fri Jan 27 17:48:30 2023 +0100
+
+    cli with help tips
+
+commit caf878ff8c3c6677e0d3cb11ae880132aaeef006
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Thu Jan 26 23:03:35 2023 +0100
+
+    first working cli
+
+commit fca77979dc0b2f989d3113d3def9741bf8cd800d
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Tue Jan 24 20:04:22 2023 +0100
+
+    first api working version
+
+commit 525c490fbe950e031efbc08ce443091d2da8c9b9
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Mon Jan 23 01:16:03 2023 +0100
+
+    chore: adding more commits to testcase
+
+commit c9dd7c15815344a39be89d5fdfe3cf1b4011b278
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Mon Jan 23 01:11:57 2023 +0100
+
+    feat: basic git operations
+
+commit 4f1af7f6a991010578245b7accf00b857a0e858d
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 21 12:33:18 2023 +0100
+
+    basic command line parser
+
+commit 3958c73d4059ec11427aaefd737277aeee09a157
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Sat Jan 21 06:03:20 2023 +0100
+
+    preparing project
+
+commit 0181c524570497d128243cfee53c5b19bda15054
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Wed Jan 18 00:28:35 2023 +0100
+
+    generation yarn lock
+
+commit e2f95940fdaf93b0962199e5e71d8c17a2f0c3a8
+Author: Flávio Stutz <flaviostutz@gmail.com>
+Date:   Wed Jan 18 00:26:50 2023 +0100
+
+    chore: initial commit
+
+commit 18909e1cec59da2561d3936778fefe5ffe78281e
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Tue Jan 17 19:44:36 2023 -0300
+
+    Update README.md
+
+commit 7cbc31eda7fee8f616f61796432ed020e21131e9
+Author: Flavio Stutz <flaviostutz@gmail.com>
+Date:   Tue Jan 17 19:43:00 2023 -0300
+
+    Initial commit

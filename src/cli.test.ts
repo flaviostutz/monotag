@@ -7,7 +7,7 @@ import { run } from './cli';
 import { createSampleRepo } from './utils/tests';
 
 describe('when using cli', () => {
-  const repoDir = './testcases/clirepo';
+  const repoDir = './testcases/cli-test-repo';
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
@@ -187,6 +187,10 @@ describe('when using cli', () => {
     expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.0.*Tag created successfully.*/);
     expect(exitCode).toBe(0);
 
+    originalLog('>>>>>>>>>>git log1');
+    originalLog(execSync('git log > log1.txt && cat log1.txt', { cwd: repoDir }).toString());
+    originalLog('>>>>>>>>>>git log1');
+
     // git tag as prerelease again without changes to see
     // if its idempodent (should be the same)
     // auto increment of pre-release is deactivated by default
@@ -202,15 +206,15 @@ describe('when using cli', () => {
     ]);
 
     // check if note files were generated and are the same
-    originalLog('>>>>>>>>>>AAAAA111 notes');
-    originalLog(stdout);
-    originalLog('>>>>>>>>>>AAAAA222');
-    originalLog('>>>>>>>>>>BBBBB111 notes1.md');
+    originalLog('>>>>>>>>>>git log2');
+    originalLog(execSync('git log > log2.txt && cat log2.txt', { cwd: repoDir }).toString());
+    originalLog('>>>>>>>>>>git log2');
+    originalLog('>>>>>>>>>>notes1.md');
     originalLog(execSync('cat dist/notes1.md').toString());
-    originalLog('>>>>>>>>>>BBBBB222');
-    originalLog('>>>>>>>>>>CCCCC111 notes2.md');
+    originalLog('>>>>>>>>>>notes1.md');
+    originalLog('>>>>>>>>>>notes2.md');
     originalLog(execSync('cat dist/notes2.md').toString());
-    originalLog('>>>>>>>>>>CCCCC222');
+    originalLog('>>>>>>>>>>notes2.md');
     await execSync('diff dist/notes1.md dist/notes2.md');
 
     stdout = '';
