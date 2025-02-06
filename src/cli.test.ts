@@ -199,11 +199,12 @@ describe('when using cli', () => {
       '--prerelease-identifier=alpha',
       '--notes-file=dist/notes2.md',
     ]);
-    expect(stdout).toEqual('346.0.0-alpha.0Tag already exists in repo');
-    expect(exitCode).toBe(0);
 
     // check if note files were generated and are the same
     await execSync('diff dist/notes1.md dist/notes2.md');
+
+    expect(stdout).toEqual('346.0.0-alpha.0Tag already exists in repo');
+    expect(exitCode).toBe(0);
 
     // get notes from latest generated version (alpha)
     stdout = '';
