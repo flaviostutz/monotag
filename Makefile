@@ -19,7 +19,7 @@ lint-fix:
 
 test:
 	@# can't be in parallel because we use nock that has shared contexts
-	pnpm exec jest -i --runInBand --verbose
+	pnpm exec jest -i --verbose
 
 publish:
 	@if [ "$${NPM_ACCESS_TOKEN}" == "" ]; then \

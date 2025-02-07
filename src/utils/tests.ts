@@ -25,6 +25,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git tag nothing
     git tag something
 
+    # force a time between commits to simulate a more real scenario
     [ -n "$CI" ] && sleep 1
 
     # prefix1 dir

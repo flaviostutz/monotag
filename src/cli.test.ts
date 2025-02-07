@@ -175,20 +175,6 @@ describe('when using cli', () => {
     //   return;
     // }
 
-    // git tag as prerelease
-    stdout = '';
-    exitCode = await run([
-      '',
-      '',
-      'tag-git',
-      `--repo-dir=${repoDir}`,
-      '--prerelease=true',
-      '--prerelease-identifier=alpha',
-      '--notes-file=dist/notes1.md',
-    ]);
-    expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.0.*Tag created successfully.*/);
-    expect(exitCode).toBe(0);
-
     originalLog('>>>>>>>>>>git log1');
     originalLog(
       execSync(
@@ -204,6 +190,20 @@ describe('when using cli', () => {
       ).toString(),
     );
     originalLog('>>>>>>>>>>git log1');
+
+    // git tag as prerelease
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag-git',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+      '--notes-file=dist/notes1.md',
+    ]);
+    expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.0.*Tag created successfully.*/);
+    expect(exitCode).toBe(0);
 
     // git tag as prerelease again without changes to see
     // if its idempodent (should return the same tag)
