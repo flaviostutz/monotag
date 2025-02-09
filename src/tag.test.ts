@@ -1,13 +1,15 @@
 /* eslint-disable functional/no-let */
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
+import { execSync } from 'node:child_process';
+
 import { filterCommits } from './git';
 import { incrementTag, nextTag } from './tag';
 import { SemverLevel } from './types/SemverLevel';
 import { createSampleRepo } from './utils/tests';
 
 describe('when generating next tag with notes', () => {
-  const repoDir = './testcases/nexttagrepo';
+  const repoDir = './testcases/nexttag-repo';
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
@@ -31,6 +33,21 @@ describe('when generating next tag with notes', () => {
     expect(nt.tagName).toBe('346.0.0');
   });
   it('should return latest if nothing changed', async () => {
+    console.log('>>>>>>>>>>git log111');
+    console.log(
+      execSync(
+        'git log --no-walk --tags --pretty="%h %d %s" --decorate=full > log1.txt && cat log1.txt',
+        { cwd: repoDir },
+      ).toString(),
+    );
+    console.log('>>>>>>>>>>git log222');
+    console.log(
+      execSync(
+        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+        { cwd: repoDir },
+      ).toString(),
+    );
+    console.log('>>>>>>>>>>git log333');
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
