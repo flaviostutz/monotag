@@ -234,13 +234,6 @@ describe('when using cli', () => {
         { cwd: repoDir },
       ).toString(),
     );
-    originalLog('>>>>>>>>>>git log2 YYY');
-    originalLog(
-      execSync(
-        `git log --topo-order --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
-        { cwd: repoDir },
-      ).toString(),
-    );
     originalLog('>>>>>>>>>>git log2');
     originalLog('>>>>>>>>>>notes1.md');
     originalLog(execSync('cat dist/notes1.md').toString());

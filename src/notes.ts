@@ -1,11 +1,16 @@
 /* eslint-disable no-undefined */
 /* eslint-disable functional/no-let */
-import { lastTagForPrefix, lookForCommitsInPreviousTags } from './git';
+import { lastTagForPrefix, findCommitsForLatestTag } from './git';
 import { CommitsSummary } from './types/CommitsSummary';
 import { NextTagOptions } from './types/NextTagOptions';
 import { getDateFromCommit, summarizeCommits } from './commits';
 import { tagParts } from './utils/tags';
 
+/**
+ * If the latest commit already has a tag for the prefix, it will reconstruct the notes by searching previous commit logs from the previous tag to current commit log.
+ * If it doesn't have the tag, it means that this is a new tag and it will build the notes from the latest tag to the current commit log.
+ * This is supposed to be an indempotent operation.
+ */
 const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefined> => {
   const latestTag = await lastTagForPrefix({
     repoDir: opts.repoDir,
@@ -18,9 +23,8 @@ const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefin
     return undefined;
   }
 
-  // look for a previous tag that actually has commits
-  // to compose the release notes
-  const commits = await lookForCommitsInPreviousTags(opts, 1);
+  // look for the commits that compose the latest tag for this prefix
+  const commits = await findCommitsForLatestTag(opts);
   if (commits.length === 0) {
     return undefined;
   }

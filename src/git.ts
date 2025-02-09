@@ -155,29 +155,22 @@ const lastTagForPrefix = async (args: {
   return undefined;
 };
 
-export const lookForCommitsInPreviousTags = async (
-  opts: NextTagOptions,
-  nth: number,
-): Promise<Commit[]> => {
-  // get commits until this reference
-  // if nth is 0, it means we want until the HEAD commit
-  // else we want until the last tag found for the prefix
-  const commitsUntilRef =
-    nth === 0
-      ? opts.toRef
-      : await lastTagForPrefix({
-          repoDir: opts.repoDir,
-          tagPrefix: opts.tagPrefix,
-          tagSuffix: opts.tagSuffix,
-          verbose: opts.verbose,
-        });
+export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Commit[]> => {
+  // get latest tag for the prefix (might be pointing to HEAD or not)
+  const commitsUntilRef = await lastTagForPrefix({
+    repoDir: opts.repoDir,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
+    verbose: opts.verbose,
+    nth: 0,
+  });
 
   // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
   // which leads to no commits between those tags
   // go back in history to find a previous tag that actually
   // has commits in relation to the current tag (or HEAD)
   let commits: Commit[] = [];
-  for (let i = nth; i < 10; i += 1) {
+  for (let i = 1; i < 10; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     const previousTag = await lastTagForPrefix({
       repoDir: opts.repoDir,
