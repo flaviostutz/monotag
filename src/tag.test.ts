@@ -35,10 +35,9 @@ describe('when generating next tag with notes', () => {
   it('should return latest if nothing changed', async () => {
     console.log('>>>>>>>>>>git log111');
     console.log(
-      execSync(
-        'git log --no-walk --tags --pretty="%h %d %s" --decorate=full > log1.txt && cat log1.txt',
-        { cwd: repoDir },
-      ).toString(),
+      execSync('git log --tags --pretty="%h %d %s" --decorate=full > log1.txt && cat log1.txt', {
+        cwd: repoDir,
+      }).toString(),
     );
     console.log('>>>>>>>>>>git log222');
     console.log(
