@@ -47,8 +47,8 @@ describe('when generating next tag with notes', () => {
         { cwd: repoDir },
       ).toString(),
     );
-    console.log('>>>>>>>>>>git log333');
-    console.log(execSync(`git log HEAD..HEAD~16`, { cwd: repoDir }).toString());
+    console.log('>>>>>>>>>>git log333BBB');
+    console.log(execSync(`git log 345.2123.143..HEAD~16`, { cwd: repoDir }).toString());
     console.log('>>>>>>>>>>git log444');
     const nt = await nextTag({
       repoDir,
