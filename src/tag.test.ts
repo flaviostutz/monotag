@@ -35,14 +35,15 @@ describe('when generating next tag with notes', () => {
   it('should return latest if nothing changed', async () => {
     console.log('>>>>>>>>>>git log111');
     console.log(
-      execSync('git log --tags --pretty="%h %d %s" --decorate=full > log1.txt && cat log1.txt', {
-        cwd: repoDir,
-      }).toString(),
+      execSync(
+        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+        { cwd: repoDir },
+      ).toString(),
     );
     console.log('>>>>>>>>>>git log222');
     console.log(
       execSync(
-        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+        `git log HEAD~16.. --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
         { cwd: repoDir },
       ).toString(),
     );
@@ -58,6 +59,17 @@ describe('when generating next tag with notes', () => {
     console.log('>>>>>RELEASE NOTES 111');
     console.log(nt.releaseNotes);
     console.log('>>>>>RELEASE NOTES 222');
+    expect(nt.tagName).toBe('345.2123.143');
+  });
+  it('this passes on dev machine, but fails on gh actions', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD~16',
+      path: '',
+      tagPrefix: '',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('345.2123.143');
   });
   it('should fail if no commits found touching path', async () => {
