@@ -21,7 +21,7 @@ describe('when using cli', () => {
 
   it('should execute cli tests successfuly', async () => {
     // mock console.log to get results and check them
-    const originalLog = console.log;
+    // const originalLog = console.log;
     let stdout = '';
     console.log = (log): void => {
       stdout += log;
