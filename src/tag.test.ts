@@ -56,6 +56,9 @@ describe('when generating next tag with notes', () => {
       tagPrefix: '',
     });
     if (!nt) throw new Error('Shouldnt be null');
+    console.log('>>>>>RELEASE NOTES 111');
+    console.log(nt.releaseNotes);
+    console.log('>>>>>RELEASE NOTES 222');
     expect(nt.tagName).toBe('345.2123.143');
   });
   it('should fail if no commits found touching path', async () => {
