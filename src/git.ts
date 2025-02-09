@@ -124,14 +124,8 @@ const lastTagForPrefix = async (args: {
     if (!tparts) {
       return false;
     }
-    // we are looking for a tag with a prefix
-    if (args.tagPrefix) {
-      // it's a tag for the desired prefix
-      if (tparts[2] === args.tagPrefix) {
-        return true;
-      }
-      // it's a tag without prefix and the desired prefix is empty
-    } else if (!tparts[2]) {
+    // it's a tag for the desired prefix
+    if (tparts[2] === args.tagPrefix) {
       return true;
     }
     return false;

@@ -11,7 +11,7 @@ describe('when generating next tag with notes', () => {
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
-  it('should increment major on root path/prefix because something has breaking change in history', async () => {
+  it('should increment major on root path/prefix because something has a breaking change in history', async () => {
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
@@ -19,6 +19,14 @@ describe('when generating next tag with notes', () => {
       path: '',
       tagPrefix: '',
     });
+    expect(nt?.releaseNotes).toContain('## 346.0.0 (');
+    expect(nt?.releaseNotes).toContain('* 8 ');
+    expect(nt?.releaseNotes).toContain('* user-ui: 9 ');
+    expect(nt?.releaseNotes).toContain('anyscope: 10 ');
+    expect(nt?.releaseNotes).toContain('* tests: 11 ');
+    expect(nt?.releaseNotes).toContain('* 12 ');
+    expect(nt?.releaseNotes).toContain('* 13 ');
+    expect(nt?.releaseNotes).toContain('* 14 ');
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('346.0.0');
   });
@@ -26,12 +34,12 @@ describe('when generating next tag with notes', () => {
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
-      toRef: 'HEAD',
+      toRef: 'HEAD~16',
       path: '',
       tagPrefix: '',
     });
     if (!nt) throw new Error('Shouldnt be null');
-    expect(nt.tagName).toBe('346.0.0');
+    expect(nt.tagName).toBe('345.2123.143');
   });
   it('should fail if no commits found touching path', async () => {
     const nt = await nextTag({
