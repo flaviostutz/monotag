@@ -43,7 +43,7 @@ const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> =>
 
   const outCommits = execCmd(
     opts.repoDir,
-    `git log ${refs} --pretty=format:"%H" | head -n 50 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    `git rev-list ${refs} | head -n 50 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
     opts.verbose,
   )
     .trim()
