@@ -33,25 +33,6 @@ describe('when generating next tag with notes', () => {
     expect(nt.tagName).toBe('346.0.0');
   });
   it('should return latest if nothing changed', async () => {
-    console.log('>>>>>>>>>>git log111');
-    console.log(
-      execSync(
-        `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
-        { cwd: repoDir },
-      ).toString(),
-    );
-    console.log('>>>>>>>>>>git log222AAAA');
-    console.log(execSync(`git rev-list 345.2123.143...HEAD~16`, { cwd: repoDir }).toString());
-    console.log('>>>>>>>>>>git log222BBBB');
-    console.log(
-      execSync(
-        `git log 345.2123.143...HEAD~16 --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
-        { cwd: repoDir },
-      ).toString(),
-    );
-    console.log('>>>>>>>>>>git log333BBB');
-    console.log(execSync(`git log 345.2123.143...HEAD~16`, { cwd: repoDir }).toString());
-    console.log('>>>>>>>>>>git log444');
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
@@ -61,13 +42,9 @@ describe('when generating next tag with notes', () => {
       verbose: true,
     });
     if (!nt) throw new Error('Shouldnt be null');
-    console.log('>>>>>RELEASE NOTES 111');
-    console.log(nt.releaseNotes);
-    console.log('>>>>>RELEASE NOTES 222');
     expect(nt.tagName).toBe('345.2123.143');
   });
   it('this passes on dev machine, but fails on gh actions', async () => {
-    console.log(']]]]] NEXT TAG FAIL ON GH ACTIONS');
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
@@ -76,9 +53,6 @@ describe('when generating next tag with notes', () => {
       tagPrefix: '',
       verbose: true,
     });
-    console.log(`CHANGES DETECTED ${nt?.changesDetected.length}`);
-    console.log(`NOTES ${nt?.releaseNotes}`);
-    console.log(`COMMITS ${nt?.changesDetected.map((c) => c.message).join('\n')}`);
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('345.2123.143');
   });
@@ -101,7 +75,6 @@ describe('when generating next tag with notes', () => {
       tagPrefix: 'prefix1/',
     });
     if (!nt) throw new Error('Shouldnt be null');
-    console.log(nt.releaseNotes);
     expect(nt.existingTag).toBeFalsy();
     expect(nt.tagName).toBe('prefix1/3.5.0');
     expect(nt.releaseNotes?.includes('## Features')).toBeTruthy();

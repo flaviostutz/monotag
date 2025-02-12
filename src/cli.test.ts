@@ -163,34 +163,6 @@ describe('when using cli', () => {
     expect(stdout).toEqual('346.0.0-alpha.0');
     expect(exitCode).toBe(0);
 
-    /**
-     * MUTATING COMMANDS ARE FAILING ONLY ON CI/CD (but works on dev machine)
-     * We discovered that the git log command returns the same list of commits in
-     * gh actions, but in a different order (probably becuse the commits are generated in the same second or minute). This is probably why the tests are failing.
-     */
-    // TODO [2025-06-01] re-enable these tests on CI/CD
-    // eslint-disable-next-line no-process-env
-    if (process.env.CI) {
-      console.log("Skipping tests that mutate the repo because they're failing on CI/CD");
-      return;
-    }
-
-    // originalLog('>>>>>>>>>>git log1');
-    // originalLog(
-    //   execSync(
-    //     'git log --no-walk --tags --pretty="%h %d %s" --decorate=full > log1.txt && cat log1.txt',
-    //     { cwd: repoDir },
-    //   ).toString(),
-    // );
-    // originalLog('>>>>>>>>>>git log1 XXX');
-    // originalLog(
-    //   execSync(
-    //     `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
-    //     { cwd: repoDir },
-    //   ).toString(),
-    // );
-    // originalLog('>>>>>>>>>>git log1');
-
     // git tag as prerelease
     stdout = '';
     exitCode = await run([
