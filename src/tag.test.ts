@@ -43,12 +43,12 @@ describe('when generating next tag with notes', () => {
     console.log('>>>>>>>>>>git log222');
     console.log(
       execSync(
-        `git log HEAD..HEAD~16 --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+        `git log HEAD...HEAD~16 --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
         { cwd: repoDir },
       ).toString(),
     );
     console.log('>>>>>>>>>>git log333BBB');
-    console.log(execSync(`git log 345.2123.143..HEAD~16`, { cwd: repoDir }).toString());
+    console.log(execSync(`git log 345.2123.143...HEAD~16`, { cwd: repoDir }).toString());
     console.log('>>>>>>>>>>git log444');
     const nt = await nextTag({
       repoDir,
