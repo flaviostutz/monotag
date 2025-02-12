@@ -38,11 +38,13 @@ const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> =>
 
   // execute just to test if refs are valid
   console.log('REV-LIST AAA');
+  // TODO: this returns 0
   execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
 
   // TODO: with range "345.2123.143...HEAD~16" on gh this returns 0; while git log (next line) returns 1 commit (the latest commit!). why?
 
   console.log('REV-LIST BBB');
+  // TODO: this returns 1 - the latest commit. maybe it's something the way shell is handling the pipes when thr results are empty?
   const outCommits = execCmd(
     opts.repoDir,
     `git rev-list ${refs} | head -n 50 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
@@ -52,6 +54,7 @@ const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> =>
     .split('COMMIT');
 
   console.log('REV-LIST CCC');
+  // TODO: this returns 0
   execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
 
   // this limit (with "head") is a safeguard for large repositories

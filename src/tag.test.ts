@@ -71,7 +71,7 @@ describe('when generating next tag with notes', () => {
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
-      toRef: 'HEAD~16',
+      toRef: 'HEAD~15',
       path: '',
       tagPrefix: '',
       verbose: true,
