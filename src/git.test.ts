@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 import { lastTagForPrefix } from './git';
-import { createSampleRepo } from './utils/createSampleRepo';
+import { createSampleRepo } from './utils/tests';
 
 describe('when using git', () => {
   const repoDir = './testcases/git-test-repo';
