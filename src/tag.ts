@@ -80,7 +80,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
       tagName,
       version: getVersionFromTag(latestTag, opts.tagPrefix, opts.tagSuffix),
       releaseNotes: releaseNotes ?? '',
-      changesDetected: 0,
+      changesDetected: commits,
       existingTag: tagExistsInRepo(opts.repoDir, tagName, opts.verbose),
     };
   }
@@ -117,7 +117,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
     tagName,
     version: getVersionFromTag(tagName, opts.tagPrefix, opts.tagSuffix),
     releaseNotes,
-    changesDetected: commits.length,
+    changesDetected: commits,
     existingTag: tagExistsInRepo(opts.repoDir, tagName, opts.verbose),
   };
 };

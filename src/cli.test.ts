@@ -301,7 +301,7 @@ describe('when using cli', () => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~999']);
     };
     await expect(rr).rejects.toThrow(
-      "fatal: ambiguous argument 'HEAD~999..HEAD': unknown revision or path not in the working tree",
+      "fatal: ambiguous argument 'HEAD~999...HEAD': unknown revision or path not in the working tree",
     );
 
     // eslint-disable-next-line require-atomic-updates

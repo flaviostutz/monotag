@@ -29,8 +29,10 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
 
   let refs = opts.toRef;
   if (opts.fromRef) {
-    refs = `${opts.fromRef}..${opts.toRef}`;
+    refs = `${opts.fromRef}...${opts.toRef}`;
   }
+
+  // const refs = `${opts.fromRef ?? ''} ${opts.toRef}`;
 
   // execute just to test if refs are valid
   execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);

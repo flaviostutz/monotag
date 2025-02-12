@@ -71,6 +71,9 @@ describe('when generating next tag with notes', () => {
       path: '',
       tagPrefix: '',
     });
+    console.log(`CHANGES DETECTED ${nt?.changesDetected.length}`);
+    console.log(`NOTES ${nt?.releaseNotes}`);
+    console.log(`COMMITS ${nt?.changesDetected.map((c) => c.message).join('\n')}`);
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('345.2123.143');
   });
