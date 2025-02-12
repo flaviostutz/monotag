@@ -19,7 +19,7 @@ import { getVersionFromTag, tagParts } from './utils/tags';
  * @param opts {BasicOptions} parameters for commits filtering
  * @returns {Commit[]} List of commits
  */
-const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
+const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> => {
   if (!opts.repoDir) {
     throw new Error("'repoDir' must be defined");
   }
@@ -34,20 +34,24 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
 
   // const refs = `${opts.fromRef ?? ''} ${opts.toRef}`;
 
+  execCmd(opts.repoDir, `git --version`, opts.verbose);
+
   // execute just to test if refs are valid
   execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
 
+  // FIXME: with range "345.2123.143...HEAD~16" on gh this returns 0; while git log (next line) returns 1 commit (the latest commit!). why?
+
   const outCommits = execCmd(
     opts.repoDir,
-    `git log ${refs} --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    `git log ${refs} --pretty=format:"%H" | head -n 50 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
     opts.verbose,
   )
     .trim()
     .split('COMMIT');
 
   // this limit (with "head") is a safeguard for large repositories
-  if (outCommits.length === 30) {
-    console.log('Commits might have been limited to 30 results');
+  if (outCommits.length === 50) {
+    console.log('Commits might have been limited to 50 results');
   }
 
   const commits = outCommits
@@ -177,7 +181,7 @@ export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Com
     });
 
     // eslint-disable-next-line no-await-in-loop
-    commits = await filterCommits({
+    commits = await findCommitsTouchingPath({
       ...opts,
       fromRef: previousTag,
       toRef: commitsUntilRef,
@@ -201,4 +205,4 @@ const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): b
   }
 };
 
-export { filterCommits, lastTagForPrefix, tagExistsInRepo };
+export { findCommitsTouchingPath as filterCommits, lastTagForPrefix, tagExistsInRepo };
