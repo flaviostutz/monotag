@@ -40,10 +40,12 @@ describe('when generating next tag with notes', () => {
         { cwd: repoDir },
       ).toString(),
     );
-    console.log('>>>>>>>>>>git log222');
+    console.log('>>>>>>>>>>git log222AAAA');
+    console.log(execSync(`git rev-list 345.2123.143...HEAD~16`, { cwd: repoDir }).toString());
+    console.log('>>>>>>>>>>git log222BBBB');
     console.log(
       execSync(
-        `git log HEAD...HEAD~16 --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+        `git log 345.2123.143...HEAD~16 --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
         { cwd: repoDir },
       ).toString(),
     );
@@ -56,6 +58,7 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD~16',
       path: '',
       tagPrefix: '',
+      verbose: true,
     });
     if (!nt) throw new Error('Shouldnt be null');
     console.log('>>>>>RELEASE NOTES 111');
