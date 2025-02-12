@@ -4,7 +4,7 @@
 /* eslint-disable no-console */
 import semver, { ReleaseType } from 'semver';
 
-import { filterCommits, lastTagForPrefix, tagExistsInRepo } from './git';
+import { findCommitsTouchingPath, lastTagForPrefix, tagExistsInRepo } from './git';
 import { notesForLatestTag, renderReleaseNotes } from './notes';
 import { NextTagOptions } from './types/NextTagOptions';
 import { TagNotes } from './types/TagNotes';
@@ -56,7 +56,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
     );
   }
 
-  const commits = await filterCommits(opts);
+  const commits = await findCommitsTouchingPath(opts);
 
   // no changes detected
   // define new tag by using the latest tag as a reference

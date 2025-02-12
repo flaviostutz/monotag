@@ -1,3 +1,3 @@
 export { nextTag } from './tag';
-export { lastTagForPrefix, filterCommits } from './git';
+export { lastTagForPrefix, findCommitsTouchingPath } from './git';
 export * from './types';

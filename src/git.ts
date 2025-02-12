@@ -39,7 +39,7 @@ const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> =>
   // execute just to test if refs are valid
   execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
 
-  // FIXME: with range "345.2123.143...HEAD~16" on gh this returns 0; while git log (next line) returns 1 commit (the latest commit!). why?
+  // TODO: with range "345.2123.143...HEAD~16" on gh this returns 0; while git log (next line) returns 1 commit (the latest commit!). why?
 
   const outCommits = execCmd(
     opts.repoDir,
@@ -205,4 +205,4 @@ const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): b
   }
 };
 
-export { findCommitsTouchingPath as filterCommits, lastTagForPrefix, tagExistsInRepo };
+export { findCommitsTouchingPath, lastTagForPrefix, tagExistsInRepo };

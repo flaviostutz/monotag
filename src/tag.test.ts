@@ -3,7 +3,7 @@
 /* eslint-disable functional/immutable-data */
 import { execSync } from 'node:child_process';
 
-import { filterCommits } from './git';
+import { findCommitsTouchingPath } from './git';
 import { incrementTag, nextTag } from './tag';
 import { SemverLevel } from './types/SemverLevel';
 import { createSampleRepo } from './utils/tests';
@@ -217,7 +217,7 @@ describe('when generating next tag with notes', () => {
   });
 
   it('should return zero commits for inexisting path', async () => {
-    const clogs = await filterCommits({
+    const clogs = await findCommitsTouchingPath({
       repoDir,
       fromRef: 'HEAD~9',
       toRef: 'HEAD',
@@ -229,7 +229,7 @@ describe('when generating next tag with notes', () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     console.log = (): void => {};
     const exec = async (): Promise<void> => {
-      await filterCommits({
+      await findCommitsTouchingPath({
         repoDir,
         fromRef: 'HEAD~9999',
         toRef: 'HEAD',
@@ -239,7 +239,7 @@ describe('when generating next tag with notes', () => {
     await expect(exec).rejects.toThrow('failed');
   });
   it('should return commits related to prefix1 path', async () => {
-    const clogs = await filterCommits({
+    const clogs = await findCommitsTouchingPath({
       repoDir,
       fromRef: 'HEAD~16',
       toRef: 'HEAD',
@@ -250,7 +250,7 @@ describe('when generating next tag with notes', () => {
     expect(clogs.filter((cl) => cl.message.includes('prefix2'))).toHaveLength(1);
   });
   it('should return commits related to prefix2 path', async () => {
-    const clogs = await filterCommits({
+    const clogs = await findCommitsTouchingPath({
       repoDir,
       fromRef: 'HEAD~12',
       toRef: 'HEAD',
@@ -261,7 +261,7 @@ describe('when generating next tag with notes', () => {
     expect(clogs.filter((cl) => cl.message.includes('prefix1'))).toHaveLength(1);
   });
   it('should return last 5 commits', async () => {
-    const clogs = await filterCommits({
+    const clogs = await findCommitsTouchingPath({
       repoDir,
       fromRef: 'HEAD~6',
       toRef: 'HEAD',
