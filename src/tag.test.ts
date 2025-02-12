@@ -1,7 +1,6 @@
 /* eslint-disable functional/no-let */
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
-import { execSync } from 'node:child_process';
 
 import { findCommitsTouchingPath } from './git';
 import { incrementTag, nextTag } from './tag';
