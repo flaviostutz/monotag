@@ -71,7 +71,7 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD~16',
       path: '',
       tagPrefix: '',
-      verbose: true
+      verbose: true,
     });
     console.log(`CHANGES DETECTED ${nt?.changesDetected.length}`);
     console.log(`NOTES ${nt?.releaseNotes}`);
