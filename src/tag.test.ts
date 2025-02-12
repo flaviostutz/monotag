@@ -38,7 +38,6 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD~16',
       path: '',
       tagPrefix: '',
-      verbose: true,
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('345.2123.143');
@@ -50,7 +49,6 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD~16',
       path: '',
       tagPrefix: '',
-      verbose: true,
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('345.2123.143');
