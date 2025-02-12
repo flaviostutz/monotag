@@ -14,7 +14,7 @@ describe('saveResultsToFile', () => {
     tagName: 'v1.0.0',
     version: '1.0.0',
     releaseNotes: 'Initial release',
-    changesDetected: 1,
+    changesDetected: [],
     existingTag: false,
   };
 
@@ -62,6 +62,16 @@ describe('saveResultsToFile', () => {
   });
 });
 
+const changesDetected = [
+  {
+    author: 'author',
+    date: 'date',
+    message: 'message',
+    files: ['file'],
+    id: '123-456',
+  },
+];
+
 describe('appendChangelog', () => {
   const tag1: TagNotes = {
     existingTag: false,
@@ -72,7 +82,7 @@ describe('appendChangelog', () => {
     
     * Feature 1`,
     version: '1.0.0',
-    changesDetected: 1,
+    changesDetected,
   };
 
   const tag2: TagNotes = {
@@ -84,7 +94,7 @@ describe('appendChangelog', () => {
     
     * Feature 2`,
     version: '1.1.0',
-    changesDetected: 1,
+    changesDetected,
   };
 
   const tag3: TagNotes = {
@@ -96,7 +106,7 @@ describe('appendChangelog', () => {
     
     * Feature 3`,
     version: '1.2.0',
-    changesDetected: 1,
+    changesDetected,
   };
 
   let tmpDir: string;
