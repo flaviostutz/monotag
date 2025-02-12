@@ -64,12 +64,14 @@ describe('when generating next tag with notes', () => {
     expect(nt.tagName).toBe('345.2123.143');
   });
   it('this passes on dev machine, but fails on gh actions', async () => {
+    console.log(']]]]] NEXT TAG FAIL ON GH ACTIONS');
     const nt = await nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD~16',
       path: '',
       tagPrefix: '',
+      verbose: true
     });
     console.log(`CHANGES DETECTED ${nt?.changesDetected.length}`);
     console.log(`NOTES ${nt?.releaseNotes}`);
