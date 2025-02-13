@@ -1,42 +1,38 @@
-import { releaseNotes } from './notes';
-import { createSampleRepo } from './utils/createSampleRepo';
+import { notesForLatestTag } from './notes';
+import { createSampleRepo } from './utils/tests';
 
-describe('when creating release notes notes', () => {
-  const repoDir = './testcases/notesrepo';
+describe('re-generate notes from latest tag', () => {
+  const repoDir = './testcases/notes-repo';
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
-  it('should return release notes for a commit range', async () => {
-    // get date now in format YYYY-MM-DD, adding 0 if needed
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const day = now.getDate();
-    const versionDate = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+  it('should get notes for existing prefixed tag', async () => {
+    const nt = await notesForLatestTag({
+      repoDir,
+      tagPrefix: 'prefix2/',
+      path: 'prefix2',
+    });
+    if (!nt) throw new Error('Shouldnt be undefined');
+    expect(nt).toContain('## prefix2/20.10.0 (');
+    expect(nt).toContain('* 8 prefix2 creating test3 file');
+    expect(nt).toContain(`### Features
 
-    const nt = await releaseNotes(
-      {
-        repoDir,
-        tagPrefix: '',
-        fromRef: 'HEAD~3',
-        toRef: 'HEAD',
-        path: 'prefix2',
-      },
-      '1.1.0',
-    );
-    expect(nt.trim()).toBe(`## 1.1.0 (${versionDate})
+* **Breaking:** 8 prefix2 creating test3 file
 
-### Features
+### Info`);
+  });
+  it('should generate notes for non-prefixed tag', async () => {
+    const nt = await notesForLatestTag({
+      repoDir,
+      tagPrefix: '',
+      path: '',
+    });
+    if (!nt) throw new Error('Shouldnt be undefined');
+    expect(nt).toContain('## 345.2123.143 (');
+    expect(nt).toContain(`### Features
 
-* 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
+* adding test1 file to root
 
-### Maintenance
-
-* 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
-
-### Info
-
-* Refs: closes #45
-* Authors: Flávio Stutz <flaviostutz@gmail.com>`);
+### Info`);
   });
 });

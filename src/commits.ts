@@ -1,13 +1,15 @@
-/* eslint-disable promise/prefer-await-to-callbacks */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
+/* eslint-disable functional/immutable-data */
 import conventionalCommitsParser from 'conventional-commits-parser';
 
-import { Commit } from '../types/Commit';
-import { CommitsSummary } from '../types/CommitsSummary';
-import { SemverLevel } from '../types/SemverLevel';
+import { Commit } from './types/Commit';
+import { CommitsSummary } from './types/CommitsSummary';
+import { SemverLevel } from './types/SemverLevel';
 
-/* eslint-disable functional/immutable-data */
+export const getDateFromCommit = (dateWithTime: string): string => {
+  return /(\d{4}-\d{2}-\d{2})/.exec(dateWithTime)?.[0] ?? '';
+};
 
 type CommitDetails = {
   parsedLog: conventionalCommitsParser.Commit;
@@ -51,6 +53,7 @@ export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
       return { parsedLog: convLog, breakingChange, commit: clog };
     })
     // order by breaking changes, scope, subject
+    // eslint-disable-next-line promise/prefer-await-to-callbacks
     .sort((ca, cb): number => {
       if (ca.breakingChange === cb.breakingChange) {
         if (ca.parsedLog.scope === cb.parsedLog.scope) {

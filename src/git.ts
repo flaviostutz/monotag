@@ -10,16 +10,16 @@ import semver from 'semver';
 
 import { BasicOptions } from './types/BasicOptions';
 import { Commit } from './types/Commit';
-import { execCmd } from './utils/execCmd';
-import { tagParts } from './utils/tagParts';
-import { getVersionFromTag } from './utils/getVersionFromTag';
+import { execCmd } from './utils/os';
+import { NextTagOptions } from './types/NextTagOptions';
+import { getVersionFromTag, tagParts } from './utils/tags';
 
 /**
  * Looks for commits that touched a certain path
  * @param opts {BasicOptions} parameters for commits filtering
  * @returns {Commit[]} List of commits
  */
-const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
+const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> => {
   if (!opts.repoDir) {
     throw new Error("'repoDir' must be defined");
   }
@@ -29,23 +29,29 @@ const filterCommits = async (opts: BasicOptions): Promise<Commit[]> => {
 
   let refs = opts.toRef;
   if (opts.fromRef) {
-    refs = `${opts.fromRef}..${opts.toRef}`;
+    refs = `${opts.fromRef}...${opts.toRef}`;
   }
+
+  // const refs = `${opts.fromRef ?? ''} ${opts.toRef}`;
+
+  execCmd(opts.repoDir, `git --version`, opts.verbose);
 
   // execute just to test if refs are valid
   execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
 
   const outCommits = execCmd(
     opts.repoDir,
-    `git log ${refs} --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    `git rev-list ${refs} | head -n 50 | xargs -r -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
     opts.verbose,
   )
     .trim()
     .split('COMMIT');
 
+  execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
+
   // this limit (with "head") is a safeguard for large repositories
-  if (outCommits.length === 30) {
-    console.log('Commits might have been limited to 30 results');
+  if (outCommits.length === 50) {
+    console.log('Commits might have been limited to 50 results');
   }
 
   const commits = outCommits
@@ -124,14 +130,8 @@ const lastTagForPrefix = async (args: {
     if (!tparts) {
       return false;
     }
-    // we are looking for a tag with a prefix
-    if (args.tagPrefix) {
-      // it's a tag for the desired prefix
-      if (tparts[2] === args.tagPrefix) {
-        return true;
-      }
-      // it's a tag without prefix and the desired prefix is empty
-    } else if (!tparts[2]) {
+    // it's a tag for the desired prefix
+    if (tparts[2] === args.tagPrefix) {
       return true;
     }
     return false;
@@ -155,13 +155,54 @@ const lastTagForPrefix = async (args: {
   return undefined;
 };
 
+export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Commit[]> => {
+  // get latest tag for the prefix (might be pointing to HEAD or not)
+  const commitsUntilRef = await lastTagForPrefix({
+    repoDir: opts.repoDir,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
+    verbose: opts.verbose,
+    nth: 0,
+  });
+
+  // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
+  // which leads to no commits between those tags
+  // go back in history to find a previous tag that actually
+  // has commits in relation to the current tag (or HEAD)
+  let commits: Commit[] = [];
+  for (let i = 1; i < 10; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const previousTag = await lastTagForPrefix({
+      repoDir: opts.repoDir,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      verbose: opts.verbose,
+      nth: i,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
+    commits = await findCommitsTouchingPath({
+      ...opts,
+      fromRef: previousTag,
+      toRef: commitsUntilRef,
+    });
+
+    // commits between versions was found
+    if (commits.length > 0) {
+      break;
+    }
+  }
+
+  return commits;
+};
+
 const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {
   try {
-    execCmd(repoDir, `git rev-parse --count "${tagName}"`, verbose);
+    execCmd(repoDir, `git show-ref --tags --quiet --verify -- "refs/tags/${tagName}"`, verbose);
     return true;
   } catch {
     return false;
   }
 };
 
-export { filterCommits, lastTagForPrefix, tagExistsInRepo };
+export { findCommitsTouchingPath, lastTagForPrefix, tagExistsInRepo };
