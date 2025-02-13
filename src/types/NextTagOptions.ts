@@ -10,11 +10,16 @@ export type NextTagOptions = BasicOptions & {
    */
   tagPrefix: string;
   /**
-   * Tag suffix to add to generated tag
+   * Tag suffix to add to the generated tag
+   * When using pre-release capabilities, that will manage and increment prerelease versions,
+   * this will be added to the generated version.
+   * E.g.: 1.0.0-beta.1-MY_SUFFIX, if tagSuffix is '-MY_SUFFIX'
+   * @default ''
    */
   tagSuffix?: string;
   /**
-   * Which level to increment the version. If null, will be automatic, based on commit messages
+   * Which level to increment the version. If undefined, will be automatic, based on commit messages
+   * @default undefined (automatic)
    */
   semverLevel?: SemverLevel;
   /**
@@ -54,18 +59,18 @@ export type NextTagOptions = BasicOptions & {
   preReleaseAlwaysIncrement?: boolean;
   /**
    * File that will be written with the tag name (e.g.: myservice/1.2.3-beta.0)
-   * Won't be written if not provided
+   * @default undefined (won't be created)
    */
   tagFile?: string;
   /**
    * File that will be written with the version (e.g.: 1.2.3-beta.0)
-   * Won't be written if not provided
+   * @default undefined (won't be created)
    */
   versionFile?: string;
   /**
    * File that will be written with the notes with the changes detected
    * The content will be a markdown with a list of commits
-   * Won't be written if not provided
+   * @default undefined (won't be created)
    */
   notesFile?: string;
   /**
@@ -73,7 +78,7 @@ export type NextTagOptions = BasicOptions & {
    * During update, this will check if the version is already present in the changelog
    * and skip generation if it's already there.
    * Normally this file is named CHANGELOG.md
-   * Won't be written if not provided
+   * @default undefined (won't be created)
    */
   changelogFile?: string;
 };
