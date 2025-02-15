@@ -3,9 +3,9 @@ import * as fs from 'node:fs';
 import * as os from 'node:os';
 import path from 'node:path';
 
-import { TagNotes } from './types/TagNotes';
-import { NextTagOptions } from './types/NextTagOptions';
-import { appendChangelog, saveResultsToFiles } from './files';
+import { TagNotes } from './types/version';
+import { appendChangelog, bumpFilesToVersion, saveResultsToFiles } from './files';
+import { CliNextTagOptions } from './types/options';
 
 describe('saveResultsToFile', () => {
   const repoDir = './testcases/test-saveResultsToFile';
@@ -18,7 +18,7 @@ describe('saveResultsToFile', () => {
     existingTag: false,
   };
 
-  const releaseOptions: NextTagOptions = {
+  const releaseOptions: CliNextTagOptions = {
     repoDir,
     tagPrefix: 'v',
     verbose: true,
@@ -169,5 +169,62 @@ ${tag2.releaseNotes}
 ${tag1.releaseNotes}
 
 `);
+  });
+});
+describe('bumpFiles', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'monotag-test-'));
+
+  afterAll(() => {
+    fs.rmSync(tmpDir, { recursive: true });
+  });
+
+  it('should bump version in JSON file', () => {
+    const jsonFile = path.join(tmpDir, 'package.json');
+    fs.writeFileSync(jsonFile, '{"name": "test", "version": "0.0.1"}', { encoding: 'utf8' });
+
+    bumpFilesToVersion([jsonFile], '1.0.0', true);
+
+    const updatedContents = fs.readFileSync(jsonFile, 'utf8');
+    expect(updatedContents).toBe('{"name": "test", "version": "1.0.0"}');
+  });
+
+  it('should bump version in YAML file', () => {
+    const yamlFile = path.join(tmpDir, 'something.yml');
+    fs.writeFileSync(yamlFile, 'name: test\nversion: "0.0.1"', { encoding: 'utf8' });
+
+    bumpFilesToVersion([yamlFile], '1.0.0', true);
+
+    const updatedContents = fs.readFileSync(yamlFile, 'utf8');
+    expect(updatedContents).toBe('name: test\nversion: "1.0.0"');
+  });
+
+  it('should bump version in TOML file', () => {
+    const yamlFile = path.join(tmpDir, 'pyproject.toml');
+    fs.writeFileSync(yamlFile, 'name = test\nversion = "0.0.1"', { encoding: 'utf8' });
+
+    bumpFilesToVersion([yamlFile], '1.0.0', true);
+
+    const updatedContents = fs.readFileSync(yamlFile, 'utf8');
+    expect(updatedContents).toBe('name = test\nversion = "1.0.0"');
+  });
+
+  it('should throw error if version field is not found', () => {
+    const invalidFile = path.join(tmpDir, 'invalid.json');
+    fs.writeFileSync(invalidFile, '{"name": "test"}', { encoding: 'utf8' });
+
+    expect(() => bumpFilesToVersion([invalidFile], '1.0.0', true)).toThrow(
+      'Could not find "version" field in file',
+    );
+  });
+
+  it('should throw error if files parameter is missing', () => {
+    // eslint-disable-next-line no-undefined
+    expect(() => bumpFilesToVersion(undefined, '1.0.0', true)).toThrow('files is required');
+  });
+
+  it('should throw error if version parameter is missing', () => {
+    expect(() => bumpFilesToVersion([path.join(tmpDir, 'dummy.json')], '', true)).toThrow(
+      'version is required',
+    );
   });
 });

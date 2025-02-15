@@ -8,18 +8,17 @@
 /* eslint-disable no-console */
 import semver from 'semver';
 
-import { BasicOptions } from './types/BasicOptions';
-import { Commit } from './types/Commit';
 import { execCmd } from './utils/os';
-import { NextTagOptions } from './types/NextTagOptions';
 import { getVersionFromTag, tagParts } from './utils/tags';
+import { BasicOptions, NextTagOptions } from './types/options';
+import { Commit } from './types/commits';
 
 /**
  * Looks for commits that touched a certain path
  * @param opts {BasicOptions} parameters for commits filtering
  * @returns {Commit[]} List of commits
  */
-const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> => {
+export const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> => {
   if (!opts.repoDir) {
     throw new Error("'repoDir' must be defined");
   }
@@ -99,7 +98,7 @@ const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> =>
  * @param {number} nth nth tag to return from the latest one
  * @returns {string} The tag with the same prefix/suffix that has the greatest semantic version
  */
-const lastTagForPrefix = async (args: {
+export const lastTagForPrefix = async (args: {
   repoDir: string;
   tagPrefix: string;
   tagSuffix?: string;
@@ -196,7 +195,17 @@ export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Com
   return commits;
 };
 
-const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {
+export const gitConfigUser = (
+  repoDir: string,
+  userName: string,
+  userEmail: string,
+  verbose?: boolean,
+): void => {
+  execCmd(repoDir, `git config user.name "${userName}"`, verbose);
+  execCmd(repoDir, `git config user.email "${userEmail}"`, verbose);
+};
+
+export const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {
   try {
     execCmd(repoDir, `git show-ref --tags --quiet --verify -- "refs/tags/${tagName}"`, verbose);
     return true;
@@ -204,5 +213,3 @@ const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): b
     return false;
   }
 };
-
-export { findCommitsTouchingPath, lastTagForPrefix, tagExistsInRepo };

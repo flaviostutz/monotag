@@ -1,8 +1,8 @@
 /* eslint-disable no-undefined */
 /* eslint-disable functional/no-let */
 import { lastTagForPrefix, findCommitsForLatestTag } from './git';
-import { CommitsSummary } from './types/CommitsSummary';
-import { NextTagOptions } from './types/NextTagOptions';
+import { CommitsSummary } from './types/commits';
+import { NextTagOptions } from './types/options';
 import { getDateFromCommit, summarizeCommits } from './commits';
 import { tagParts } from './utils/tags';
 

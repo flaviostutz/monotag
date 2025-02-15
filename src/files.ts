@@ -3,11 +3,11 @@
 import * as fs from 'node:fs';
 import path from 'node:path';
 
-import { TagNotes } from './types/TagNotes';
-import { NextTagOptions } from './types/NextTagOptions';
+import { TagNotes } from './types/version';
 import { getVersionFromTag } from './utils/tags';
+import { CliNextTagOptions } from './types/options';
 
-export const saveResultsToFiles = (nt: TagNotes, opts: NextTagOptions): void => {
+export const saveResultsToFiles = (nt: TagNotes, opts: CliNextTagOptions): void => {
   // extract version from tag by matching with version part from tag
   const version = getVersionFromTag(nt.tagName, opts.tagPrefix, opts.tagSuffix);
 
@@ -45,6 +45,49 @@ export const saveResultsToFiles = (nt: TagNotes, opts: NextTagOptions): void => 
   // save changelog to file
   if (opts.changelogFile) {
     appendChangelog(opts.changelogFile, nt);
+  }
+
+  // bump package.json or pyproject.toml files
+  if (opts.bumpAction === 'latest' || opts.bumpAction === 'zero') {
+    const bumpVersion = opts.bumpAction === 'latest' ? version : '0.0.0';
+    bumpFilesToVersion(opts.bumpFiles, bumpVersion, opts.verbose);
+  }
+};
+
+/**
+ * Bump version in files by simply replacing the contents of fields called "version"
+ * Supports json and yml files
+ * @param files {string[]} List of files to bump
+ * @param version {string} New version to be set
+ * @param verbose {boolean} If true, will print logs
+ */
+export const bumpFilesToVersion = (files?: string[], version?: string, verbose?: boolean): void => {
+  if (!files) throw new Error('files is required');
+  if (!version) throw new Error('version is required');
+  // eslint-disable-next-line no-restricted-syntax
+  for (const file of files) {
+    if (verbose) {
+      console.log(`Bumping ${file} to version ${version}`);
+    }
+    const contents = fs.readFileSync(file, { encoding: 'utf8' });
+    // json files
+    const updatedContents1 = contents.replace(/"version":\s*".*"/, `"version": "${version}"`);
+    // toml files
+    const updatedContents2 = updatedContents1.replace(
+      /version\s*=\s*".*"/,
+      `version = "${version}"`,
+    );
+    // yml files
+    const updatedContents3 = updatedContents2.replace(/version:\s*".*"/, `version: "${version}"`);
+    if (updatedContents3 === contents) {
+      throw new Error(
+        `Could not find "version" field in file ${file}. You need it with any value so it can be bumped.`,
+      );
+    }
+    fs.writeFileSync(file, updatedContents3, { encoding: 'utf8' });
+    if (verbose) {
+      console.log(`File ${file} bumped to version ${version}`);
+    }
   }
 };
 

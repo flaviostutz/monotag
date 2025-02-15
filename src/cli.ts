@@ -11,11 +11,10 @@ import os from 'node:os';
 import yargs, { Argv } from 'yargs';
 
 import { nextTag } from './tag';
-import { BasicOptions } from './types/BasicOptions';
-import { NextTagOptions } from './types/NextTagOptions';
 import { execCmd } from './utils/os';
 import { lastTagForPrefix } from './git';
 import { saveResultsToFiles } from './files';
+import { BasicOptions, CliNextTagOptions } from './types/options';
 
 const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
@@ -78,7 +77,11 @@ const run = async (processArgs: string[]): Promise<number> => {
   return execAction(action, args, yargs2);
 };
 
-const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): Promise<number> => {
+const execAction = async (
+  action: string,
+  opts: CliNextTagOptions,
+  yargs2: Argv,
+): Promise<number> => {
   if (opts.verbose) {
     console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
   }
@@ -202,11 +205,8 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
         return 0;
       }
 
-      if (opts.changelogFile) {
-        console.log('Commiting changelog file');
-        execCmd(opts.repoDir, `git add ${opts.changelogFile}`, opts.verbose);
-        execCmd(opts.repoDir, `git commit -m "chore(release): ${nt.tagName}"`, opts.verbose);
-      }
+      execCmd(opts.repoDir, `git add ${opts.changelogFile}`, opts.verbose);
+      execCmd(opts.repoDir, `git commit -m "chore(release): ${nt.tagName}"`, opts.verbose);
 
       console.log(`Creating tag ${nt.tagName}`);
 
@@ -238,7 +238,7 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const expandDefaults = (args: any): NextTagOptions => {
+const expandDefaults = (args: any): CliNextTagOptions => {
   const verbose = defaultValueBoolean(args.verbose, false);
 
   let repoDir = <string>args['repo-dir'];
@@ -263,6 +263,7 @@ const expandDefaults = (args: any): NextTagOptions => {
   if (pathRepo && pathRepo.startsWith('/')) {
     pathRepo = pathRepo.slice(1);
   }
+
   const basicOpts: BasicOptions = {
     repoDir,
     path: pathRepo,
@@ -282,11 +283,18 @@ const expandDefaults = (args: any): NextTagOptions => {
     }
   }
 
+  const bumpAction = defaultValueString(args['bump-action'], 'none') as 'latest' | 'zero' | 'none';
+  if (!bumpAction || !['latest', 'zero', 'none'].includes(bumpAction)) {
+    throw new Error(`Invalid bump action "${bumpAction}". Must be "latest", "zero" or "none"`);
+  }
+
   return {
     ...basicOpts,
     tagPrefix,
     tagSuffix: args.suffix,
     semverLevel: <number>args['semver-level'],
+    bumpAction,
+    bumpFiles: defaultValueListString(args['bump-files'], ['package.json']),
     preRelease: defaultValueBoolean(args.prerelease, false),
     preReleaseIdentifier: defaultValueString(args['prerelease-identifier'], undefined),
     preReleaseAlwaysIncrement: defaultValueBoolean(args['prerelease-increment'], false),
@@ -426,6 +434,19 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
         'Maximum version to be considered when calculating next version. If calculated version is higher, the process will fail',
       default: undefined,
     });
+    y1.option('bump-action', {
+      alias: 'ba',
+      type: 'string',
+      describe:
+        'Bump action. Can be "latest" (bump to latest tag), "zero" (set version to 0.0.0) or "none',
+      default: 'none',
+    });
+    y1.option('bump-files', {
+      alias: 'bf',
+      type: 'string',
+      describe: 'Comma separated list of file names to bump version',
+      default: 'package.json',
+    });
   }
 
   return y1;
@@ -442,6 +463,14 @@ const defaultValueString = (
 ): string | undefined => {
   // eslint-disable-next-line no-negated-condition
   return value !== undefined ? `${value}` : defValue;
+};
+
+const defaultValueListString = (
+  value: unknown | undefined,
+  defValue: string[] | undefined,
+): string[] | undefined => {
+  // eslint-disable-next-line no-negated-condition
+  return value !== undefined ? `${value}`.split(',').map((str) => str.trim()) : defValue;
 };
 
 const lastPathPart = (fullpath: string): string => {

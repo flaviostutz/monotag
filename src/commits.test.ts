@@ -1,5 +1,5 @@
-import { Commit } from './types/Commit';
-import { SemverLevel } from './types/SemverLevel';
+import { Commit } from './types/commits';
+import { SemverLevel } from './types/version';
 import { getDateFromCommit, summarizeCommits } from './commits';
 
 describe('getDateFromCommit', () => {

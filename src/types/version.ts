@@ -1,4 +1,4 @@
-import { Commit } from './Commit';
+import { Commit } from './commits';
 
 export type TagNotes = {
   tagName: string;
@@ -7,3 +7,10 @@ export type TagNotes = {
   changesDetected: Commit[];
   existingTag: boolean;
 };
+
+export enum SemverLevel {
+  MAJOR = 1,
+  MINOR = 2,
+  PATCH = 3,
+  NONE = 4,
+}

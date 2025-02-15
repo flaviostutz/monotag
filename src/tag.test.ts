@@ -4,7 +4,7 @@
 
 import { findCommitsTouchingPath } from './git';
 import { incrementTag, nextTag } from './tag';
-import { SemverLevel } from './types/SemverLevel';
+import { SemverLevel } from './types/version';
 import { createSampleRepo } from './utils/tests';
 
 describe('when generating next tag with notes', () => {

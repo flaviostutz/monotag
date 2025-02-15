@@ -6,10 +6,9 @@ import semver, { ReleaseType } from 'semver';
 
 import { findCommitsTouchingPath, lastTagForPrefix, tagExistsInRepo } from './git';
 import { notesForLatestTag, renderReleaseNotes } from './notes';
-import { NextTagOptions } from './types/NextTagOptions';
-import { TagNotes } from './types/TagNotes';
+import { NextTagOptions } from './types/options';
+import { TagNotes, SemverLevel } from './types/version';
 import { getDateFromCommit, summarizeCommits } from './commits';
-import { SemverLevel } from './types/SemverLevel';
 import { getVersionFromTag } from './utils/tags';
 
 /**
