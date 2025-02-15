@@ -197,12 +197,29 @@ export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Com
 
 export const gitConfigUser = (
   repoDir: string,
-  userName: string,
-  userEmail: string,
+  userName?: string,
+  userEmail?: string,
   verbose?: boolean,
 ): void => {
-  execCmd(repoDir, `git config user.name "${userName}"`, verbose);
-  execCmd(repoDir, `git config user.email "${userEmail}"`, verbose);
+  if (userName) {
+    execCmd(repoDir, `git config user.name "${userName}"`, verbose);
+  } else {
+    try {
+      const a = execCmd(repoDir, `git config user.name`, verbose);
+      console.log(`>>>>>> ${a}`);
+    } catch {
+      throw new Error("git username is required because it's not already set in git");
+    }
+  }
+  if (userEmail) {
+    execCmd(repoDir, `git config user.email "${userEmail}"`, verbose);
+  } else {
+    try {
+      execCmd(repoDir, `git config user.email`, verbose);
+    } catch {
+      throw new Error("git email is required because it's not already set in git");
+    }
+  }
 };
 
 export const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {

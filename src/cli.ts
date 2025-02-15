@@ -12,7 +12,7 @@ import yargs, { Argv } from 'yargs';
 
 import { nextTag } from './tag';
 import { execCmd } from './utils/os';
-import { lastTagForPrefix } from './git';
+import { gitConfigUser, lastTagForPrefix } from './git';
 import { saveResultsToFiles } from './files';
 import { BasicOptions, CliNextTagOptions } from './types/options';
 
@@ -205,8 +205,17 @@ const execAction = async (
         return 0;
       }
 
-      execCmd(opts.repoDir, `git add ${opts.changelogFile}`, opts.verbose);
-      execCmd(opts.repoDir, `git commit -m "chore(release): ${nt.tagName}"`, opts.verbose);
+      if (opts.verbose) {
+        console.log(`Adding and commiting all files changed in repo during release`);
+      }
+      execCmd(opts.repoDir, `git add .`, opts.verbose);
+      // eslint-disable-next-line functional/no-try-statements
+      try {
+        gitConfigUser(opts.repoDir, opts.gitUsername, opts.gitEmail, opts.verbose);
+        execCmd(opts.repoDir, `git commit -m "chore(release): ${nt.tagName}"`, opts.verbose);
+      } catch {
+        console.log('No changes to commit. Ignoring.');
+      }
 
       console.log(`Creating tag ${nt.tagName}`);
 
