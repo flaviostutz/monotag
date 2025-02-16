@@ -1,12 +1,14 @@
 /* eslint-disable no-undefined */
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
+import { randomBytes } from 'node:crypto';
+
 import { gitConfigUser, lastTagForPrefix } from './git';
 import { execCmd } from './utils/os';
 import { createSampleRepo } from './utils/tests';
 
 describe('when using git', () => {
-  const repoDir = './testcases/git-test-repo';
+  const repoDir = `./testcases/git-test-repo-${randomBytes(2).toString('hex')}`;
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });
@@ -50,7 +52,7 @@ describe('when using git', () => {
   });
 });
 describe('gitConfigUser', () => {
-  const repoDir = './testcases/gitconfig-repo';
+  const repoDir = `./testcases/gitconfig-repo-${randomBytes(4).toString('hex')}`;
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });

@@ -2,12 +2,14 @@
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 
+import { randomBytes } from 'node:crypto';
+
 import { findCommitsTouchingPath } from './git';
 import { incrementTag, nextTag } from './tag';
 import { createSampleRepo } from './utils/tests';
 
 describe('when generating next tag with notes', () => {
-  const repoDir = './testcases/nexttag-repo';
+  const repoDir = `./testcases/nexttag-repo-${randomBytes(2).toString('hex')}`;
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });

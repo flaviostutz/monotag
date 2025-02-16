@@ -10,8 +10,8 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     repoDir,
     `
     set -e
-
-    git init
+    
+    git init -b master
 
     git config user.email 'flaviostutz@gmail.com'
     git config user.name 'Flávio Stutz'

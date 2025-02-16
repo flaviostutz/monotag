@@ -3,17 +3,13 @@
 /* eslint-disable functional/no-let */
 import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
+import { randomBytes } from 'node:crypto';
 
 import { run } from './cli';
 import { createSampleRepo } from './utils/tests';
 import { execCmd } from './utils/os';
 
 describe('when using cli', () => {
-  const repoDir = './testcases/cli-test-repo';
-  beforeAll(async () => {
-    await createSampleRepo(repoDir);
-  });
-
   /**
    * RUN ONLY ONE TEST AT A TIME
    * TO AVOID CONCURRENCY AT THE GIT
@@ -22,6 +18,9 @@ describe('when using cli', () => {
    */
 
   it('should execute cli tests successfuly', async () => {
+    const repoDir = `./testcases/cli-test-repo-${randomBytes(2).toString('hex')}`;
+    await createSampleRepo(repoDir);
+
     // mock console.log to get results and check them
     // const originalLog = console.log;
     let stdout = '';
@@ -244,6 +243,10 @@ describe('when using cli', () => {
     expect(stdout).toMatch('**Breaking:** 4 prefix1 creating test3 file');
     expect(exitCode).toBe(0);
 
+    // check if notes were generated exactly with the same contents
+    // from previous tags with the same actual changes (related to the same commitid)
+    expect(stdout).toEqual(notesAlpha);
+
     // bump package.json
     // create sample file that will be bumped
     fs.writeFileSync(`${repoDir}/packagerr.json`, '{"version":"0.0.1"}', { encoding: 'utf8' });
@@ -256,12 +259,11 @@ describe('when using cli', () => {
       'tag',
       `--repo-dir=${repoDir}`,
       '--bump-action=latest',
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
       '--bump-files=packagerr.json,mypro.toml',
     ]);
     expect(exitCode).toBe(0);
-    // check if notes were generated exactly with the same contents
-    // from previous tags with the same actual changes (related to the same commitid)
-    expect(stdout).toEqual(notesAlpha);
 
     // this command will fail if content is not updated in files
     execCmd(repoDir, 'cat packagerr.json | grep 346.0.0-alpha.1');

@@ -2,13 +2,14 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import path from 'node:path';
+import { randomBytes } from 'node:crypto';
 
 import { TagNotes } from './types/commits';
 import { appendChangelog, bumpFilesToVersion, saveResultsToFiles } from './files';
 import { CliNextTagOptions } from './types/options';
 
 describe('saveResultsToFile', () => {
-  const repoDir = './testcases/test-saveResultsToFile';
+  const repoDir = `./testcases/test-saveResultsToFile-${randomBytes(2).toString('hex')}`;
 
   const tagNotes: TagNotes = {
     tagName: 'v1.0.0',
@@ -121,7 +122,7 @@ describe('appendChangelog', () => {
   it('should handle changelog mutations correctly', () => {
     // create changelog if it doesn't exist
     const changelogFile = path.join(tmpDir, 'changelog.md');
-    appendChangelog(changelogFile, tag1, true);
+    appendChangelog(changelogFile, tag1, false);
     expect(fs.existsSync(changelogFile)).toBe(true);
     expect(fs.readFileSync(changelogFile, { encoding: 'utf8' })).toBe(`# Changelog
 
@@ -130,7 +131,7 @@ ${tag1.releaseNotes}
 `);
 
     // if version already exists, skip adding to changelog
-    appendChangelog(changelogFile, tag1, true);
+    appendChangelog(changelogFile, tag1, false);
     expect(fs.existsSync(changelogFile)).toBe(true);
     expect(fs.readFileSync(changelogFile, { encoding: 'utf8' })).toBe(`# Changelog
 
@@ -139,7 +140,7 @@ ${tag1.releaseNotes}
 `);
 
     // if version doesn't exist, add to changelog on top
-    appendChangelog(changelogFile, tag2, true);
+    appendChangelog(changelogFile, tag2, false);
     expect(fs.readFileSync(changelogFile, { encoding: 'utf8' })).toBe(`# Changelog
 
 ${tag2.releaseNotes}
@@ -149,7 +150,7 @@ ${tag1.releaseNotes}
 `);
 
     // skip existing version
-    appendChangelog(changelogFile, tag1, true);
+    appendChangelog(changelogFile, tag1, false);
     expect(fs.readFileSync(changelogFile, { encoding: 'utf8' })).toBe(`# Changelog
 
 ${tag2.releaseNotes}
@@ -159,7 +160,7 @@ ${tag1.releaseNotes}
 `);
 
     // if version doesn't exist, add to changelog on top
-    appendChangelog(changelogFile, tag3, true);
+    appendChangelog(changelogFile, tag3, false);
     expect(fs.readFileSync(changelogFile, { encoding: 'utf8' })).toBe(`# Changelog
 
 ${tag3.releaseNotes}
@@ -182,7 +183,7 @@ describe('bumpFiles', () => {
     const jsonFile = path.join(tmpDir, 'package.json');
     fs.writeFileSync(jsonFile, '{"name": "test", "version": "0.0.1"}', { encoding: 'utf8' });
 
-    bumpFilesToVersion([jsonFile], '1.0.0', true);
+    bumpFilesToVersion([jsonFile], '1.0.0', false);
 
     const updatedContents = fs.readFileSync(jsonFile, 'utf8');
     expect(updatedContents).toBe('{"name": "test", "version": "1.0.0"}');
@@ -192,7 +193,7 @@ describe('bumpFiles', () => {
     const jsonFile = path.join(tmpDir, 'package.json');
     fs.writeFileSync(jsonFile, '{"version":"0.0.1"}', { encoding: 'utf8' });
 
-    bumpFilesToVersion([jsonFile], '1.0.0', true);
+    bumpFilesToVersion([jsonFile], '1.0.0', false);
 
     const updatedContents = fs.readFileSync(jsonFile, 'utf8');
     expect(updatedContents).toBe('{"version": "1.0.0"}');
@@ -202,7 +203,7 @@ describe('bumpFiles', () => {
     // eslint-disable-next-line no-undefined
     expect(() => {
       // eslint-disable-next-line no-undefined
-      bumpFilesToVersion(['packagerrr.json'], '1.0.0', true);
+      bumpFilesToVersion(['packagerrr.json'], '1.0.0', false);
     }).toThrow('Cannot bump packagerrr.json. File does not exist');
   });
 
@@ -210,7 +211,7 @@ describe('bumpFiles', () => {
     const yamlFile = path.join(tmpDir, 'something.yml');
     fs.writeFileSync(yamlFile, 'name: test\nversion: "0.0.1"', { encoding: 'utf8' });
 
-    bumpFilesToVersion([yamlFile], '1.0.0', true);
+    bumpFilesToVersion([yamlFile], '1.0.0', false);
 
     const updatedContents = fs.readFileSync(yamlFile, 'utf8');
     expect(updatedContents).toBe('name: test\nversion: "1.0.0"');
@@ -220,7 +221,7 @@ describe('bumpFiles', () => {
     const yamlFile = path.join(tmpDir, 'pyproject.toml');
     fs.writeFileSync(yamlFile, 'name = test\nversion = "0.0.1"', { encoding: 'utf8' });
 
-    bumpFilesToVersion([yamlFile], '1.0.0', true);
+    bumpFilesToVersion([yamlFile], '1.0.0', false);
 
     const updatedContents = fs.readFileSync(yamlFile, 'utf8');
     expect(updatedContents).toBe('name = test\nversion = "1.0.0"');
@@ -230,18 +231,18 @@ describe('bumpFiles', () => {
     const invalidFile = path.join(tmpDir, 'invalid.json');
     fs.writeFileSync(invalidFile, '{"name": "test"}', { encoding: 'utf8' });
 
-    expect(() => bumpFilesToVersion([invalidFile], '1.0.0', true)).toThrow(
+    expect(() => bumpFilesToVersion([invalidFile], '1.0.0', false)).toThrow(
       'Could not find "version" field in file',
     );
   });
 
   it('should throw error if files parameter is missing', () => {
     // eslint-disable-next-line no-undefined
-    expect(() => bumpFilesToVersion(undefined, '1.0.0', true)).toThrow('files is required');
+    expect(() => bumpFilesToVersion(undefined, '1.0.0', false)).toThrow('files is required');
   });
 
   it('should throw error if version parameter is missing', () => {
-    expect(() => bumpFilesToVersion([path.join(tmpDir, 'dummy.json')], '', true)).toThrow(
+    expect(() => bumpFilesToVersion([path.join(tmpDir, 'dummy.json')], '', false)).toThrow(
       'version is required',
     );
   });
