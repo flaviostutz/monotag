@@ -21,7 +21,7 @@ describe('saveResultsToFile', () => {
   const releaseOptions: CliNextTagOptions = {
     repoDir,
     tagPrefix: 'v',
-    verbose: true,
+    verbose: false,
     path: '.',
     versionFile: 'dist/version.txt',
     notesFile: 'dist/changelog.md',
@@ -186,6 +186,24 @@ describe('bumpFiles', () => {
 
     const updatedContents = fs.readFileSync(jsonFile, 'utf8');
     expect(updatedContents).toBe('{"name": "test", "version": "1.0.0"}');
+  });
+
+  it('should bump version in minimal JSON file', () => {
+    const jsonFile = path.join(tmpDir, 'package.json');
+    fs.writeFileSync(jsonFile, '{"version":"0.0.1"}', { encoding: 'utf8' });
+
+    bumpFilesToVersion([jsonFile], '1.0.0', true);
+
+    const updatedContents = fs.readFileSync(jsonFile, 'utf8');
+    expect(updatedContents).toBe('{"version": "1.0.0"}');
+  });
+
+  it("should fail if file doesn't exist", () => {
+    // eslint-disable-next-line no-undefined
+    expect(() => {
+      // eslint-disable-next-line no-undefined
+      bumpFilesToVersion(['packagerrr.json'], '1.0.0', true);
+    }).toThrow('Cannot bump packagerrr.json. File does not exist');
   });
 
   it('should bump version in YAML file', () => {

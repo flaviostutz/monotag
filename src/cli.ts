@@ -308,13 +308,18 @@ const expandDefaults = (args: any): CliNextTagOptions => {
     throw new Error(`Invalid bump action "${bumpAction}". Must be "latest", "zero" or "none"`);
   }
 
+  // add full path to bump files
+  const bumpFiles = defaultValueListString(args['bump-files'], ['package.json'])?.map((file) =>
+    path.join(repoDir, file),
+  );
+
   return {
     ...basicOpts,
     tagPrefix,
     tagSuffix: args.suffix,
     semverLevel,
     bumpAction,
-    bumpFiles: defaultValueListString(args['bump-files'], ['package.json']),
+    bumpFiles,
     preRelease: defaultValueBoolean(args.prerelease, false),
     preReleaseIdentifier: defaultValueString(args['prerelease-identifier'], undefined),
     preReleaseAlwaysIncrement: defaultValueBoolean(args['prerelease-increment'], false),

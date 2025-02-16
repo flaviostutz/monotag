@@ -66,6 +66,9 @@ export const bumpFilesToVersion = (files?: string[], version?: string, verbose?:
   if (!version) throw new Error('version is required');
   // eslint-disable-next-line no-restricted-syntax
   for (const file of files) {
+    if (!fs.existsSync(file)) {
+      throw new Error(`Cannot bump ${file}. File does not exist`);
+    }
     if (verbose) {
       console.log(`Bumping ${file} to version ${version}`);
     }
