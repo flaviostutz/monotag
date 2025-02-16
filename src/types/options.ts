@@ -2,7 +2,7 @@
  * Basic options for searching for changes in a certain path
  */
 
-import { SemverLevel } from './version';
+import { SemverLevel } from './commits';
 
 export type BasicOptions = {
   /**

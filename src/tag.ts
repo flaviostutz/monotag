@@ -7,7 +7,7 @@ import semver, { ReleaseType } from 'semver';
 import { findCommitsTouchingPath, lastTagForPrefix, tagExistsInRepo } from './git';
 import { notesForLatestTag, renderReleaseNotes } from './notes';
 import { NextTagOptions } from './types/options';
-import { SemverLevelNone, TagNotes } from './types/version';
+import { SemverLevelNone, TagNotes } from './types/commits';
 import { getDateFromCommit, summarizeCommits } from './commits';
 import { getVersionFromTag } from './utils/tags';
 

@@ -3,8 +3,7 @@
 /* eslint-disable functional/immutable-data */
 import conventionalCommitsParser from 'conventional-commits-parser';
 
-import { Commit, CommitsSummary } from './types/commits';
-import { SemverLevelNone } from './types/version';
+import { Commit, CommitsSummary, SemverLevelNone } from './types/commits';
 
 export const getDateFromCommit = (dateWithTime: string): string => {
   return /(\d{4}-\d{2}-\d{2})/.exec(dateWithTime)?.[0] ?? '';

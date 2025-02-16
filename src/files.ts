@@ -3,7 +3,7 @@
 import * as fs from 'node:fs';
 import path from 'node:path';
 
-import { TagNotes } from './types/version';
+import { TagNotes } from './types/commits';
 import { getVersionFromTag } from './utils/tags';
 import { CliNextTagOptions } from './types/options';
 
