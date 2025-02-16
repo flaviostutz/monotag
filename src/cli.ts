@@ -484,7 +484,7 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
   }
 
   // example call with all the options possible
-  // monotag tag --repo-dir=/home/user/repo --path=services/myservice --from-ref=HEAD~3 --to-ref=HEAD --prefix=myservice --suffix= --semver-level=2 --prerelease=false --prerelease-identifier=beta --prerelease-increment=false --tag-file=dist/tag.txt --version-file=dist/version.txt --notes-file=dist/notes.txt --changelog-file=dist/changelog.md --min-version=1.0.0 --max-version=2.0.0 --bump-action=latest --bump-files=package.json --git-username=flavio --git-email=flaviostutz@gmail.com --verbose=true
+  // monotag tag --path services/myservice --from-ref=HEAD~3 --to-ref=HEAD --prefix=myservice/ --suffix=+win64 --semver-level=patch --prerelease --prerelease-identifier=beta --prerelease-increment --verbose --tag-file=tag.txt --version-file=version.txt --notes-file=notes.txt --changelog-file=CHANGELOG.md --min-version=1.0.0 --max-version=2.0.0 --bump-action=latest --bump-files=package.json --git-username=flaviostutz --git-email=flaviostutz@gmail.com
 
   return y1;
 };
