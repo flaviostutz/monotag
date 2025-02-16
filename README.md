@@ -1,6 +1,6 @@
 # monotag
 
-Semantic versioning for monorepos based on tag prefix, path prefix, affected files and conventional commit.
+Semantic versioning for monorepos based on tag prefix, path prefix, affected files and conventional commits.
 
 This lib can help you tag changes in specific parts of the monorepo using tag prefixes or publishing libs or deploying services independently, even though they reside in a single monorepo.
 
@@ -11,6 +11,23 @@ Normally this is not easy because the monorepo shares the entire commit history 
 Run 'npx monotag --help' or 'npx monotag tag --help' for info on specific commands
 
 The automatic versioning feature can be used for non-monorepos too and you can use this as a library also. Check examples below.
+
+## Actions
+
+In general it will always to calculate the next tag/version/notes and create some resources as the result of this analysis.
+
+After analysis we will have calculated:
+- Tag: a release tag that identifies uniquelly this module in the monorepo (e.g.: mymodule/1.0.1-beta.1)
+- Notes: description of what changed for this new version in comparison to the previous one
+
+As "actions", it can:
+  - display tag/version/notes on console
+  - save tag, version and notes to specific files
+  - append notes to an existing changelog.md file
+  - git tag the repo with the calculated version (using generated notes as tag notes)
+  - git commit and push any files or tags created during the process
+
+Run `npx monotag --help` for a list of actions you can use.
 
 ## Example
 
@@ -63,18 +80,88 @@ See a complete github actions workflow that publishes libs to NPM with automatic
 monotag [command]
 
 Commands:
-  monotag latest    Show latest tag for path. If path has tags 1.2.0 and 2.1.1,
-                    for example, 2.1.1 will be returned
+  monotag current   Show the latest tag for the path and fail if it's not up to
+                    date
+  monotag latest    Show the latest tag for the path
   monotag tag       Calculate and show next tag, incrementing semver according
                     to detected changes on path
+  monotag version   Calculate and show next version, incrementing semver
+                    according to detected changes on path
   monotag notes     Calculate and show release notes according to detected
                     commits in path
   monotag tag-git   Calculate next tag and tag it in local git repo
   monotag tag-push  Calculate next tag, git-tag and git-push it to remote
 
 Options:
-  --version  Show version number                                       [boolean]
-  --help     Show help                                                 [boolean]
+      --version                       Show version number              [boolean]
+      --help                          Show help                        [boolean]
+  -v, --verbose                       Run with verbose logging
+                                                      [boolean] [default: false]
+  -d, --path                          File path inside repo to consider when
+                                      analysing changes. Commits that don't
+                                      touch files in this path will be ignored.
+                                      Defaults to current dir.
+                                                      [string] [default: "auto"]
+  -f, --from-ref                      Starting point ref for analysing changes
+                                      in commits. Defaults to auto, which will
+                                      be last version with this same tag prefix
+                                                      [string] [default: "auto"]
+  -t, --to-ref                        Ending point ref for analysing changes in
+                                      commits. Defaults to HEAD
+                                                      [string] [default: "HEAD"]
+  -c, --conv-commit                   Use only conventional commit styled
+                                      commits during release notes creation
+                                                      [boolean] [default: false]
+  -g, --repo-dir                      Git repo dir to run command on. Defaults
+                                      to current process dir
+                                                          [string] [default: ""]
+  -l, --semver-level                  Level to increment tag. One of "major",
+                                      "minor", "patch" or "auto". "auto" will
+                                      increment according to semantic commit
+                                      messages        [string] [default: "auto"]
+  -p, --prefix                        Tag prefix to look for latest versions and
+                                      to use on generated tags. If not defined
+                                      will be derived from last path part
+                                                      [string] [default: "auto"]
+  -j, --separator                     When prefix is "auto", append this
+                                      separator to last working dir path to
+                                      define the tag prefix to use. e.g.: dir
+                                      "services/myservice" with separator "/v"
+                                      leads to tag prefix "myservice/v"
+                                                         [string] [default: "/"]
+  -s, --suffix                        Tag suffix to be added to generated tags
+                                                          [string] [default: ""]
+      --prerelease, --pre             Create tags as pre-release versions. E.g.:
+                                      2.1.0-beta.0    [boolean] [default: false]
+      --prerelease-identifier, --pid  Pre-release identifier. E.g.: beta
+                                                      [string] [default: "beta"]
+      --prerelease-increment, --pai   Increment pre-release number even if no
+                                      changes are detected
+                                                      [boolean] [default: false]
+      --tag-file, --ft                File to save the release tag      [string]
+      --version-file, --fv            File to save version              [string]
+      --notes-file, --fn              File to save the notes with a changelog
+                                                                        [string]
+      --changelog-file, --fc          Changelog file that will be appended with
+                                      new version/release notes. Disabled for
+                                      prerelease versions               [string]
+      --min-version, --lv             Minimum version to be considered when
+                                      calculating next version. If calculated
+                                      version is lower, this value will be used
+                                      instead                           [string]
+      --max-version, --uv             Maximum version to be considered when
+                                      calculating next version. If calculated
+                                      version is higher, the process will fail
+                                                                        [string]
+      --bump-action, --ba             Bump action. Can be "latest" (bump to
+                                      latest tag), "zero" (set version to 0.0.0)
+                                      or "none        [string] [default: "none"]
+      --bump-files, --bf              Comma separated list of file names to bump
+                                      version [string] [default: "package.json"]
+      --git-username, --gu            Git username config when commiting and
+                                      tagging resources                 [string]
+      --git-email, --ge               Git email config when commiting and
+                                      tagging resources                 [string]
 ```
 
 ### Lib
@@ -107,6 +194,12 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
 - `monotag tag --changelog-file=docs/changelog.md`
   - Calculates next tag and add the release notes of the version to the existing docs/changelog.md file by appending the contents of the version notes to the top of the file so that this file will contain a history of versions.
 
+- `monotag tag --changelog-file=docs/changelog.md`
+  - Same as above, but will also commit, tag with latest generated version and push changes to remote git repo, including changelog.md
+
+- `monotag tag --bump-action=latest --bump-files=package.json`
+  - Will calculate next tag/version and change the field "version" of the file "package.json" to the latest version
+
 - `monotag tag --min-version=2.0.0 --max-version=2.999.999`
   - Limit the generated versions to 1.x. If the calculated version is lower than 2.x, force to 2.0.0. If the generated version is higher than 2.x (due to a major change), fail. Useful when controlling versioning on specific major release branches (e.g.: branch 2.x).
 
@@ -123,7 +216,14 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
   - Generate tag "myservice/v1.3.0" if previous tag was "myservice/v1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
 
 - `monotag tag --path services/myservice --prerelease`
-  - Generate tag "myservice/1.3.0-beta.0" if previous tag was "myservice/1.2.8" and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD
+  - Generate tag "myservice/1.3.0-beta.0" if previous tag was "myservice/1.2.8" (and one commit with comment "feat: adding something new" is found between commits from the latest tag and HEAD)
+
+- `monotag tag-push`
+  - Generate tag "myservice/1.3.0" if previous tag was "myservice/1.2.8", tag repo and push tag to remote repo
+
+- `monotag tag-push --changelog-file=docs/changelog.md`
+  - Calculate next tag, add latest change notes to existing changelog.md file, add to repo, commit with "chore(release): myservice/1.3.0", tag git with "myservice/1.3.0" and push newly created commit (with changelog.md) and new tag to remote git repo.
+
 
 ### Github actions workflow
 
