@@ -11,11 +11,10 @@ import os from 'node:os';
 import yargs, { Argv } from 'yargs';
 
 import { nextTag } from './tag';
-import { BasicOptions } from './types/BasicOptions';
-import { NextTagOptions } from './types/NextTagOptions';
 import { execCmd } from './utils/os';
-import { lastTagForPrefix } from './git';
+import { gitConfigUser, lastTagForPrefix } from './git';
 import { saveResultsToFiles } from './files';
+import { BasicOptions, CliNextTagOptions } from './types/options';
 
 const run = async (processArgs: string[]): Promise<number> => {
   // configure yargs
@@ -78,7 +77,11 @@ const run = async (processArgs: string[]): Promise<number> => {
   return execAction(action, args, yargs2);
 };
 
-const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): Promise<number> => {
+const execAction = async (
+  action: string,
+  opts: CliNextTagOptions,
+  yargs2: Argv,
+): Promise<number> => {
   if (opts.verbose) {
     console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
   }
@@ -202,10 +205,16 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
         return 0;
       }
 
-      if (opts.changelogFile) {
-        console.log('Commiting changelog file');
-        execCmd(opts.repoDir, `git add ${opts.changelogFile}`, opts.verbose);
+      if (opts.verbose) {
+        console.log(`Adding and commiting all files changed in repo during release`);
+      }
+      execCmd(opts.repoDir, `git add .`, opts.verbose);
+      // eslint-disable-next-line functional/no-try-statements
+      try {
+        gitConfigUser(opts.repoDir, opts.gitUsername, opts.gitEmail, opts.verbose);
         execCmd(opts.repoDir, `git commit -m "chore(release): ${nt.tagName}"`, opts.verbose);
+      } catch {
+        console.log('No changes to commit');
       }
 
       console.log(`Creating tag ${nt.tagName}`);
@@ -238,7 +247,7 @@ const execAction = async (action: string, opts: NextTagOptions, yargs2: Argv): P
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const expandDefaults = (args: any): NextTagOptions => {
+const expandDefaults = (args: any): CliNextTagOptions => {
   const verbose = defaultValueBoolean(args.verbose, false);
 
   let repoDir = <string>args['repo-dir'];
@@ -263,6 +272,7 @@ const expandDefaults = (args: any): NextTagOptions => {
   if (pathRepo && pathRepo.startsWith('/')) {
     pathRepo = pathRepo.slice(1);
   }
+
   const basicOpts: BasicOptions = {
     repoDir,
     path: pathRepo,
@@ -274,6 +284,17 @@ const expandDefaults = (args: any): NextTagOptions => {
 
   let tagPrefix = args.prefix;
 
+  const semverLevel = defaultValueString(args['semver-level'], 'auto') as
+    | 'major'
+    | 'minor'
+    | 'patch'
+    | 'auto';
+  if (!semverLevel || !['major', 'minor', 'patch', 'auto'].includes(semverLevel)) {
+    throw new Error(
+      `Invalid semver level "${semverLevel}". Must be "major", "minor", "patch" or "auto"`,
+    );
+  }
+
   // default tag prefix is relative to path inside repo
   if (tagPrefix === 'auto') {
     tagPrefix = lastPathPart(basicOpts.path);
@@ -282,11 +303,23 @@ const expandDefaults = (args: any): NextTagOptions => {
     }
   }
 
+  const bumpAction = defaultValueString(args['bump-action'], 'none') as 'latest' | 'zero' | 'none';
+  if (!bumpAction || !['latest', 'zero', 'none'].includes(bumpAction)) {
+    throw new Error(`Invalid bump action "${bumpAction}". Must be "latest", "zero" or "none"`);
+  }
+
+  // add full path to bump files
+  const bumpFiles = defaultValueListString(args['bump-files'], ['package.json'])?.map((file) =>
+    path.join(repoDir, file),
+  );
+
   return {
     ...basicOpts,
     tagPrefix,
     tagSuffix: args.suffix,
-    semverLevel: <number>args['semver-level'],
+    semverLevel,
+    bumpAction,
+    bumpFiles,
     preRelease: defaultValueBoolean(args.prerelease, false),
     preReleaseIdentifier: defaultValueString(args['prerelease-identifier'], undefined),
     preReleaseAlwaysIncrement: defaultValueBoolean(args['prerelease-increment'], false),
@@ -296,6 +329,8 @@ const expandDefaults = (args: any): NextTagOptions => {
     changelogFile: defaultValueString(args['changelog-file'], undefined),
     minVersion: defaultValueString(args['min-version'], undefined),
     maxVersion: defaultValueString(args['max-version'], undefined),
+    gitUsername: defaultValueString(args['git-username'], undefined),
+    gitEmail: defaultValueString(args['git-email'], undefined),
   };
 };
 
@@ -342,10 +377,10 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
     })
     .option('semver-level', {
       alias: 'l',
-      type: 'number',
+      type: 'string',
       describe:
-        'Increase tag in specific semver level (1,2,3). If not defined, detect automatically based on semantic commit',
-      default: undefined,
+        'Level to increment tag. One of "major", "minor", "patch" or "auto". "auto" will increment according to semantic commit messages',
+      default: 'auto',
     })
     .option('prefix', {
       alias: 'p',
@@ -426,7 +461,35 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
         'Maximum version to be considered when calculating next version. If calculated version is higher, the process will fail',
       default: undefined,
     });
+    y1.option('bump-action', {
+      alias: 'ba',
+      type: 'string',
+      describe:
+        'Bump action. Can be "latest" (bump to latest tag), "zero" (set version to 0.0.0) or "none',
+      default: 'none',
+    });
+    y1.option('bump-files', {
+      alias: 'bf',
+      type: 'string',
+      describe: 'Comma separated list of file names to bump version',
+      default: 'package.json',
+    });
+    y1.option('git-username', {
+      alias: 'gu',
+      type: 'string',
+      describe: 'Git username config when commiting and tagging resources',
+      default: undefined,
+    });
+    y1.option('git-email', {
+      alias: 'ge',
+      type: 'string',
+      describe: 'Git email config when commiting and tagging resources',
+      default: undefined,
+    });
   }
+
+  // example call with all the options possible
+  // monotag tag --path services/myservice --from-ref=HEAD~3 --to-ref=HEAD --prefix=myservice/ --suffix=+win64 --semver-level=patch --prerelease --prerelease-identifier=beta --prerelease-increment --verbose --tag-file=tag.txt --version-file=version.txt --notes-file=notes.txt --changelog-file=CHANGELOG.md --min-version=1.0.0 --max-version=2.0.0 --bump-action=latest --bump-files=package.json --git-username=flaviostutz --git-email=flaviostutz@gmail.com
 
   return y1;
 };
@@ -442,6 +505,14 @@ const defaultValueString = (
 ): string | undefined => {
   // eslint-disable-next-line no-negated-condition
   return value !== undefined ? `${value}` : defValue;
+};
+
+const defaultValueListString = (
+  value: unknown | undefined,
+  defValue: string[] | undefined,
+): string[] | undefined => {
+  // eslint-disable-next-line no-negated-condition
+  return value !== undefined ? `${value}`.split(',').map((str) => str.trim()) : defValue;
 };
 
 const lastPathPart = (fullpath: string): string => {

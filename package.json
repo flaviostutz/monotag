@@ -1,6 +1,6 @@
 {
   "name": "monotag",
-  "version": "1.12.0",
+  "version": "346.0.0",
   "description": "Semantic versioning for monorepos based on tag prefix, path prefix, affected files and conventional commit",
   "bin": "dist/main.js",
   "main": "dist/index.js",

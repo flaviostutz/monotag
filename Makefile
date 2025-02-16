@@ -18,7 +18,7 @@ lint-fix:
 	pnpm exec eslint . --ext .ts --fix
 
 test:
-	@# can't be in parallel because we use nock that has shared contexts
+	-rm -rf testcases
 	pnpm exec jest -i --verbose
 
 publish:

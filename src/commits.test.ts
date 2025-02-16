@@ -1,6 +1,5 @@
-import { Commit } from './types/Commit';
-import { SemverLevel } from './types/SemverLevel';
-import { getDateFromCommit, summarizeCommits } from './commits';
+import { Commit } from './types/commits';
+import { getDateFromCommit, semverGreaterThan, summarizeCommits } from './commits';
 
 describe('getDateFromCommit', () => {
   it('should extract the date from a string with date and time', () => {
@@ -81,7 +80,7 @@ describe('summarizeCommits', () => {
     expect(summary.maintenance).toEqual(['update dependencies']);
     expect(summary.nonConventional).toEqual(['docs: update documentation']);
     expect(summary.notes).toEqual([]);
-    expect(summary.level).toEqual(SemverLevel.MAJOR);
+    expect(summary.level).toEqual('major');
     expect(summary.authors).toEqual(['Author 11', 'Author 22', 'Author 33', 'Author 44']);
     expect(summary.references).toEqual([]);
   });
@@ -100,7 +99,132 @@ describe('summarizeCommits', () => {
     const summary = summarizeCommits(commits);
 
     expect(summary.features).toEqual(['**Breaking:** add new feature']);
-    expect(summary.level).toEqual(SemverLevel.MAJOR);
+    expect(summary.level).toEqual('major');
     expect(summary.notes).toEqual(['BREAKING CHANGE: new API']);
+  });
+
+  it('should handle minor changes', () => {
+    const commits: Commit[] = [
+      {
+        id: '1',
+        author: 'Author One',
+        date: '2023-01-01',
+        message: 'feat: add new feature',
+        files: ['file1.ts'],
+      },
+    ];
+
+    const summary = summarizeCommits(commits);
+
+    expect(summary.features).toEqual(['add new feature']);
+    expect(summary.level).toEqual('minor');
+  });
+
+  it('should handle basic changes', () => {
+    const commits: Commit[] = [
+      {
+        id: '1',
+        author: 'Author One',
+        date: '2023-01-01',
+        message: 'fix: fix something',
+        files: ['file1.ts'],
+      },
+      {
+        id: '2',
+        author: 'Author One',
+        date: '2023-01-02',
+        message: 'chore: chore something',
+        files: ['file1.ts'],
+      },
+      {
+        id: '3',
+        author: 'Author One',
+        date: '2023-01-03',
+        message: 'feat: feat something',
+        files: ['file1.ts'],
+      },
+    ];
+
+    const summary = summarizeCommits(commits);
+
+    expect(summary.fixes).toEqual(['fix something']);
+    expect(summary.level).toEqual('minor');
+  });
+
+  it('should handle random changes correctly', () => {
+    const commits: Commit[] = [
+      {
+        id: '1',
+        author: 'Author One',
+        date: '2023-01-01',
+        message: 'feat!: major something',
+        files: ['file1.ts'],
+      },
+      {
+        id: '2',
+        author: 'Author One',
+        date: '2023-01-02',
+        message: 'chore: chore something',
+        files: ['file1.ts'],
+      },
+      {
+        id: '3',
+        author: 'Author One',
+        date: '2023-01-03',
+        message: 'feat: feat something',
+        files: ['file1.ts'],
+      },
+    ];
+
+    const summary = summarizeCommits(commits);
+
+    expect(summary.fixes).toEqual([]);
+    expect(summary.features).toEqual(['**Breaking:** major something', 'feat something']);
+    expect(summary.level).toEqual('major');
+  });
+
+  it('should handle changes', () => {
+    const commits: Commit[] = [
+      {
+        id: '1',
+        author: 'Author One',
+        date: '2023-01-01',
+        message: 'non conventional change',
+        files: ['file1.ts'],
+      },
+    ];
+
+    const summary = summarizeCommits(commits);
+
+    expect(summary.nonConventional).toEqual(['non conventional change']);
+    expect(summary.level).toEqual('patch');
+  });
+});
+describe('semverGreaterThan', () => {
+  it('should return false when both semver levels are equal', () => {
+    expect(semverGreaterThan('major', 'major')).toBe(false);
+    expect(semverGreaterThan('minor', 'minor')).toBe(false);
+    expect(semverGreaterThan('patch', 'patch')).toBe(false);
+  });
+
+  it('should return true when major is compared to anything else', () => {
+    expect(semverGreaterThan('major', 'minor')).toBe(true);
+    expect(semverGreaterThan('major', 'patch')).toBe(true);
+    expect(semverGreaterThan('major', 'none')).toBe(true);
+  });
+
+  it('should return true when minor is compared to patch', () => {
+    expect(semverGreaterThan('minor', 'patch')).toBe(true);
+  });
+
+  it('should return false in other minor comparisons', () => {
+    expect(semverGreaterThan('minor', 'major')).toBe(false);
+    expect(semverGreaterThan('none', 'major')).toBe(false);
+  });
+
+  it('should return false for patch in any comparison except itself', () => {
+    expect(semverGreaterThan('patch', 'major')).toBe(false);
+    expect(semverGreaterThan('patch', 'minor')).toBe(false);
+    expect(semverGreaterThan('patch', 'none')).toBe(true);
   });
 });

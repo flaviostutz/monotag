@@ -1,8 +1,10 @@
+import { randomBytes } from 'node:crypto';
+
 import { notesForLatestTag } from './notes';
 import { createSampleRepo } from './utils/tests';
 
 describe('re-generate notes from latest tag', () => {
-  const repoDir = './testcases/notes-repo';
+  const repoDir = `./testcases/notes-repo-${randomBytes(2).toString('hex')}`;
   beforeAll(async () => {
     await createSampleRepo(repoDir);
   });

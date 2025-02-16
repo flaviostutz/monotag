@@ -2,16 +2,14 @@
 /* eslint-disable functional/immutable-data */
 /* eslint-disable functional/no-let */
 import { execSync } from 'node:child_process';
+import * as fs from 'node:fs';
+import { randomBytes } from 'node:crypto';
 
 import { run } from './cli';
 import { createSampleRepo } from './utils/tests';
+import { execCmd } from './utils/os';
 
 describe('when using cli', () => {
-  const repoDir = './testcases/cli-test-repo';
-  beforeAll(async () => {
-    await createSampleRepo(repoDir);
-  });
-
   /**
    * RUN ONLY ONE TEST AT A TIME
    * TO AVOID CONCURRENCY AT THE GIT
@@ -20,6 +18,9 @@ describe('when using cli', () => {
    */
 
   it('should execute cli tests successfuly', async () => {
+    const repoDir = `./testcases/cli-test-repo-${randomBytes(2).toString('hex')}`;
+    await createSampleRepo(repoDir);
+
     // mock console.log to get results and check them
     // const originalLog = console.log;
     let stdout = '';
@@ -150,6 +151,12 @@ describe('when using cli', () => {
     expect(stdout).toEqual('346.0.0');
     expect(exitCode).toBe(0);
 
+    // get next version
+    stdout = '';
+    exitCode = await run(['', '', 'version', `--repo-dir=${repoDir}`]);
+    expect(stdout).toEqual('346.0.0');
+    expect(exitCode).toBe(0);
+
     // get next tag as prerelease
     stdout = '';
     exitCode = await run([
@@ -191,28 +198,6 @@ describe('when using cli', () => {
       '--notes-file=dist/notes2.md',
     ]);
 
-    // check if note files were generated and are the same
-    // originalLog('>>>>>>>>>>git log2');
-    // originalLog(
-    //   execSync(
-    //     'git log --no-walk --tags --pretty="%h %d %s" --decorate=full > log2.txt && cat log2.txt',
-    //     { cwd: repoDir },
-    //   ).toString(),
-    // );
-    // originalLog('>>>>>>>>>>git log2 XXX');
-    // originalLog(
-    //   execSync(
-    //     `git log --pretty=format:"%H" | head -n 30 | xargs -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
-    //     { cwd: repoDir },
-    //   ).toString(),
-    // );
-    // originalLog('>>>>>>>>>>git log2');
-    // originalLog('>>>>>>>>>>notes1.md');
-    // originalLog(execSync('cat dist/notes1.md').toString());
-    // originalLog('>>>>>>>>>>notes1.md');
-    // originalLog('>>>>>>>>>>notes2.md');
-    // originalLog(execSync('cat dist/notes2.md').toString());
-    // originalLog('>>>>>>>>>>notes2.md');
     await execSync('diff dist/notes1.md dist/notes2.md');
 
     stdout = '';
@@ -266,7 +251,29 @@ describe('when using cli', () => {
 
     // check if notes were generated exactly with the same contents
     // from previous tags with the same actual changes (related to the same commitid)
-    expect(notesAlpha).toEqual(stdout);
+    expect(stdout).toEqual(notesAlpha);
+
+    // bump package.json
+    // create sample file that will be bumped
+    fs.writeFileSync(`${repoDir}/packagerr.json`, '{"version":"0.0.1"}', { encoding: 'utf8' });
+    fs.writeFileSync(`${repoDir}/mypro.toml`, '[main]\nversion="0.0.1"', { encoding: 'utf8' });
+    // bump the file
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag',
+      `--repo-dir=${repoDir}`,
+      '--bump-action=latest',
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+      '--bump-files=packagerr.json,mypro.toml',
+    ]);
+    expect(exitCode).toBe(0);
+
+    // this command will fail if content is not updated in files
+    execCmd(repoDir, 'cat packagerr.json | grep 346.0.0-alpha.1');
+    execCmd(repoDir, 'cat mypro.toml | grep 346.0.0-alpha.1');
 
     stdout = '';
     const rr = async (): Promise<void> => {
