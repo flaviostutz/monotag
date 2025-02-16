@@ -151,6 +151,12 @@ describe('when using cli', () => {
     expect(stdout).toEqual('346.0.0');
     expect(exitCode).toBe(0);
 
+    // get next version
+    stdout = '';
+    exitCode = await run(['', '', 'version', `--repo-dir=${repoDir}`]);
+    expect(stdout).toEqual('346.0.0');
+    expect(exitCode).toBe(0);
+
     // get next tag as prerelease
     stdout = '';
     exitCode = await run([

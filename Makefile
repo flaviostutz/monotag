@@ -18,7 +18,7 @@ lint-fix:
 	pnpm exec eslint . --ext .ts --fix
 
 test:
-	rm -rf testcases
+	-rm -rf testcases
 	pnpm exec jest -i --verbose
 
 publish:
