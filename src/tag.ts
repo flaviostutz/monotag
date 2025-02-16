@@ -7,7 +7,7 @@ import semver, { ReleaseType } from 'semver';
 import { findCommitsTouchingPath, lastTagForPrefix, tagExistsInRepo } from './git';
 import { notesForLatestTag, renderReleaseNotes } from './notes';
 import { NextTagOptions } from './types/options';
-import { TagNotes, SemverLevel } from './types/version';
+import { SemverLevelNone, TagNotes } from './types/version';
 import { getDateFromCommit, summarizeCommits } from './commits';
 import { getVersionFromTag } from './utils/tags';
 
@@ -71,7 +71,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
 
     const tagName = incrementTag({
       fullTagName: latestTag,
-      type: SemverLevel.NONE,
+      type: 'none',
       ...opts,
     });
 
@@ -95,7 +95,10 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
   const currentTag = latestTag ?? `${opts.tagPrefix}0.0.0${opts.tagSuffix}`;
   const tagName = incrementTag({
     fullTagName: currentTag,
-    type: opts.semverLevel ?? commitsSummary.level,
+    type:
+      !opts.semverLevel || opts.semverLevel === 'auto'
+        ? commitsSummary.level
+        : (opts.semverLevel ?? 'none'),
     ...opts,
   });
 
@@ -139,7 +142,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
  */
 export const incrementTag = (args: {
   fullTagName: string;
-  type: SemverLevel;
+  type: SemverLevelNone;
   tagPrefix?: string;
   tagSuffix?: string;
   minVersion?: string;
@@ -148,6 +151,9 @@ export const incrementTag = (args: {
   preReleaseIdentifier?: string;
   preReleaseAlwaysIncrement?: boolean;
 }): string => {
+  if (!['major', 'minor', 'patch', 'none'].includes(args.type)) {
+    throw new Error(`Invalid type: ${args.type}`);
+  }
   const tagPrefix = args.tagPrefix ?? '';
   const tagSuffix = args.tagSuffix ?? '';
 
@@ -175,7 +181,7 @@ export const incrementTag = (args: {
   } else if (
     !args.preReleaseAlwaysIncrement &&
     curVersion.prerelease.length > 0 &&
-    args.type === SemverLevel.NONE &&
+    args.type === 'none' &&
     args.preRelease
   ) {
     incVersion = curVersion;
@@ -233,27 +239,12 @@ const versionMinMax = (
   return incVersion;
 };
 
-const getIncType = (type: SemverLevel, preRelease: boolean): ReleaseType => {
-  if (type === SemverLevel.MAJOR) {
-    if (preRelease) {
-      return 'premajor';
-    }
-    return 'major';
-  }
-  if (type === SemverLevel.MINOR) {
-    if (preRelease) {
-      return 'preminor';
-    }
-    return 'minor';
-  }
-  if (type === SemverLevel.PATCH) {
-    if (preRelease) {
-      return 'prepatch';
-    }
-    return 'patch';
+export const getIncType = (type: SemverLevelNone, preRelease: boolean): ReleaseType => {
+  if (type === 'major' || type === 'minor' || type === 'patch') {
+    return `${preRelease ? 'pre' : ''}${type}`;
   }
 
-  // SemverLevel is NONE
+  // type is 'none'
   if (preRelease) {
     return 'prerelease';
   }

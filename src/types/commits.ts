@@ -1,4 +1,4 @@
-import { SemverLevel } from './version';
+import { SemverLevelNone } from './version';
 
 /**
  * A commit in repository
@@ -24,7 +24,7 @@ export type CommitsSummary = {
   features: string[];
   maintenance: string[];
   notes: string[];
-  level: SemverLevel;
+  level: SemverLevelNone;
   authors: string[];
   references: string[];
   nonConventional: string[];

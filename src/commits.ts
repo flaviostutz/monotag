@@ -4,7 +4,7 @@
 import conventionalCommitsParser from 'conventional-commits-parser';
 
 import { Commit, CommitsSummary } from './types/commits';
-import { SemverLevel } from './types/version';
+import { SemverLevelNone } from './types/version';
 
 export const getDateFromCommit = (dateWithTime: string): string => {
   return /(\d{4}-\d{2}-\d{2})/.exec(dateWithTime)?.[0] ?? '';
@@ -28,7 +28,7 @@ export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
     maintenance: <string[]>[],
     nonConventional: <string[]>[],
     notes: <string[]>[],
-    level: SemverLevel.NONE,
+    level: 'none',
     authors: <string[]>[],
     references: <string[]>[],
   };
@@ -75,26 +75,35 @@ export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
       // feat
       if (parsedLog.type === 'feat') {
         pushItem(summary.features, convLog);
-        if (summary.level > SemverLevel.MINOR) summary.level = SemverLevel.MINOR;
+        if (semverGreaterThan('minor', summary.level)) {
+          summary.level = 'minor';
+        }
 
         // fix
       } else if (parsedLog.type === 'fix') {
         pushItem(summary.fixes, convLog);
-        if (summary.level > SemverLevel.PATCH) summary.level = SemverLevel.PATCH;
+        if (semverGreaterThan('patch', summary.level)) {
+          summary.level = 'patch';
+        }
 
         // chore
       } else if (parsedLog.type === 'chore') {
         pushItem(summary.maintenance, convLog);
-        if (summary.level > SemverLevel.PATCH) summary.level = SemverLevel.PATCH;
+        if (semverGreaterThan('patch', summary.level)) {
+          summary.level = 'patch';
+        }
 
         // non conventional commits
       } else {
         summary.nonConventional.push(parsedLog.header.trim());
+        if (semverGreaterThan('patch', summary.level)) {
+          summary.level = 'patch';
+        }
       }
 
       // breaking changes -> major level
-      if (breakingChange && summary.level > SemverLevel.MAJOR) {
-        summary.level = SemverLevel.MAJOR;
+      if (breakingChange) {
+        summary.level = 'major';
       }
 
       // notes
@@ -126,6 +135,22 @@ export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
   });
 
   return sum;
+};
+
+export const semverGreaterThan = (semverA: SemverLevelNone, semverB: SemverLevelNone): boolean => {
+  if (semverA === semverB) {
+    return false;
+  }
+  if (semverB === 'none') {
+    return true;
+  }
+  if (semverA === 'major') {
+    return true;
+  }
+  if (semverA === 'minor') {
+    return semverB === 'patch';
+  }
+  return false;
 };
 
 const pushItem = (pushTo: string[], commitDetails: CommitDetails): void => {

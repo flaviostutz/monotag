@@ -8,9 +8,6 @@ export type TagNotes = {
   existingTag: boolean;
 };
 
-export enum SemverLevel {
-  MAJOR = 1,
-  MINOR = 2,
-  PATCH = 3,
-  NONE = 4,
-}
+export type SemverLevel = 'patch' | 'minor' | 'major';
+
+export type SemverLevelNone = SemverLevel | 'none';

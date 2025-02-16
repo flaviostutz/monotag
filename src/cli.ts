@@ -214,7 +214,7 @@ const execAction = async (
         gitConfigUser(opts.repoDir, opts.gitUsername, opts.gitEmail, opts.verbose);
         execCmd(opts.repoDir, `git commit -m "chore(release): ${nt.tagName}"`, opts.verbose);
       } catch {
-        console.log('No changes to commit. Ignoring.');
+        console.log('No changes to commit');
       }
 
       console.log(`Creating tag ${nt.tagName}`);
@@ -284,6 +284,17 @@ const expandDefaults = (args: any): CliNextTagOptions => {
 
   let tagPrefix = args.prefix;
 
+  const semverLevel = defaultValueString(args['semver-level'], 'auto') as
+    | 'major'
+    | 'minor'
+    | 'patch'
+    | 'auto';
+  if (!semverLevel || !['major', 'minor', 'patch', 'auto'].includes(semverLevel)) {
+    throw new Error(
+      `Invalid semver level "${semverLevel}". Must be "major", "minor", "patch" or "auto"`,
+    );
+  }
+
   // default tag prefix is relative to path inside repo
   if (tagPrefix === 'auto') {
     tagPrefix = lastPathPart(basicOpts.path);
@@ -301,7 +312,7 @@ const expandDefaults = (args: any): CliNextTagOptions => {
     ...basicOpts,
     tagPrefix,
     tagSuffix: args.suffix,
-    semverLevel: <number>args['semver-level'],
+    semverLevel,
     bumpAction,
     bumpFiles: defaultValueListString(args['bump-files'], ['package.json']),
     preRelease: defaultValueBoolean(args.prerelease, false),
@@ -313,6 +324,8 @@ const expandDefaults = (args: any): CliNextTagOptions => {
     changelogFile: defaultValueString(args['changelog-file'], undefined),
     minVersion: defaultValueString(args['min-version'], undefined),
     maxVersion: defaultValueString(args['max-version'], undefined),
+    gitUsername: defaultValueString(args['git-username'], undefined),
+    gitEmail: defaultValueString(args['git-email'], undefined),
   };
 };
 
@@ -359,10 +372,10 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
     })
     .option('semver-level', {
       alias: 'l',
-      type: 'number',
+      type: 'string',
       describe:
-        'Increase tag in specific semver level (1,2,3). If not defined, detect automatically based on semantic commit',
-      default: undefined,
+        'Level to increment tag. One of "major", "minor", "patch" or "auto". "auto" will increment according to semantic commit messages',
+      default: 'auto',
     })
     .option('prefix', {
       alias: 'p',
@@ -456,7 +469,22 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       describe: 'Comma separated list of file names to bump version',
       default: 'package.json',
     });
+    y1.option('git-username', {
+      alias: 'gu',
+      type: 'string',
+      describe: 'Git username config when commiting and tagging resources',
+      default: undefined,
+    });
+    y1.option('git-email', {
+      alias: 'ge',
+      type: 'string',
+      describe: 'Git email config when commiting and tagging resources',
+      default: undefined,
+    });
   }
+
+  // example call with all the options possible
+  // monotag tag --repo-dir=/home/user/repo --path=services/myservice --from-ref=HEAD~3 --to-ref=HEAD --prefix=myservice --suffix= --semver-level=2 --prerelease=false --prerelease-identifier=beta --prerelease-increment=false --tag-file=dist/tag.txt --version-file=dist/version.txt --notes-file=dist/notes.txt --changelog-file=dist/changelog.md --min-version=1.0.0 --max-version=2.0.0 --bump-action=latest --bump-files=package.json --git-username=flavio --git-email=flaviostutz@gmail.com --verbose=true
 
   return y1;
 };

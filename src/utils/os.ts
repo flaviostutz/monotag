@@ -15,7 +15,7 @@ export const execCmd = (
   try {
     const result = execSync(shellScript, { cwd: baseDir, shell: '/bin/bash' }).toString();
     if (verbose) {
-      console.log(`${result}`);
+      console.log(`${new Date().toISOString()}: ${result}`);
     }
     return result;
   } catch (error) {

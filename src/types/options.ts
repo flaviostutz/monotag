@@ -1,6 +1,7 @@
 /**
  * Basic options for searching for changes in a certain path
  */
+
 import { SemverLevel } from './version';
 
 export type BasicOptions = {
@@ -55,10 +56,10 @@ export type NextTagOptions = BasicOptions & {
    */
   tagSuffix?: string;
   /**
-   * Which level to increment the version. If undefined, will be automatic, based on commit messages
-   * @default undefined (automatic)
+   * Which level to increment the version ([major].[minor].[patch]). If undefined, will be automatic based on conventional commit messages
+   * @default 'auto'
    */
-  semverLevel?: SemverLevel;
+  semverLevel?: SemverLevel | 'auto';
   /**
    * Minimum version for the generated tag.
    * If the naturally incremented version is lower, this value will be used
