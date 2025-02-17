@@ -191,7 +191,11 @@ const execAction = async (
       console.log('No changes detected and no previous tag found');
       return 4;
     }
+
+    // display tag, version and notes
     console.log(nt.tagName);
+    console.log(nt.version);
+    console.log(nt.releaseNotes);
 
     saveResultsToFiles(nt, opts);
 

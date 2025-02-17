@@ -57,7 +57,7 @@ describe('when using cli', () => {
     // get next tag
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    expect(stdout).toEqual('346.0.0');
+    expect(stdout).toMatch(/^346\.0\.0/);
     expect(exitCode).toBe(0);
 
     stdout = '';
@@ -75,7 +75,7 @@ describe('when using cli', () => {
       '--path=prefix9',
       '--separator=/v',
     ]);
-    expect(stdout).toEqual('prefix9/v1.0.3');
+    expect(stdout).toMatch(/^prefix9\/v1.0.3/);
     expect(exitCode).toBe(0);
 
     // get release notes
@@ -148,7 +148,7 @@ describe('when using cli', () => {
     // get next tag
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    expect(stdout).toEqual('346.0.0');
+    expect(stdout).toMatch(/^346\.0\.0/);
     expect(exitCode).toBe(0);
 
     // get next version
@@ -167,7 +167,7 @@ describe('when using cli', () => {
       '--prerelease=true',
       '--prerelease-identifier=alpha',
     ]);
-    expect(stdout).toEqual('346.0.0-alpha.0');
+    expect(stdout).toMatch(/^346.0.0-alpha.0/);
     expect(exitCode).toBe(0);
 
     // git tag as prerelease
@@ -211,7 +211,7 @@ describe('when using cli', () => {
       '--notes-file=dist/notes2.md',
     ]);
 
-    expect(stdout).toEqual('346.0.0-alpha.0Tag already exists in repo');
+    expect(stdout).toMatch(/^346.0.0-alpha.0.*Tag already exists in repo$/s);
     expect(exitCode).toBe(0);
 
     // get notes from latest generated version (alpha)
