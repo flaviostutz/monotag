@@ -40,7 +40,7 @@
     "@stutzlab/eslint-config": "^3.2.1",
     "@tsconfig/node20": "^20.1.4",
     "@types/conventional-commits-parser": "^5.0.1",
-    "@types/node": "^20.14.8",
+    "@types/node": "^22.13.8",
     "@types/jest": "^29.4.0",
     "@types/semver": "^7.5.8",
     "@types/yargs": "^17.0.22",
