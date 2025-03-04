@@ -77,7 +77,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
 
     return {
       tagName,
-      version: getVersionFromTag(latestTag, opts.tagPrefix, opts.tagSuffix),
+      version: getVersionFromTag(tagName, opts.tagPrefix, opts.tagSuffix),
       releaseNotes: releaseNotes ?? '',
       changesDetected: commits,
       existingTag: tagExistsInRepo(opts.repoDir, tagName, opts.verbose),

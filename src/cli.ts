@@ -165,6 +165,8 @@ const execAction = async (
       console.log('No changes detected and no previous tag found');
       return 4;
     }
+    console.log(nt.tagName);
+    console.log(nt.version);
     console.log(nt.releaseNotes);
     saveResultsToFiles(nt, opts);
     return 0;

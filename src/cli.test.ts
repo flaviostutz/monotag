@@ -125,7 +125,7 @@ describe('when using cli', () => {
       '--separator=/v',
     ]);
     expect(exitCode).toBe(0);
-    expect(stdout).toEqual('');
+    expect(stdout).toContain('prefix9/v1.0.3');
 
     stdout = '';
     exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);

@@ -260,6 +260,7 @@ describe('when generating next tag with notes', () => {
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix1/3.5.0-beta.0');
+    expect(nt.version).toBe('3.5.0-beta.0');
   });
   it('should create release correctly', async () => {
     const nt = await nextTag({
@@ -272,6 +273,7 @@ describe('when generating next tag with notes', () => {
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix1/3.5.0');
+    expect(nt.version).toBe('3.5.0');
   });
 });
 
