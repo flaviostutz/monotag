@@ -214,7 +214,7 @@ const execAction = async (
       if (opts.verbose) {
         console.log(`Adding and commiting all files changed in repo during release`);
       }
-      execCmd(opts.repoDir, `git add .`, opts.verbose);
+      execCmd(opts.repoDir, `git add $(git rev-parse --show-toplevel)`, opts.verbose);
       // eslint-disable-next-line functional/no-try-statements
       try {
         gitConfigUser(opts.repoDir, opts.gitUsername, opts.gitEmail, opts.verbose);
