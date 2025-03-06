@@ -35,13 +35,18 @@ export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
   commits
     // parse each commit
     .map((clog): CommitDetails => {
-      // remove ! from type because the parser doesn't support it
-      // (but it's valid for conventional commit)
-      const convLog = conventionalCommitsParser.sync(clog.message.replace('!:', ':'));
+      // remove ! from type because the parser doesn't support it (but it's valid for conventional commit)
+      const clogMessage = clog.message.replace('!:', ':');
+
+      // move prefix to the end of commit log, exposing conv commit to the beginning of the log
+      const clogMessageMovedPrefix = movePrefixFromCommitLog(clogMessage);
+
+      const convLog = conventionalCommitsParser.sync(clogMessageMovedPrefix);
 
       // identify breaking changes (cannot be done after mapping because '!:' is not supported by the parser)
       const breakingChange =
-        convLog.notes.some((note) => note.title.includes('BREAKING CHANGE')) ||
+        convLog.body?.includes('BREAKING CHANGES') ||
+        convLog.notes.some((note) => note.title.includes('BREAKING CHANGES')) ||
         clog.message.includes('!:');
 
       if (breakingChange) {
@@ -109,6 +114,9 @@ export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
       for (const note of parsedLog.notes) {
         summary.notes.push(`${note.title}: ${note.text}`);
       }
+      if (parsedLog.body) {
+        summary.notes.push(parsedLog.body);
+      }
 
       // references
       for (const reference of parsedLog.references) {
@@ -163,4 +171,35 @@ const pushItem = (pushTo: string[], commitDetails: CommitDetails): void => {
     return;
   }
   pushTo.push(`${commitDetails.parsedLog.subject.trim()}`);
+};
+
+/**
+ * Try to identify and move prefixes to the end of the commit log so we leave the conventional
+ * commit message at the beginning
+ * @param commitLog
+ * @returns
+ */
+export const movePrefixFromCommitLog = (commitLog: string): string => {
+  // if log is multi-line, skip this
+  if (commitLog.includes('\n')) {
+    return commitLog;
+  }
+
+  const suffixRe = /([a-z]{1,10}\(*.*\)*!*:.*)/;
+
+  // try to identify suffix that has conv commit etc
+  const suffix = suffixRe.exec(commitLog);
+
+  // this is not a conventional commit
+  if (!suffix) {
+    return commitLog;
+  }
+
+  // get prefix from commit log
+  const prefix = commitLog.replace(suffixRe, '');
+  // keep only some letters and numbers in prefix
+  const prefixClean = prefix.replaceAll(/[^\s\w-]+/g, '').trim();
+
+  // move prefix to the end of the commit log, if exists
+  return `${suffix[0]}${prefixClean ? ` (${prefixClean})` : ''}`;
 };
