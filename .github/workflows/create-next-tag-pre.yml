@@ -1,4 +1,4 @@
-name: create-next-tag-pre
+name: create-release-pre
 
 on:
   workflow_dispatch:
