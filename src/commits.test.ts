@@ -1,5 +1,10 @@
 import { Commit } from './types/commits';
-import { getDateFromCommit, semverGreaterThan, summarizeCommits } from './commits';
+import {
+  getDateFromCommit,
+  movePrefixFromCommitLog,
+  semverGreaterThan,
+  summarizeCommits,
+} from './commits';
 
 describe('getDateFromCommit', () => {
   it('should extract the date from a string with date and time', () => {
@@ -71,12 +76,19 @@ describe('summarizeCommits', () => {
         message: 'fix: fix bug',
         files: ['file2.ts'],
       },
+      {
+        id: '6',
+        author: 'Author 22',
+        date: '2023-01-04',
+        message: 'MERGED FROM 123: fix: fix second bug',
+        files: ['file2.ts'],
+      },
     ];
 
     const summary = summarizeCommits(commits);
 
     expect(summary.features).toEqual(['**Breaking:** add breaking change', 'add new feature']);
-    expect(summary.fixes).toEqual(['fix bug']);
+    expect(summary.fixes).toEqual(['fix bug', 'fix second bug (MERGED FROM 123)']);
     expect(summary.maintenance).toEqual(['update dependencies']);
     expect(summary.nonConventional).toEqual(['docs: update documentation']);
     expect(summary.notes).toEqual([]);
@@ -91,7 +103,7 @@ describe('summarizeCommits', () => {
         id: '1',
         author: 'Author One',
         date: '2023-01-01',
-        message: 'feat: add new feature\n\nBREAKING CHANGE: new API',
+        message: 'feat: add new feature\n\nBREAKING CHANGES: new API',
         files: ['file1.ts'],
       },
     ];
@@ -100,7 +112,7 @@ describe('summarizeCommits', () => {
 
     expect(summary.features).toEqual(['**Breaking:** add new feature']);
     expect(summary.level).toEqual('major');
-    expect(summary.notes).toEqual(['BREAKING CHANGE: new API']);
+    expect(summary.notes).toEqual(['BREAKING CHANGES: new API']);
   });
 
   it('should handle minor changes', () => {
@@ -226,5 +238,81 @@ describe('semverGreaterThan', () => {
     expect(semverGreaterThan('patch', 'major')).toBe(false);
     expect(semverGreaterThan('patch', 'minor')).toBe(false);
     expect(semverGreaterThan('patch', 'none')).toBe(true);
+  });
+});
+
+describe('movePrefixFromCommitLog', () => {
+  it('should return the same string if no conventional commit is found', () => {
+    const input = 'Just a random commit message';
+    expect(movePrefixFromCommitLog(input)).toBe(input);
+  });
+
+  it('should move prefix to the end when conventional commit is found', () => {
+    const input = 'PREFIX-123 feat: add feature';
+    const expected = 'feat: add feature (PREFIX-123)';
+    expect(movePrefixFromCommitLog(input)).toBe(expected);
+  });
+
+  it('should remove non-alphanumeric characters from the prefix', () => {
+    const input = '[PROJ-1]! fix: fix error';
+    const expected = 'fix: fix error (PROJ-1)';
+    expect(movePrefixFromCommitLog(input)).toBe(expected);
+  });
+
+  it('should not add parentheses if no prefix remains after cleaning', () => {
+    const input = '!!! feat(something): new stuff';
+    const expected = 'feat(something): new stuff';
+    expect(movePrefixFromCommitLog(input)).toBe(expected);
+  });
+
+  it('should correctly handle multiple words in the prefix', () => {
+    const input = 'MY PROJECT 2023 fix: correct the bug';
+    const expected = 'fix: correct the bug (MY PROJECT 2023)';
+    expect(movePrefixFromCommitLog(input)).toBe(expected);
+  });
+
+  it('should handle "feat: something to break"', () => {
+    const input = 'feat: something to break';
+    expect(movePrefixFromCommitLog(input)).toBe(input);
+  });
+
+  it('should handle "chore(main): doing that!!"', () => {
+    const input = 'chore(main): doing that!!';
+    expect(movePrefixFromCommitLog(input)).toBe(input);
+  });
+
+  it('should handle "feat!: another one"', () => {
+    const input = 'feat!: another one';
+    expect(movePrefixFromCommitLog(input)).toBe(input);
+  });
+
+  it('should handle "feat(test)!: another two"', () => {
+    const input = 'feat(test)!: another two';
+    expect(movePrefixFromCommitLog(input)).toBe(input);
+  });
+
+  it('should handle "MERGED HERE chore(abc)!: abracadabra"', () => {
+    const input = 'MERGED HERE chore(abc)!: abracadabra';
+    expect(movePrefixFromCommitLog(input)).toBe('chore(abc)!: abracadabra (MERGED HERE)');
+  });
+
+  it('should handle "MERGED THERE 123! fix: abracadabra"', () => {
+    const input = 'MERGED THERE 123! fix: abracadabra';
+    expect(movePrefixFromCommitLog(input)).toBe('fix: abracadabra (MERGED THERE 123)');
+  });
+
+  it('should handle "MERGED FROM 123: fix: fix bug fix: abc"', () => {
+    const input = 'MERGED FROM 123: fix: fix bug fix: abc';
+    expect(movePrefixFromCommitLog(input)).toBe('fix: fix bug fix: abc (MERGED FROM 123)');
+  });
+
+  it('should handle "NOTHING"', () => {
+    const input = 'NOTHING';
+    expect(movePrefixFromCommitLog(input)).toBe(input);
+  });
+
+  it('should handle "BREAKING CHANGES" in message body', () => {
+    const input = 'feat: add new feature\n\nBREAKING CHANGES: new API';
+    expect(movePrefixFromCommitLog(input)).toBe(input);
   });
 });

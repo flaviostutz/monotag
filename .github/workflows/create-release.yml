@@ -18,6 +18,8 @@ jobs:
           token: ${{ secrets.GH_PERSONAL_TOKEN }}
       - name: Create tag and push to repo
         run: |
-          git config --global user.email "flaviostutz@gmail.com"
-          git config --global user.name "Flávio Stutz"
-          npx -y monotag@1.14.0 tag-push
+          npx -y monotag@1.15.1 tag-push \
+            --git-username="Flávio Stutz" \
+            --git-email="flaviostutz@gmail.com" \
+            --prefix= \
+            --changelog-file ../../CHANGELOG.md
