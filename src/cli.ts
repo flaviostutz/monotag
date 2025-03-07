@@ -128,7 +128,7 @@ const execAction = async (
     // either the next tag for pre-release or the next tag for final should match the latest tag
     if (ntNext.tagName !== latestTag && ntNextPre.tagName !== latestTag) {
       console.log(
-        `The latest tag is not up to date. Latest tag is '${latestTag}'. Next tag would be '${ntNext.tagName}'`,
+        `The latest tag is not up to date. Latest tag is '${latestTag}', but next tag would be '${ntNext.tagName}' or '${ntNextPre.tagName}' (prerelease)`,
       );
       return 5;
     }

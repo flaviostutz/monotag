@@ -27,9 +27,8 @@ publish:
 		exit 1; \
 	fi
 
-	git config --global user.email "flaviostutz@gmail.com"
-	git config --global user.name "Flávio Stutz"
-	npm version from-git --no-git-tag-version
+	// bump version in package.json to latest tag
+	npx -y monotag@1.15.1 current --bump-action=latest
 
 	echo "" >> .npmrc
 	echo "//registry.npmjs.org/:_authToken=$${NPM_ACCESS_TOKEN}" >> .npmrc
