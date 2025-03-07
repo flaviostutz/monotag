@@ -134,8 +134,15 @@ const execAction = async (
     }
 
     console.log(latestTag);
-    saveResultsToFiles(ntNext, opts);
 
+    // latest tag is not a pre-release
+    if (ntNext.tagName === latestTag) {
+      saveResultsToFiles(ntNext, opts);
+      return 0;
+    }
+
+    // latest tag is a pre-release
+    saveResultsToFiles(ntNextPre, opts);
     return 0;
   }
 
