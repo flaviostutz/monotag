@@ -6,6 +6,8 @@ This lib can help you tag changes in specific parts of the monorepo using tag pr
 
 Normally this is not easy because the monorepo shares the entire commit history and to identify which commits touched a specific dir requires some sort of filtering.
 
+**Quick trial: Go to any directory in your git repo and run `npx -y monotag notes` for a dry run**
+
 <img src="diagram.png" with="600">
 
 Run 'npx monotag --help' or 'npx monotag tag --help' for info on specific commands
