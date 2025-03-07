@@ -27,7 +27,7 @@ publish:
 		exit 1; \
 	fi
 
-	// bump version in package.json to latest tag
+	# check if tag is current and bump version in package.json to latest tag
 	npx -y monotag@1.15.1 current --bump-action=latest
 
 	echo "" >> .npmrc
