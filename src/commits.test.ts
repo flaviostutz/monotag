@@ -301,6 +301,11 @@ describe('movePrefixFromCommitLog', () => {
     expect(movePrefixFromCommitLog(input)).toBe('fix: abracadabra (MERGED THERE 123)');
   });
 
+  it('should handle "Merged PR 123: feat(my-service): call Lambda"', () => {
+    const input = 'Merged PR 123: feat(my-service): call Lambda';
+    expect(movePrefixFromCommitLog(input)).toBe('feat(my-service): call Lambda (Merged PR 123)');
+  });
+
   it('should handle "MERGED FROM 123: fix: fix bug fix: abc"', () => {
     const input = 'MERGED FROM 123: fix: fix bug fix: abc';
     expect(movePrefixFromCommitLog(input)).toBe('fix: fix bug fix: abc (MERGED FROM 123)');

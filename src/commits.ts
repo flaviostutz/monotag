@@ -185,7 +185,7 @@ export const movePrefixFromCommitLog = (commitLog: string): string => {
     return commitLog;
   }
 
-  const suffixRe = /([a-z]{1,10}\(*.*\)*!*:.*)/;
+  const suffixRe = /([a-z]{1,10}\(*[A-Z_a-z-]*\)*!*:.*)/;
 
   // try to identify suffix that has conv commit etc
   const suffix = suffixRe.exec(commitLog);
