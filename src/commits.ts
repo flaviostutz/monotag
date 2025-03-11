@@ -185,7 +185,7 @@ export const movePrefixFromCommitLog = (commitLog: string): string => {
     return commitLog;
   }
 
-  const suffixRe = /([a-z]{1,10}\(*[A-Z_a-z-]*\)*!*:.*)/;
+  const suffixRe = /([a-z]{1,10}\(*[\w-]*\)*!*:.*)/;
 
   // try to identify suffix that has conv commit etc
   const suffix = suffixRe.exec(commitLog);
@@ -198,7 +198,7 @@ export const movePrefixFromCommitLog = (commitLog: string): string => {
   // get prefix from commit log
   const prefix = commitLog.replace(suffixRe, '');
   // keep only some letters and numbers in prefix
-  const prefixClean = prefix.replaceAll(/[^\s\w-]+/g, '').trim();
+  const prefixClean = prefix.replaceAll(/[^\s\w-#]+/g, '').trim();
 
   // move prefix to the end of the commit log, if exists
   return `${suffix[0]}${prefixClean ? ` (${prefixClean})` : ''}`;

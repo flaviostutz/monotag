@@ -311,6 +311,13 @@ describe('movePrefixFromCommitLog', () => {
     expect(movePrefixFromCommitLog(input)).toBe('fix: fix bug fix: abc (MERGED FROM 123)');
   });
 
+  it('should handle "Merge pull request #69 fix(wso2): deployment when needed"', () => {
+    const input = 'Merge pull request #69 fix(wso2): deployment when needed';
+    expect(movePrefixFromCommitLog(input)).toBe(
+      'fix(wso2): deployment when needed (Merge pull request #69)',
+    );
+  });
+
   it('should handle "NOTHING"', () => {
     const input = 'NOTHING';
     expect(movePrefixFromCommitLog(input)).toBe(input);
