@@ -87,7 +87,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
   // changes detected. create new tag based on new commits
 
   if (opts.verbose) {
-    console.log(`${commits.length} commits found`);
+    console.log(`Change detected. ${commits.length} commits found`);
   }
 
   const commitsSummary = summarizeCommits(commits);

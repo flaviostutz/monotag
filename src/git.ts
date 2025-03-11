@@ -145,6 +145,10 @@ export const lastTagForPrefix = async (args: {
     return semver.rcompare(versionA, versionB);
   });
 
+  if (args.verbose) {
+    console.log(`orderedTags: ${orderedTags}`);
+  }
+
   const i = args.nth ?? 0;
   if (orderedTags.length > i) {
     return orderedTags[i];
