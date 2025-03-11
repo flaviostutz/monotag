@@ -19,6 +19,7 @@ jobs:
       - name: Create tag and push to repo
         run: |
           npx -y monotag@1.18.0 tag-push \
+            -v \
             --git-username="Flávio Stutz" \
             --git-email="flaviostutz@gmail.com" \
             --prefix= \
