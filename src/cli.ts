@@ -58,13 +58,18 @@ const run = async (processArgs: string[]): Promise<number> => {
     ])
     .epilogue('For more information, check https://github.com/flaviostutz/monotag');
 
-  const args2 = yargs2.parseSync();
+  const args = yargs2.parseSync();
 
-  const action = <string>args2._[0];
+  const action = <string>args._[0];
 
-  const args = expandDefaults(args2);
+  const expandedArgs = expandDefaults(args);
 
-  return execAction(action, args, yargs2);
+  if (args.verbose) {
+    console.log(`>> Current dir: ${process.cwd()}`);
+    console.log(`>> args (input): ${JSON.stringify(args)}`);
+  }
+
+  return execAction(action, expandedArgs, yargs2);
 };
 
 const execAction = async (
@@ -73,7 +78,7 @@ const execAction = async (
   yargs2: Argv,
 ): Promise<number> => {
   if (opts.verbose) {
-    console.log(`Running "${action}" with ${JSON.stringify(opts)}"`);
+    console.log(`>> Running "${action}" with ${JSON.stringify(opts)}"`);
   }
 
   if (!action) {
@@ -166,9 +171,10 @@ const execAction = async (
     // display tag, version and notes
     console.log(nt.tagName);
     console.log(nt.version);
-    console.log(nt.releaseNotes);
 
-    if (!nt.releaseNotes) {
+    if (nt.releaseNotes) {
+      console.log(nt.releaseNotes);
+    } else {
       console.log(`No changes detected in path "${opts.path}"`);
     }
 
@@ -229,38 +235,38 @@ const execAction = async (
 const expandDefaults = (args: any): CliNextTagOptions => {
   const verbose = defaultValueBoolean(args.verbose, false);
 
+  // find the root path of the repo
   let repoDir = <string>args['repo-dir'];
   if (!repoDir) {
-    repoDir = execCmd(process.cwd(), 'git rev-parse --show-toplevel', verbose);
+    repoDir = process.cwd();
   }
-  repoDir = repoDir.trim();
+  const absRepoDir = execCmd(repoDir, 'git rev-parse --show-toplevel', verbose).trim();
 
   // detect current dir reference to repo
   let pathRepo = <string>args.path;
-  if (pathRepo === 'auto') {
+  if (!pathRepo || pathRepo === 'auto') {
     const currentDir = process.cwd();
-    if (currentDir.includes(repoDir)) {
-      pathRepo = currentDir.replace(repoDir, '');
+    if (currentDir.includes(absRepoDir)) {
+      pathRepo = currentDir.replace(absRepoDir, '');
     } else {
       pathRepo = '';
-    }
-    if (verbose) {
-      console.log(`Using path inside repo "${pathRepo}"`);
     }
   }
   if (pathRepo) {
     if (pathRepo.startsWith('/')) {
       pathRepo = pathRepo.slice(1);
+    } else {
+      // resolve relative paths
+      const absPathRepo = path.resolve(pathRepo);
+      pathRepo = absPathRepo.replace(absRepoDir, '');
     }
-    pathRepo = path.resolve(pathRepo);
-    pathRepo = pathRepo.replace(repoDir, '');
   }
   if (args.verbose) {
     console.log(`Analysing changes in path "${repoDir}/${pathRepo}"`);
   }
 
   const basicOpts: BasicOptions = {
-    repoDir,
+    repoDir: absRepoDir,
     path: pathRepo,
     fromRef: <string>args['from-ref'],
     toRef: <string>args['to-ref'],
