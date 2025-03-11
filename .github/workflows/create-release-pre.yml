@@ -24,6 +24,5 @@ jobs:
             --git-email="flaviostutz@gmail.com" \
             --prerelease \
             --prefix= \
-            --path=../.. \
-            --changelog-file ../../CHANGELOG.md
+            --changelog-file CHANGELOG.md
 

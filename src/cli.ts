@@ -244,25 +244,34 @@ const expandDefaults = (args: any): CliNextTagOptions => {
 
   // detect current dir reference to repo
   let pathRepo = <string>args.path;
+
+  // automatically detect path inside repo dir according to current dir
   if (!pathRepo || pathRepo === 'auto') {
     const currentDir = process.cwd();
     if (currentDir.includes(absRepoDir)) {
       pathRepo = currentDir.replace(absRepoDir, '');
     } else {
+      // defaults to repo root
       pathRepo = '';
     }
-  }
-  if (pathRepo) {
-    if (pathRepo.startsWith('/')) {
-      pathRepo = pathRepo.slice(1);
-    } else {
-      // resolve relative paths
-      const absPathRepo = path.resolve(pathRepo);
+
+    // support relative paths to current dir
+  } else if (pathRepo.startsWith('..')) {
+    const absPathRepo = path.resolve(process.cwd(), pathRepo);
+    if (absPathRepo.includes(absRepoDir)) {
       pathRepo = absPathRepo.replace(absRepoDir, '');
+    } else {
+      throw new Error(`Path "${pathRepo}" is not inside repo dir "${absRepoDir}"`);
     }
+
+    // path is relative to repo dir
+    // support paths starting with /
+  } else if (pathRepo.startsWith('/')) {
+    pathRepo = pathRepo.slice(1);
   }
+
   if (args.verbose) {
-    console.log(`Analysing changes in path "${repoDir}/${pathRepo}"`);
+    console.log(`Analysing changes in path "${absRepoDir}/${pathRepo}"`);
   }
 
   const basicOpts: BasicOptions = {

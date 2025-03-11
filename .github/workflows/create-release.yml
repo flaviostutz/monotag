@@ -23,5 +23,4 @@ jobs:
             --git-username="Flávio Stutz" \
             --git-email="flaviostutz@gmail.com" \
             --prefix= \
-            --path=../.. \
-            --changelog-file ../../CHANGELOG.md
+            --changelog-file CHANGELOG.md
