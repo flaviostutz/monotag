@@ -89,8 +89,6 @@ Commands:
                     to detected changes on path
   monotag version   Calculate and show next version, incrementing semver
                     according to detected changes on path
-  monotag notes     Calculate and show release notes according to detected
-                    commits in path
   monotag tag-git   Calculate next tag and tag it in local git repo
   monotag tag-push  Calculate next tag, git-tag and git-push it to remote
 
@@ -208,7 +206,7 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
 - `monotag current`
   - Will get the latest tag for current path and check if it's the latest possible tag in the repo. It will fail if there are changes in the repo that would lead to the creation of a new tag. If the latest tag is the latest possible (current), then it will be returned.
   
-- `monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice`
+- `monotag tag --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice`
   - Generate release notes according to changes made in the last 3 commits for changes in dir services/myservice of the repo
 
 - `monotag tag --path services/myservice`

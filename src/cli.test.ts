@@ -84,7 +84,7 @@ describe('when using cli', () => {
     exitCode = await run([
       '',
       '',
-      'notes',
+      'tag',
       `--repo-dir=${repoDir}`,
       '--path=SOMETHING_INEXISTENT',
       '--separator=/v',
@@ -93,7 +93,7 @@ describe('when using cli', () => {
     expect(exitCode).toBe(4);
 
     stdout = '';
-    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
     expect(exitCode).toBe(0);
     expect(stdout).toMatch('346.0.0 (');
     expect(stdout).toMatch('### Features');
@@ -119,7 +119,7 @@ describe('when using cli', () => {
     exitCode = await run([
       '',
       '',
-      'notes',
+      'tag',
       `--repo-dir=${repoDir}`,
       '--path=prefix9',
       '--separator=/v',
@@ -128,7 +128,7 @@ describe('when using cli', () => {
     expect(stdout).toContain('prefix9/v1.0.3');
 
     stdout = '';
-    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--fromRef=HEAD~3']);
     expect(stdout).toMatch('Refs: closes #45');
     expect(stdout).toMatch('## Features');
     expect(exitCode).toBe(0);
@@ -191,7 +191,7 @@ describe('when using cli', () => {
     exitCode = await run([
       '',
       '',
-      'notes',
+      'tag',
       `--repo-dir=${repoDir}`,
       '--prerelease=true',
       '--prerelease-identifier=alpha',
@@ -214,9 +214,9 @@ describe('when using cli', () => {
     expect(stdout).toMatch(/^346.0.0-alpha.0.*Tag already exists in repo$/s);
     expect(exitCode).toBe(0);
 
-    // get notes from latest generated version (alpha)
+    // get tag/notes from latest generated version (alpha)
     stdout = '';
-    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
     const notesAlpha = stdout;
 
     // git tag prerelease again without changes
@@ -243,7 +243,7 @@ describe('when using cli', () => {
     // check if notes were generated getting inherated
     // commits from previous tags that had actual changes
     stdout = '';
-    exitCode = await run(['', '', 'notes', `--repo-dir=${repoDir}`]);
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
     expect(stdout).toMatch('## 346.0.0 (');
     expect(stdout).toMatch('15 adding test2 file to root');
     expect(stdout).toMatch('**Breaking:** 4 prefix1 creating test3 file');

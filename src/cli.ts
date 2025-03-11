@@ -37,11 +37,6 @@ const run = async (processArgs: string[]): Promise<number> => {
       (y): Argv => addOptions(y, true),
     )
     .command(
-      'notes',
-      'Calculate and show release notes according to detected commits in path',
-      (y): Argv => addOptions(y, true),
-    )
-    .command(
       'tag-git',
       'Calculate next tag and tag it in local git repo',
       (y): Argv => addOptions(y, true),
@@ -58,7 +53,7 @@ const run = async (processArgs: string[]): Promise<number> => {
         'Will use current dir as repo and tag prefix name, try to find the latest tag in this repo with this prefix, look for changes since the last tag to HEAD and output a newer version according to conventional commit changes',
       ],
       [
-        'monotag notes --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice',
+        'monotag tag --from-ref=HEAD~3 --to-ref=HEAD --path services/myservice',
         'Generate release notes according to changes made in the last 3 commits for changes in dir services/myservice of the repo',
       ],
       [
@@ -161,21 +156,6 @@ const execAction = async (
 
     console.log(latestTag);
 
-    return 0;
-  }
-
-  // NOTES ACTION
-  if (action === 'notes') {
-    // calculate and show tag
-    const nt = await nextTag(opts);
-    if (nt === undefined) {
-      console.log('No changes detected and no previous tag found');
-      return 4;
-    }
-    console.log(nt.tagName);
-    console.log(nt.version);
-    console.log(nt.releaseNotes);
-    saveResultsToFiles(nt, opts);
     return 0;
   }
 
