@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.19.3 (2025-03-11)
+
+### Maintenance
+
+* fix pre-release
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+
+
 ## 1.19.2 (2025-03-11)
 
 ### Bug Fixes
