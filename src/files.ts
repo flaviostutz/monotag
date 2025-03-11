@@ -112,7 +112,7 @@ export const appendChangelog = (changelogFile: string, nt: TagNotes, verbose?: b
   const existingContents = fs.readFileSync(changelogFile, { encoding: 'utf8' });
 
   // check if notes already exist in the file
-  if (existingContents.includes(nt.tagName)) {
+  if (existingContents.includes(nt.releaseNotes)) {
     if (verbose) {
       console.log(`Changelog already have mention to tag ${nt.tagName}. Skipping append.`);
     }

@@ -124,7 +124,10 @@ describe('appendChangelog', () => {
     const changelogFile = path.join(tmpDir, 'changelog.md');
     appendChangelog(changelogFile, tag1, false);
     expect(fs.existsSync(changelogFile)).toBe(true);
-    expect(fs.readFileSync(changelogFile, { encoding: 'utf8' })).toBe(`# Changelog
+
+    const fcontents = fs.readFileSync(changelogFile, { encoding: 'utf8' });
+    expect(fcontents.match(`${tag1.tagName}`)?.length).toBe(1);
+    expect(fcontents).toBe(`# Changelog
 
 ${tag1.releaseNotes}
 
@@ -133,7 +136,10 @@ ${tag1.releaseNotes}
     // if version already exists, skip adding to changelog
     appendChangelog(changelogFile, tag1, false);
     expect(fs.existsSync(changelogFile)).toBe(true);
-    expect(fs.readFileSync(changelogFile, { encoding: 'utf8' })).toBe(`# Changelog
+
+    const fcontents2 = fs.readFileSync(changelogFile, { encoding: 'utf8' });
+    expect(fcontents2.match(`${tag1.tagName}`)?.length).toBe(1);
+    expect(fcontents2).toBe(`# Changelog
 
 ${tag1.releaseNotes}
 
