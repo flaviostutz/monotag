@@ -282,8 +282,15 @@ const expandDefaults = (args: any): CliNextTagOptions => {
       console.log(`Using path inside repo "${pathRepo}"`);
     }
   }
-  if (pathRepo && pathRepo.startsWith('/')) {
-    pathRepo = pathRepo.slice(1);
+  if (pathRepo) {
+    if (pathRepo.startsWith('/')) {
+      pathRepo = pathRepo.slice(1);
+    }
+    pathRepo = path.resolve(pathRepo);
+    pathRepo = pathRepo.replace(repoDir, '');
+  }
+  if (args.verbose) {
+    console.log(`Analysing changes in path "${repoDir}/${pathRepo}"`);
   }
 
   const basicOpts: BasicOptions = {
