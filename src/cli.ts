@@ -32,11 +32,6 @@ const run = async (processArgs: string[]): Promise<number> => {
       (y): Argv => addOptions(y, true),
     )
     .command(
-      'version',
-      'Calculate and show next version, incrementing semver according to detected changes on path',
-      (y): Argv => addOptions(y, true),
-    )
-    .command(
       'tag-git',
       'Calculate next tag and tag it in local git repo',
       (y): Argv => addOptions(y, true),
@@ -159,19 +154,6 @@ const execAction = async (
     return 0;
   }
 
-  // VERSION ACTION
-  if (action === 'version') {
-    // calculate and show version
-    const nt = await nextTag(opts);
-    if (nt === undefined) {
-      console.log('No changes detected and no previous tag found');
-      return 4;
-    }
-    console.log(nt.version);
-    saveResultsToFiles(nt, opts);
-    return 0;
-  }
-
   // TAG* ACTIONS
   if (action.startsWith('tag')) {
     // calculate and show tag
@@ -185,6 +167,10 @@ const execAction = async (
     console.log(nt.tagName);
     console.log(nt.version);
     console.log(nt.releaseNotes);
+
+    if (!nt.releaseNotes) {
+      console.log(`No changes detected in path "${opts.path}"`);
+    }
 
     saveResultsToFiles(nt, opts);
 

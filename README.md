@@ -87,8 +87,6 @@ Commands:
   monotag latest    Show the latest tag for the path
   monotag tag       Calculate and show next tag, incrementing semver according
                     to detected changes on path
-  monotag version   Calculate and show next version, incrementing semver
-                    according to detected changes on path
   monotag tag-git   Calculate next tag and tag it in local git repo
   monotag tag-push  Calculate next tag, git-tag and git-push it to remote
 
