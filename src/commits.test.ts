@@ -87,9 +87,12 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.features).toEqual(['**Breaking:** add breaking change', 'add new feature']);
-    expect(summary.fixes).toEqual(['fix bug', 'fix second bug (MERGED FROM 123)']);
-    expect(summary.maintenance).toEqual(['update dependencies']);
+    expect(summary.features).toEqual([
+      '**Breaking:** add breaking change [5]',
+      'add new feature [1]',
+    ]);
+    expect(summary.fixes).toEqual(['fix bug [2]', 'fix second bug (MERGED FROM 123) [6]']);
+    expect(summary.maintenance).toEqual(['update dependencies [3]']);
     expect(summary.nonConventional).toEqual(['docs: update documentation']);
     expect(summary.notes).toEqual([]);
     expect(summary.level).toEqual('major');
@@ -110,7 +113,7 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.features).toEqual(['**Breaking:** add new feature']);
+    expect(summary.features).toEqual(['**Breaking:** add new feature [1]']);
     expect(summary.level).toEqual('major');
     expect(summary.notes).toEqual(['BREAKING CHANGES: new API']);
   });
@@ -128,7 +131,7 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.features).toEqual(['add new feature']);
+    expect(summary.features).toEqual(['add new feature [1]']);
     expect(summary.level).toEqual('minor');
   });
 
@@ -159,7 +162,7 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.fixes).toEqual(['fix something']);
+    expect(summary.fixes).toEqual(['fix something [1]']);
     expect(summary.level).toEqual('minor');
   });
 
@@ -191,7 +194,7 @@ describe('summarizeCommits', () => {
     const summary = summarizeCommits(commits);
 
     expect(summary.fixes).toEqual([]);
-    expect(summary.features).toEqual(['**Breaking:** major something', 'feat something']);
+    expect(summary.features).toEqual(['**Breaking:** major something [1]', 'feat something [3]']);
     expect(summary.level).toEqual('major');
   });
 

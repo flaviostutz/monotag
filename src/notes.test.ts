@@ -19,9 +19,7 @@ describe('re-generate notes from latest tag', () => {
     expect(nt).toContain('* 8 prefix2 creating test3 file');
     expect(nt).toContain(`### Features
 
-* **Breaking:** 8 prefix2 creating test3 file
-
-### Info`);
+* **Breaking:** 8 prefix2 creating test3 file`);
   });
   it('should generate notes for non-prefixed tag', async () => {
     const nt = await notesForLatestTag({
@@ -33,9 +31,7 @@ describe('re-generate notes from latest tag', () => {
     expect(nt).toContain('## 345.2123.143 (');
     expect(nt).toContain(`### Features
 
-* adding test1 file to root
-
-### Info`);
+* adding test1 file to root`);
   });
 
   it('should return undefined for non existing tag', async () => {

@@ -170,7 +170,7 @@ const pushItem = (pushTo: string[], commitDetails: CommitDetails): void => {
     );
     return;
   }
-  pushTo.push(`${commitDetails.parsedLog.subject.trim()}`);
+  pushTo.push(`${commitDetails.parsedLog.subject.trim()} [${commitDetails.commit.id.slice(0, 7)}]`);
 };
 
 /**

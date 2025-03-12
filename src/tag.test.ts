@@ -143,8 +143,8 @@ describe('when generating next tag with notes', () => {
 
 ### Features
 
-* **Breaking:** 12 prefix2 adding test3 file for module prefix2
-* 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2
+* **Breaking:** 12 prefix2 adding test3 file for module prefix2 [COMMITID]
+* 14 prefix1 prefix2 adding test4 for both prefix1 and prefix2 [COMMITID]
 
 ### Bug Fixes
 
@@ -152,7 +152,7 @@ describe('when generating next tag with notes', () => {
 
 ### Maintenance
 
-* 13 prefix2 updating test1 and test2 files for module prefix2 closes #45
+* 13 prefix2 updating test1 and test2 files for module prefix2 closes #45 [COMMITID]
 
 ### Info
 
