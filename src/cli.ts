@@ -171,12 +171,7 @@ const execAction = async (
     // display tag, version and notes
     console.log(nt.tagName);
     console.log(nt.version);
-
-    if (nt.releaseNotes) {
-      console.log(nt.releaseNotes);
-    } else {
-      console.log(`No changes detected in path "${opts.path}"`);
-    }
+    console.log(nt.releaseNotes);
 
     saveResultsToFiles(nt, opts);
 

@@ -37,4 +37,28 @@ describe('re-generate notes from latest tag', () => {
 
 ### Info`);
   });
+
+  it('should return undefined for non existing tag', async () => {
+    const nt = await notesForLatestTag({
+      repoDir,
+      tagPrefix: 'SOMETHING_INEXISTENT/',
+      path: 'prefix2',
+    });
+    expect(nt).toBeUndefined();
+  });
+
+  it('should return empty release note if no commits found touching path', async () => {
+    const nt = await notesForLatestTag({
+      repoDir,
+      tagPrefix: 'lonelytag/',
+      path: 'INEXISTENT_PATH',
+    });
+    expect(nt).toBe(`## lonelytag/1.0.0
+
+### Misc
+
+* No changes in path INEXISTENT_PATH
+
+`);
+  });
 });

@@ -41,8 +41,9 @@ export type TagNotes = {
   version: string;
   /**
    * Release notes for this tag
+   * If this is the first tag, it will be undefined
    */
-  releaseNotes: string;
+  releaseNotes?: string;
   /**
    * Commits detected for this tag
    */

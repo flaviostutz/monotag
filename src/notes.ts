@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-undefined */
 /* eslint-disable functional/no-let */
 import { lastTagForPrefix, findCommitsForLatestTag } from './git';
@@ -20,19 +21,37 @@ const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefin
   });
 
   if (!latestTag) {
+    if (opts.verbose) {
+      console.log(`Latest tag not found, so no release notes will be generated`);
+    }
     return undefined;
   }
 
   // look for the commits that compose the latest tag for this prefix
   const commits = await findCommitsForLatestTag(opts);
   if (commits.length === 0) {
-    return undefined;
+    const initialCommitSummary: CommitsSummary = {
+      nonConventional: [`No changes in path ${opts.path}`],
+      level: 'none',
+      features: [],
+      fixes: [],
+      maintenance: [],
+      notes: [],
+      references: [],
+      authors: [],
+    };
+    const initialReleaseNotes = renderReleaseNotes({
+      commitsSummary: initialCommitSummary,
+      tagName: latestTag,
+    });
+
+    return initialReleaseNotes;
   }
 
+  // commits found for the latest tag
+
   const commitsSummary = summarizeCommits(commits);
-
   const versionDate = getDateFromCommit(commits[0].date);
-
   const formattedReleaseNotes = renderReleaseNotes({
     commitsSummary,
     tagName: latestTag,
@@ -46,7 +65,7 @@ const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefin
 const renderReleaseNotes = (args: {
   commitsSummary: CommitsSummary;
   tagName: string;
-  versionDate: string;
+  versionDate?: string;
   onlyConvCommit?: boolean;
 }): string => {
   let notes = '';
@@ -54,7 +73,11 @@ const renderReleaseNotes = (args: {
   const tparts = tagParts(args.tagName);
 
   if (tparts) {
-    notes += `## ${tparts[1]} (${args.versionDate})\n\n`;
+    if (args.versionDate) {
+      notes += `## ${tparts[1]} (${args.versionDate})\n\n`;
+    } else {
+      notes += `## ${tparts[1]}\n\n`;
+    }
   }
 
   // features

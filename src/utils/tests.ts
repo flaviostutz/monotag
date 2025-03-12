@@ -41,6 +41,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
     git tag prefix1/abracadabra
     git tag prefix1/20230118.17
     git tag prefix1-abracadabra
+    git tag lonelytag/1.0.0
 
     [ -n "$CI" ] && sleep 1
 

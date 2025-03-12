@@ -23,8 +23,8 @@ export const saveResultsToFiles = (nt: TagNotes, opts: CliNextTagOptions): void 
 
   // save notes to file
   if (opts.notesFile) {
-    if (opts.verbose && !nt.releaseNotes) {
-      console.log('No release notes available to be saved to notes file');
+    if (!nt.releaseNotes) {
+      throw new Error('No release notes available to be saved to notes file');
     }
     fs.mkdirSync(path.dirname(opts.notesFile), { recursive: true });
     fs.rmSync(opts.notesFile, { force: true });
@@ -97,8 +97,8 @@ export const bumpFilesToVersion = (files?: string[], version?: string, verbose?:
 };
 
 export const appendChangelog = (changelogFile: string, nt: TagNotes, verbose?: boolean): void => {
-  if (verbose && !nt.releaseNotes) {
-    console.log('No release notes available to be saved to changelog');
+  if (!nt.releaseNotes) {
+    throw new Error('No release notes available to be saved to changelog');
   }
 
   // create header if file does not exist

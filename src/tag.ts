@@ -37,11 +37,11 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
   });
 
   if (opts.verbose) {
-    console.log(`Using latest tag '${latestTag}' for '${opts.tagPrefix}'`);
-  }
-
-  if (opts.verbose && !latestTag) {
-    console.log(`No existing tag found with for prefix "${opts.tagPrefix}"`);
+    if (!latestTag) {
+      console.log(`No existing tag found with for prefix "${opts.tagPrefix}"`);
+    } else {
+      console.log(`Using latest tag '${latestTag}' for '${opts.tagPrefix}'`);
+    }
   }
 
   // search for changes
@@ -58,27 +58,28 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
   const commits = await findCommitsTouchingPath(opts);
 
   // no changes detected
-  // define new tag by using the latest tag as a reference
   if (commits.length === 0) {
     if (opts.verbose) {
       console.log('No changes detected in commit range');
     }
+
     if (!latestTag) {
       return undefined;
     }
 
-    const releaseNotes = await notesForLatestTag(opts);
-
+    // reconstruct existing latest tag
     const tagName = incrementTag({
       fullTagName: latestTag,
       type: 'none',
       ...opts,
     });
 
+    const releaseNotes = await notesForLatestTag(opts);
+
     return {
       tagName,
       version: getVersionFromTag(tagName, opts.tagPrefix, opts.tagSuffix),
-      releaseNotes: releaseNotes ?? '',
+      releaseNotes,
       changesDetected: commits,
       existingTag: tagExistsInRepo(opts.repoDir, tagName, opts.verbose),
     };
