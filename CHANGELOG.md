@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.20.0 (2025-03-11)
+
+### Features
+
+* return initial release notes for tag without commits yet
+
+### Bug Fixes
+
+* current dir resolver fixed
+
+### Maintenance
+
+* release: 1.19.3-beta.0 [c77a9d0]
+* remove changelog from prerelease
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+
+
 ## 1.19.2 (2025-03-11)
 
 ### Bug Fixes
