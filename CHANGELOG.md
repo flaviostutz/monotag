@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.20.1 (2025-03-12)
+
+### Bug Fixes
+
+* show commit id on logs without scope
+
+### Maintenance
+
+* release: 1.20.0 [b1600bc]
+* bump monotag for releases
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+
+
 ## 1.19.2 (2025-03-11)
 
 ### Bug Fixes
