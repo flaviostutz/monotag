@@ -258,10 +258,11 @@ const expandDefaults = (args: any): CliNextTagOptions => {
     } else {
       throw new Error(`Path "${pathRepo}" is not inside repo dir "${absRepoDir}"`);
     }
+  }
 
-    // path is relative to repo dir
-    // support paths starting with /
-  } else if (pathRepo.startsWith('/')) {
+  // path is relative to repo dir
+  // support paths starting with /
+  if (pathRepo.startsWith('/')) {
     pathRepo = pathRepo.slice(1);
   }
 
