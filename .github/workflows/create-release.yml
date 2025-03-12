@@ -18,7 +18,7 @@ jobs:
           token: ${{ secrets.GH_PERSONAL_TOKEN }}
       - name: Create tag and push to repo
         run: |
-          npx -y monotag@1.19.2 tag-push \
+          npx -y monotag@1.20.0 tag-push \
             -v \
             --git-username="Flávio Stutz" \
             --git-email="flaviostutz@gmail.com" \
