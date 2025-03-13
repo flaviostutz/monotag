@@ -18,7 +18,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: '',
+      paths: [''],
       tagPrefix: '',
     });
     expect(nt?.releaseNotes).toContain('## 346.0.0 (');
@@ -37,7 +37,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD~16',
-      path: '',
+      paths: [''],
       tagPrefix: '',
     });
     if (!nt) throw new Error('Shouldnt be null');
@@ -48,7 +48,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD~16',
-      path: '',
+      paths: [''],
       tagPrefix: '',
     });
     if (!nt) throw new Error('Shouldnt be null');
@@ -59,7 +59,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'inexistentModule',
+      paths: ['inexistentModule'],
       tagPrefix: 'inexistentModule/',
     });
     expect(nt).toBeUndefined();
@@ -69,7 +69,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix1',
+      paths: ['prefix1'],
       tagPrefix: 'prefix1/',
     });
     if (!nt) throw new Error('Shouldnt be null');
@@ -87,7 +87,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix1',
+      paths: ['prefix1'],
       tagPrefix: 'prefix1/',
       tagSuffix: '-alphaaaaa',
     });
@@ -99,7 +99,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix9',
+      paths: ['prefix9'],
       tagPrefix: 'prefix9/v',
       tagSuffix: '',
     });
@@ -112,7 +112,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix1',
+      paths: ['prefix1'],
       tagPrefix: 'prefix1/',
       tagSuffix: '-beta-gama',
     });
@@ -124,7 +124,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix2',
+      paths: ['prefix2'],
       tagPrefix: 'prefix2/',
       notesDisableLinks: true,
     });
@@ -165,7 +165,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix3',
+      paths: ['prefix3'],
       tagPrefix: 'prefix3/',
       tagSuffix: '-alpha',
     });
@@ -180,7 +180,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix3',
+      paths: ['prefix3'],
       tagPrefix: 'prefix3/',
       tagSuffix: '-rc1.0-all',
     });
@@ -196,7 +196,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'HEAD~9',
       toRef: 'HEAD',
-      path: 'inexistentModule',
+      paths: ['inexistentModule'],
     });
     expect(clogs).toHaveLength(0);
   });
@@ -208,7 +208,7 @@ describe('when generating next tag with notes', () => {
         repoDir,
         fromRef: 'HEAD~9999',
         toRef: 'HEAD',
-        path: '',
+        paths: [''],
       });
     };
     await expect(exec).rejects.toThrow('failed');
@@ -218,7 +218,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'HEAD~16',
       toRef: 'HEAD',
-      path: 'prefix1',
+      paths: ['prefix1'],
     });
     expect(clogs).toHaveLength(7);
     expect(clogs.filter((cl) => cl.message.includes('prefix1'))).toHaveLength(7);
@@ -229,7 +229,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'HEAD~12',
       toRef: 'HEAD',
-      path: 'prefix2',
+      paths: ['prefix2'],
     });
     expect(clogs).toHaveLength(8);
     expect(clogs.filter((cl) => cl.message.includes('prefix2'))).toHaveLength(8);
@@ -240,7 +240,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'HEAD~6',
       toRef: 'HEAD',
-      path: '',
+      paths: [''],
     });
     expect(clogs).toHaveLength(6);
     expect(clogs[0].message.includes('10')).toBeTruthy();
@@ -255,7 +255,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix1',
+      paths: ['prefix1'],
       tagPrefix: 'prefix1/',
       preRelease: true,
     });
@@ -268,7 +268,7 @@ describe('when generating next tag with notes', () => {
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
-      path: 'prefix1',
+      paths: ['prefix1'],
       tagPrefix: 'prefix1/',
       preRelease: false,
     });
