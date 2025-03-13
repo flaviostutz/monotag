@@ -252,6 +252,28 @@ describe('when using cli', () => {
     // from previous tags with the same actual changes (related to the same commitid)
     expect(stdout).toEqual(notesAlpha);
 
+    // notes links
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag',
+      `--repo-dir=${repoDir}`,
+      '--url-commit=https://myrepo/commits/',
+    ]);
+    expect(stdout).toMatch('## 346.0.0 (');
+    expect(stdout).toMatch(
+      /15 adding test2 file to root \[\[.{7}]\(https:\/\/myrepo\/commits\/.*\)]/,
+    );
+    expect(exitCode).toBe(0);
+
+    // no notes links
+    stdout = '';
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--no-links=true']);
+    expect(stdout).toMatch('## 346.0.0 (');
+    expect(stdout).not.toMatch(/https/);
+    expect(exitCode).toBe(0);
+
     // bump package.json
     // create sample file that will be bumped
     fs.writeFileSync(`${repoDir}/packagerr.json`, '{"version":"0.0.1"}', { encoding: 'utf8' });
