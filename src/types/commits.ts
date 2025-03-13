@@ -1,3 +1,5 @@
+import conventionalCommitsParser from 'conventional-commits-parser';
+
 /**
  * A commit in repository
  */
@@ -18,14 +20,14 @@ export type Commit = {
  * Commit summarized according to conventional commit
  */
 export type CommitsSummary = {
-  fixes: string[];
-  features: string[];
-  maintenance: string[];
+  fixes: CommitDetails[];
+  features: CommitDetails[];
+  maintenance: CommitDetails[];
+  nonConventional: CommitDetails[];
   notes: string[];
   level: SemverLevelNone;
   authors: string[];
   references: string[];
-  nonConventional: string[];
 };
 
 export type TagNotes = {
@@ -52,6 +54,12 @@ export type TagNotes = {
    * If tag already exists in repository or a new one would be created
    */
   existingTag: boolean;
+};
+
+export type CommitDetails = {
+  parsedLog: conventionalCommitsParser.Commit;
+  commit: Commit;
+  breakingChange: boolean;
 };
 
 export type SemverLevel = 'patch' | 'minor' | 'major';

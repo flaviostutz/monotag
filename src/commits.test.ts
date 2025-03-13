@@ -87,13 +87,25 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.features).toEqual([
-      '**Breaking:** add breaking change [5]',
-      'add new feature [1]',
+    expect(summary.features.map((cd) => cd.commit)).toMatchObject([
+      { id: '5', author: 'Author 44', date: '2023-01-05', message: 'feat!: add breaking change' },
+      { id: '1', author: 'Author 11', date: '2023-01-01', message: 'feat: add new feature' },
     ]);
-    expect(summary.fixes).toEqual(['fix bug [2]', 'fix second bug (MERGED FROM 123) [6]']);
-    expect(summary.maintenance).toEqual(['update dependencies [3]']);
-    expect(summary.nonConventional).toEqual(['docs: update documentation']);
+    expect(summary.fixes.map((cd) => cd.commit)).toMatchObject([
+      { id: '2', author: 'Author 22', date: '2023-01-02', message: 'fix: fix bug' },
+      {
+        id: '6',
+        author: 'Author 22',
+        date: '2023-01-04',
+        message: 'MERGED FROM 123: fix: fix second bug',
+      },
+    ]);
+    expect(summary.maintenance.map((cd) => cd.commit)).toMatchObject([
+      { id: '3', author: 'Author 33', date: '2023-01-03', message: 'chore: update dependencies' },
+    ]);
+    expect(summary.nonConventional.map((cd) => cd.commit)).toMatchObject([
+      { id: '4', author: 'Author 44', date: '2023-01-04', message: 'docs: update documentation' },
+    ]);
     expect(summary.notes).toEqual([]);
     expect(summary.level).toEqual('major');
     expect(summary.authors).toEqual(['Author 11', 'Author 22', 'Author 33', 'Author 44']);
@@ -113,7 +125,18 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.features).toEqual(['**Breaking:** add new feature [1]']);
+    expect(summary.features).toMatchObject([
+      {
+        commit: {
+          id: '1',
+          author: 'Author One',
+          date: '2023-01-01',
+          message: `feat: add new feature
+
+BREAKING CHANGES: new API`,
+        },
+      },
+    ]);
     expect(summary.level).toEqual('major');
     expect(summary.notes).toEqual(['BREAKING CHANGES: new API']);
   });
@@ -131,7 +154,16 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.features).toEqual(['add new feature [1]']);
+    expect(summary.features).toMatchObject([
+      {
+        commit: {
+          id: '1',
+          author: 'Author One',
+          date: '2023-01-01',
+          message: 'feat: add new feature',
+        },
+      },
+    ]);
     expect(summary.level).toEqual('minor');
   });
 
@@ -162,7 +194,16 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.fixes).toEqual(['fix something [1]']);
+    expect(summary.fixes).toMatchObject([
+      {
+        commit: {
+          id: '1',
+          author: 'Author One',
+          date: '2023-01-01',
+          message: 'fix: fix something',
+        },
+      },
+    ]);
     expect(summary.level).toEqual('minor');
   });
 
@@ -194,7 +235,21 @@ describe('summarizeCommits', () => {
     const summary = summarizeCommits(commits);
 
     expect(summary.fixes).toEqual([]);
-    expect(summary.features).toEqual(['**Breaking:** major something [1]', 'feat something [3]']);
+    expect(summary.features).toMatchObject([
+      {
+        commit: {
+          id: '1',
+          author: 'Author One',
+          date: '2023-01-01',
+          message: 'feat!: major something',
+        },
+      },
+      {
+        commit: {
+          id: '3',
+        },
+      },
+    ]);
     expect(summary.level).toEqual('major');
   });
 
@@ -211,7 +266,9 @@ describe('summarizeCommits', () => {
 
     const summary = summarizeCommits(commits);
 
-    expect(summary.nonConventional).toEqual(['non conventional change']);
+    expect(summary.nonConventional).toMatchObject([
+      { commit: { id: '1', message: 'non conventional change' } },
+    ]);
     expect(summary.level).toEqual('patch');
   });
 });

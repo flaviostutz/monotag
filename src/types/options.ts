@@ -95,6 +95,33 @@ export type NextTagOptions = BasicOptions & {
    * @default false
    */
   preReleaseAlwaysIncrement?: boolean;
+
+  /**
+   * If true, no links to commit, PR and issue URLs will be created in release notes
+   * @default false
+   */
+  notesDisableLinks?: boolean;
+
+  /**
+   * Base URL for commit links. E.g.: https://github.com/myorg/myrepo/commit/
+   * If not defined, it will be derived from the repo git origin URL if possible
+   * @default undefined
+   */
+  notesBaseCommitUrl?: string;
+
+  /**
+   * Base URL for pull request links. E.g.: https://github.com/myorg/myrepo/pull/
+   * If not defined, it will be derived from the repo git origin URL if possible
+   * @default undefined
+   */
+  notesBasePRUrl?: string;
+
+  /**
+   * Base URL for issue links. E.g.: https://github.com/myorg/myrepo/issues/
+   * If not defined, it will be derived from the repo git origin URL if possible
+   * @default undefined
+   */
+  notesBaseIssueUrl?: string;
 };
 
 export type CliNextTagOptions = NextTagOptions & {
