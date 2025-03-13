@@ -214,6 +214,8 @@ const execAction = async (
       console.log('Tag created successfully');
 
       if (action === 'tag-push' && !nt.existingTag) {
+        console.log("Pushing changes to remote 'origin'");
+        execCmd(opts.repoDir, `git push origin`, opts.verbose);
         console.log("Pushing tag to remote 'origin'");
         execCmd(opts.repoDir, `git push origin ${nt.tagName}`, opts.verbose);
         console.log('Tag pushed to origin successfully');
