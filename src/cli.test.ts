@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable functional/no-let */
-import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import { randomBytes } from 'node:crypto';
 
@@ -198,7 +197,7 @@ describe('when using cli', () => {
       '--notes-file=dist/notes2.md',
     ]);
 
-    await execSync('diff dist/notes1.md dist/notes2.md');
+    execCmd('.', 'diff dist/notes1.md dist/notes2.md', true);
 
     stdout = '';
     exitCode = await run([
@@ -253,6 +252,28 @@ describe('when using cli', () => {
     // from previous tags with the same actual changes (related to the same commitid)
     expect(stdout).toEqual(notesAlpha);
 
+    // notes links
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag',
+      `--repo-dir=${repoDir}`,
+      '--url-commit=https://myrepo/commits/',
+    ]);
+    expect(stdout).toMatch('## 346.0.0 (');
+    expect(stdout).toMatch(
+      /15 adding test2 file to root \[\[.{7}]\(https:\/\/myrepo\/commits\/.*\)]/,
+    );
+    expect(exitCode).toBe(0);
+
+    // no notes links
+    stdout = '';
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--no-links=true']);
+    expect(stdout).toMatch('## 346.0.0 (');
+    expect(stdout).not.toMatch(/https/);
+    expect(exitCode).toBe(0);
+
     // bump package.json
     // create sample file that will be bumped
     fs.writeFileSync(`${repoDir}/packagerr.json`, '{"version":"0.0.1"}', { encoding: 'utf8' });
@@ -288,6 +309,6 @@ describe('when using cli', () => {
     const rr1 = async (): Promise<void> => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~5']);
     };
-    await expect(rr1).rejects.toThrow("fatal: 'origin' does not appear to be a git repository");
+    await expect(rr1).rejects.toThrow();
   });
 });

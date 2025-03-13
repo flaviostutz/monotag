@@ -209,8 +209,7 @@ export const gitConfigUser = (
     execCmd(repoDir, `git config user.name "${userName}"`, verbose);
   } else {
     try {
-      const a = execCmd(repoDir, `git config user.name`, verbose);
-      console.log(`>>>>>> ${a}`);
+      execCmd(repoDir, `git config user.name`, verbose);
     } catch {
       throw new Error("git username is required because it's not already set in git");
     }
@@ -232,5 +231,16 @@ export const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: bool
     return true;
   } catch {
     return false;
+  }
+};
+
+export const remoteOriginUrl = (repoDir: string, verbose?: boolean): string | undefined => {
+  try {
+    return execCmd(repoDir, `git remote get-url origin`, verbose).trim();
+  } catch (error) {
+    if (verbose) {
+      console.log(`Unable to get remote origin url. err=${error}`);
+    }
+    return undefined;
   }
 };

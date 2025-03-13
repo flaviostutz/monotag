@@ -214,6 +214,8 @@ const execAction = async (
       console.log('Tag created successfully');
 
       if (action === 'tag-push' && !nt.existingTag) {
+        console.log("Pushing changes to remote 'origin'");
+        execCmd(opts.repoDir, `git push origin`, opts.verbose);
         console.log("Pushing tag to remote 'origin'");
         execCmd(opts.repoDir, `git push origin ${nt.tagName}`, opts.verbose);
         console.log('Tag pushed to origin successfully');
@@ -328,6 +330,10 @@ const expandDefaults = (args: any): CliNextTagOptions => {
     maxVersion: defaultValueString(args['max-version'], undefined),
     gitUsername: defaultValueString(args['git-username'], undefined),
     gitEmail: defaultValueString(args['git-email'], undefined),
+    notesDisableLinks: defaultValueBoolean(args['no-links'], false),
+    notesBaseCommitUrl: defaultValueString(args['url-commit'], undefined),
+    notesBasePRUrl: defaultValueString(args['url-pr'], undefined),
+    notesBaseIssueUrl: defaultValueString(args['url-issue'], undefined),
   };
 };
 
@@ -440,8 +446,7 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
     y1.option('changelog-file', {
       alias: 'fc',
       type: 'string',
-      describe:
-        'Changelog file that will be appended with new version/release notes. Disabled for prerelease versions',
+      describe: 'Changelog file that will be appended with new version/release notes',
       default: undefined,
     });
     y1.option('min-version', {
@@ -481,6 +486,30 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       alias: 'ge',
       type: 'string',
       describe: 'Git email config when commiting and tagging resources',
+      default: undefined,
+    });
+    y1.option('no-links', {
+      alias: 'nl',
+      type: 'boolean',
+      describe: `Disable rendering links in release notes for issues, prs and commits`,
+      default: false,
+    });
+    y1.option('url-commit', {
+      alias: 'uc',
+      type: 'string',
+      describe: `Base commit URL used to generate links to commits in release notes. Defaults to git origin when possible. E.g.: http://mygit.com/myrepo/commit/`,
+      default: undefined,
+    });
+    y1.option('url-pr', {
+      alias: 'up',
+      type: 'string',
+      describe: `Base pr URL used to generate links to pr in release notes. Defaults to git origin when possible. E.g.: http://mygit.com/myrepo/prs/`,
+      default: undefined,
+    });
+    y1.option('url-issue', {
+      alias: 'ui',
+      type: 'string',
+      describe: `Base issue URL used to generate links to issues in release notes. Defaults to git origin when possible. E.g.: http://mygit.com/myrepo/issues/`,
       default: undefined,
     });
   }

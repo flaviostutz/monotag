@@ -3,16 +3,10 @@
 /* eslint-disable functional/immutable-data */
 import conventionalCommitsParser from 'conventional-commits-parser';
 
-import { Commit, CommitsSummary, SemverLevelNone } from './types/commits';
+import { Commit, CommitDetails, CommitsSummary, SemverLevelNone } from './types/commits';
 
 export const getDateFromCommit = (dateWithTime: string): string => {
   return /(\d{4}-\d{2}-\d{2})/.exec(dateWithTime)?.[0] ?? '';
-};
-
-type CommitDetails = {
-  parsedLog: conventionalCommitsParser.Commit;
-  commit: Commit;
-  breakingChange: boolean;
 };
 
 /**
@@ -22,10 +16,10 @@ type CommitDetails = {
  */
 export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
   const sum: CommitsSummary = {
-    features: <string[]>[],
-    fixes: <string[]>[],
-    maintenance: <string[]>[],
-    nonConventional: <string[]>[],
+    features: <CommitDetails[]>[],
+    fixes: <CommitDetails[]>[],
+    maintenance: <CommitDetails[]>[],
+    nonConventional: <CommitDetails[]>[],
     notes: <string[]>[],
     level: 'none',
     authors: <string[]>[],
@@ -78,28 +72,28 @@ export const summarizeCommits = (commits: Commit[]): CommitsSummary => {
 
       // feat
       if (parsedLog.type === 'feat') {
-        pushItem(summary.features, convLog);
+        summary.features.push(convLog);
         if (semverGreaterThan('minor', summary.level)) {
           summary.level = 'minor';
         }
 
         // fix
       } else if (parsedLog.type === 'fix') {
-        pushItem(summary.fixes, convLog);
+        summary.fixes.push(convLog);
         if (semverGreaterThan('patch', summary.level)) {
           summary.level = 'patch';
         }
 
         // chore
       } else if (parsedLog.type === 'chore') {
-        pushItem(summary.maintenance, convLog);
+        summary.maintenance.push(convLog);
         if (semverGreaterThan('patch', summary.level)) {
           summary.level = 'patch';
         }
 
         // non conventional commits
       } else {
-        summary.nonConventional.push(parsedLog.header.trim());
+        summary.nonConventional.push(convLog);
         if (semverGreaterThan('patch', summary.level)) {
           summary.level = 'patch';
         }
@@ -158,19 +152,6 @@ export const semverGreaterThan = (semverA: SemverLevelNone, semverB: SemverLevel
     return semverB === 'patch';
   }
   return false;
-};
-
-const pushItem = (pushTo: string[], commitDetails: CommitDetails): void => {
-  if (!commitDetails.parsedLog.subject) {
-    return;
-  }
-  if (commitDetails.parsedLog.scope) {
-    pushTo.push(
-      `${commitDetails.parsedLog.scope}: ${commitDetails.parsedLog.subject.trim()} [${commitDetails.commit.id.slice(0, 7)}]`,
-    );
-    return;
-  }
-  pushTo.push(`${commitDetails.parsedLog.subject.trim()} [${commitDetails.commit.id.slice(0, 7)}]`);
 };
 
 /**

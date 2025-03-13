@@ -15,6 +15,7 @@ const createSampleRepo = async (repoDir: string): Promise<void> => {
 
     git config user.email 'flaviostutz@gmail.com'
     git config user.name 'Flávio Stutz'
+    git remote add origin http://user@github.com/someone/myrepo.git
 
     # root dir
     echo 'test1' > test1

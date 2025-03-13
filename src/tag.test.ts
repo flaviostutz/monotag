@@ -126,6 +126,7 @@ describe('when generating next tag with notes', () => {
       toRef: 'HEAD',
       path: 'prefix2',
       tagPrefix: 'prefix2/',
+      notesDisableLinks: true,
     });
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix2/21.0.0');

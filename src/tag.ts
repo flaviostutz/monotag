@@ -110,10 +110,16 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
   // const relevantCommitsSummary = summarizeCommits(commitsForNotes);
   const versionDate = getDateFromCommit(commits[0].date);
   const releaseNotes = renderReleaseNotes({
+    repoDir: opts.repoDir,
     commitsSummary,
     tagName,
     versionDate,
     onlyConvCommit: opts.onlyConvCommit,
+    disableLinks: opts.notesDisableLinks,
+    baseCommitUrl: opts.notesBaseCommitUrl,
+    basePRUrl: opts.notesBasePRUrl,
+    baseIssueUrl: opts.notesBaseIssueUrl,
+    verbose: opts.verbose,
   });
 
   return {
