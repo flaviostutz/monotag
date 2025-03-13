@@ -221,9 +221,7 @@ export const renderSubject = (
 
 const renderCommitId = (commitDetails: CommitDetails, baseCommitUrl?: string): string => {
   if (baseCommitUrl) {
-    return `[${commitDetails.commit.id.slice(0, 7)}](${baseCommitUrl}/commit/${
-      commitDetails.commit.id
-    })`;
+    return `[${commitDetails.commit.id.slice(0, 7)}](${baseCommitUrl}${commitDetails.commit.id})`;
   }
   return `${commitDetails.commit.id.slice(0, 7)}`;
 };

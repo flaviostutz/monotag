@@ -4,12 +4,14 @@ import { randomBytes } from 'node:crypto';
 import {
   cleanupRemoteOrigin,
   notesForLatestTag,
+  renderCommit,
   renderSubject,
   resolveBaseCommitUrl,
   resolveBaseIssueUrl,
   resolveBasePRUrl,
 } from './notes';
 import { createSampleRepo } from './utils/tests';
+import { CommitDetails } from './types';
 
 describe('re-generate notes from latest tag', () => {
   const repoDir = `./testcases/notes-repo-${randomBytes(2).toString('hex')}`;
@@ -207,5 +209,51 @@ describe('renderSubject', () => {
       'http://example.com/issues/',
     );
     expect(result).toBe('Nothing special here');
+  });
+});
+
+describe('renderCommit', () => {
+  it('returns empty string if subject is missing', () => {
+    const commitDetails = { parsedLog: {}, commit: { id: 'abc123' } } as unknown as CommitDetails;
+    expect(renderCommit(commitDetails)).toBe('');
+  });
+
+  it('includes scope when available', () => {
+    const commitDetails = {
+      parsedLog: { subject: 'Add feature X', scope: 'my-feature-123' },
+      commit: { id: 'abc123' },
+    } as unknown as CommitDetails;
+    expect(renderCommit(commitDetails)).toContain('* my-feature-123: Add feature X [abc123]');
+  });
+
+  it('doesnt remove issue reference if not replacing', () => {
+    const commitDetails = {
+      parsedLog: {
+        subject: 'chore: 13 prefix2 updating test1 and test2 files for module prefix2 closes #45',
+      },
+      commit: { id: 'abc123' },
+    } as unknown as CommitDetails;
+    expect(renderCommit(commitDetails)).toContain(
+      '* chore: 13 prefix2 updating test1 and test2 files for module prefix2 closes #45 [abc123]',
+    );
+  });
+
+  it('excludes scope if not provided', () => {
+    const commitDetails = {
+      parsedLog: {
+        subject: 'Fix bug Y',
+      },
+      commit: { id: 'abc123' },
+    } as unknown as CommitDetails;
+    expect(renderCommit(commitDetails)).toContain('* Fix bug Y [abc123]');
+  });
+
+  it('links commit ID if baseCommitUrl is provided', () => {
+    const commitDetails = {
+      parsedLog: { subject: 'Enhance performance' },
+      commit: { id: 'def456' },
+    } as CommitDetails;
+    const result = renderCommit(commitDetails, 'http://example.com/commits/');
+    expect(result).toContain('Enhance performance [[def456](http://example.com/commits/def456)]');
   });
 });

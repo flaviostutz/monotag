@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable functional/immutable-data */
 /* eslint-disable functional/no-let */
-import { execSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import { randomBytes } from 'node:crypto';
 
@@ -198,7 +197,7 @@ describe('when using cli', () => {
       '--notes-file=dist/notes2.md',
     ]);
 
-    await execSync('diff dist/notes1.md dist/notes2.md');
+    execCmd('.', 'diff dist/notes1.md dist/notes2.md', true);
 
     stdout = '';
     exitCode = await run([
@@ -288,6 +287,8 @@ describe('when using cli', () => {
     const rr1 = async (): Promise<void> => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~5']);
     };
-    await expect(rr1).rejects.toThrow("fatal: 'origin' does not appear to be a git repository");
+    await expect(rr1).rejects.toThrow(
+      "fatal: repository 'https://github.com/someone/myrepo.git/' not found",
+    );
   });
 });

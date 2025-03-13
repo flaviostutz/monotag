@@ -115,6 +115,11 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
     tagName,
     versionDate,
     onlyConvCommit: opts.onlyConvCommit,
+    disableLinks: opts.notesDisableLinks,
+    baseCommitUrl: opts.notesBaseCommitUrl,
+    basePRUrl: opts.notesBasePRUrl,
+    baseIssueUrl: opts.notesBaseIssueUrl,
+    verbose: opts.verbose,
   });
 
   return {
