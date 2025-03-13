@@ -4,32 +4,65 @@ Semantic versioning for monorepos based on tag prefix, path prefix, affected fil
 
 This lib can help you tag changes in specific parts of the monorepo using tag prefixes or publishing libs or deploying services independently, even though they reside in a single monorepo.
 
+<img src="diagram.png" with="600">
+
 Normally this is not easy because the monorepo shares the entire commit history and to identify which commits touched a specific dir requires some sort of filtering.
 
-**Quick trial: Go to any directory in your git repo and run `npx -y monotag notes` for a dry run**
 
-<img src="diagram.png" with="600">
+## Quick start
+
+* Open a terminal and cd to a git repository folder with commits
+* Run `npx -y monotag tag`
+* Sample output:
+```md
+1.20.0 <-- calculad version
+1.20.0 <-- calculated tag
+## 1.20.0 (2025-03-11) <-- release notes
+
+### Features
+
+* add note links config to cli args [[bad440f](https://github.com/flaviostutz/monotag/commit/bad440fff0cb15012ae2512588253bcbf6195ee6)]
+* add pr, issues and commit links to release notes [[a298550](https://github.com/flaviostutz/monotag/commit/a2985502ca25f35d4cf63fe7761ac6bda495ef2d)]
+
+### Bug Fixes
+
+* current dir resolver fixed [[05333e5](https://github.com/flaviostutz/monotag/commit/05333e50b9601992b7823b8bbbca2f5791b071b5)]
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+```
+
+## Main features
+
+* Calculation of next tag and version based on conv commits on log history taking into account only commits that touches a certain path in a monorepo
+* Tagging of calculated tag to git repo and pushing to remote
+* Generation of changelog files markdown containing the list of changes along with links to commits, prs etc
+* Bump of package.json to the latest calculated version to help with publishing of libraries
+* Pre-release version calculation for experimental or beta version releases
+* Save tag, version and notes to specific files so other processes can use it
 
 Run 'npx monotag --help' or 'npx monotag tag --help' for info on specific commands
 
 The automatic versioning feature can be used for non-monorepos too and you can use this as a library also. Check examples below.
 
-## Actions
+## Basic operation
 
-In general it will always to calculate the next tag/version/notes and create some resources as the result of this analysis.
-
-After analysis we will have calculated:
+Monotag analyses commits that touched the current dir and then calculates:
 - Tag: a release tag that identifies uniquelly this module in the monorepo (e.g.: mymodule/1.0.1-beta.1)
-- Notes: description of what changed for this new version in comparison to the previous one
+- Version: Version of the package, such as "1.0.1-beta.1"
+- Notes: changelog with release notes of what changed for this new version in comparison to the previous one
 
-As "actions", it can:
-  - display tag/version/notes on console
-  - save tag, version and notes to specific files
-  - append notes to an existing changelog.md file
-  - git tag the repo with the calculated version (using generated notes as tag notes)
-  - git commit and push any files or tags created during the process
+After calculating it, it can perform actions such as:
+  - "tag": display tag/version/notes on console (dry run)
+  - "tag-git": tag the repo with the calculated version. I will push any files or tags created during the process to the repo
+  - "tag-push": pushes all tags and changes to the remote repo
+  - "current": verifies if current tag is really the latest one. Useful to make sure that HEAD is tagged and up to date with what you want to release.
 
-Run `npx monotag --help` for a list of actions you can use.
+Run `npx monotag --help` for a list of actions you can use
+Run `npx monotag tag --help` for specific options related to tag
+
+See below more options, such as changelog generation and automatic bumping.
 
 ## Example
 
@@ -79,7 +112,7 @@ See a complete github actions workflow that publishes libs to NPM with automatic
 ### CLI
 
 ```text
-monotag [command]
+npx monotag [command]
 
 Commands:
   monotag current   Show the latest tag for the path and fail if it's not up to
@@ -160,6 +193,21 @@ Options:
                                       tagging resources                 [string]
       --git-email, --ge               Git email config when commiting and
                                       tagging resources                 [string]
+      --no-links, --nl                Disable rendering links in release notes
+                                      for issues, prs and commits
+                                                      [boolean] [default: false]
+      --url-commit, --uc              Base commit URL used to generate links to
+                                      commits in release notes. Defaults to git
+                                      origin when possible. E.g.:
+                                      http://mygit.com/myrepo/commit/   [string]
+      --url-pr, --up                  Base pr URL used to generate links to pr
+                                      in release notes. Defaults to git origin
+                                      when possible. E.g.:
+                                      http://mygit.com/myrepo/prs/      [string]
+      --url-issue, --ui               Base issue URL used to generate links to
+                                      issues in release notes. Defaults to git
+                                      origin when possible. E.g.:
+                                      http://mygit.com/myrepo/issues/   [string]
 ```
 
 ### Lib
