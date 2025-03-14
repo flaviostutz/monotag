@@ -22,7 +22,7 @@ describe('re-generate notes from latest tag', () => {
     const nt = await notesForLatestTag({
       repoDir,
       tagPrefix: 'prefix2/',
-      path: 'prefix2',
+      paths: ['prefix2'],
     });
     if (!nt) throw new Error('Shouldnt be undefined');
     expect(nt).toContain('## prefix2/20.10.0 (');
@@ -35,7 +35,7 @@ describe('re-generate notes from latest tag', () => {
     const nt = await notesForLatestTag({
       repoDir,
       tagPrefix: '',
-      path: '',
+      paths: [''],
     });
     if (!nt) throw new Error('Shouldnt be undefined');
     expect(nt).toContain('## 345.2123.143 (');
@@ -48,7 +48,7 @@ describe('re-generate notes from latest tag', () => {
     const nt = await notesForLatestTag({
       repoDir,
       tagPrefix: 'SOMETHING_INEXISTENT/',
-      path: 'prefix2',
+      paths: ['prefix2'],
     });
     expect(nt).toBeUndefined();
   });
@@ -57,7 +57,7 @@ describe('re-generate notes from latest tag', () => {
     const nt = await notesForLatestTag({
       repoDir,
       tagPrefix: 'lonelytag/',
-      path: 'INEXISTENT_PATH',
+      paths: ['INEXISTENT_PATH'],
     });
     expect(nt).toBeUndefined();
   });

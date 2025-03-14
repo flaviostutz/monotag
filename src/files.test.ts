@@ -23,7 +23,7 @@ describe('saveResultsToFile', () => {
     repoDir,
     tagPrefix: 'v',
     verbose: false,
-    path: '.',
+    paths: ['.'],
     versionFile: 'dist/version.txt',
     notesFile: 'dist/changelog.md',
     tagFile: 'dist/releasetag.txt',
@@ -44,7 +44,7 @@ describe('saveResultsToFile', () => {
 
   it('should save version to file with custom opts', () => {
     saveResultsToFiles(tagNotes, {
-      path: '.',
+      paths: ['.'],
       repoDir,
       tagPrefix: 'v',
       versionFile: `${repoDir}/dist/versionAA.txt`,

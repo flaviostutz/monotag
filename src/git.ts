@@ -31,8 +31,6 @@ export const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commi
     refs = `${opts.fromRef}...${opts.toRef}`;
   }
 
-  // const refs = `${opts.fromRef ?? ''} ${opts.toRef}`;
-
   execCmd(opts.repoDir, `git --version`, opts.verbose);
 
   // execute just to test if refs are valid
@@ -72,9 +70,19 @@ export const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commi
       if (!cm) {
         return false;
       }
-      // only keep commits that have touched any file inside "path"
+      // only keep commits that have touched any file inside any of the paths provided to be analised
       return cm.files.some((fn: string): boolean => {
-        return fn.startsWith(opts.path);
+        if (!opts.paths || opts.paths.length === 0) {
+          return true;
+        }
+        // check if this file is inside any of the paths
+        return opts.paths.some((p: string): boolean => {
+          // empty path means any path
+          if (p.trim().length === 0) {
+            return true;
+          }
+          return fn.startsWith(p);
+        });
       });
     })
     .map((cm: Commit | undefined): Commit => {

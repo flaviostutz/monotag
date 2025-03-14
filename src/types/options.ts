@@ -11,10 +11,10 @@ export type BasicOptions = {
    */
   repoDir: string;
   /**
-   * Path inside repository for looking for changes
-   * Defaults to any path
+   * Path list inside repository for looking for changes
+   * @default empty which means any changes in repo
    */
-  path: string;
+  paths: string[];
   /**
    * Git ref range (starting point) for searching for changes in git log history
    * @default latest tag

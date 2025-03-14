@@ -51,7 +51,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
 
   if (opts.verbose) {
     console.log(
-      `Analysing commit range ${opts.fromRef}...${opts.toRef} and filtering path "${opts.path}"`,
+      `Analysing commit range ${opts.fromRef}...${opts.toRef} and filtering paths "${opts.paths.join(',')}"`,
     );
   }
 

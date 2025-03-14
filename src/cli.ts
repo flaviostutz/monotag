@@ -240,41 +240,18 @@ const expandDefaults = (args: any): CliNextTagOptions => {
   const absRepoDir = execCmd(repoDir, 'git rev-parse --show-toplevel', verbose).trim();
 
   // detect current dir reference to repo
-  let pathRepo = <string>args.path;
+  const pathRepoList = defaultValueListString(<string>args.path, ['auto']);
+  if (!pathRepoList) throw new Error('path must be defined');
 
-  // automatically detect path inside repo dir according to current dir
-  if (!pathRepo || pathRepo === 'auto') {
-    const currentDir = process.cwd();
-    if (currentDir.includes(absRepoDir)) {
-      pathRepo = currentDir.replace(absRepoDir, '');
-    } else {
-      // defaults to repo root
-      pathRepo = '';
-    }
-
-    // support relative paths to current dir
-  } else if (pathRepo.startsWith('..')) {
-    const absPathRepo = path.resolve(process.cwd(), pathRepo);
-    if (absPathRepo.includes(absRepoDir)) {
-      pathRepo = absPathRepo.replace(absRepoDir, '');
-    } else {
-      throw new Error(`Path "${pathRepo}" is not inside repo dir "${absRepoDir}"`);
-    }
-  }
-
-  // path is relative to repo dir
-  // support paths starting with /
-  if (pathRepo.startsWith('/')) {
-    pathRepo = pathRepo.slice(1);
-  }
-
-  if (args.verbose) {
-    console.log(`Analysing changes in path "${absRepoDir}/${pathRepo}"`);
+  const pathsRepo = expandPathWithDefaults(pathRepoList, absRepoDir, process.cwd());
+  if (verbose) {
+    console.log(`Repo dir is "${absRepoDir}"`);
+    console.log(`Analysing changes in "${pathsRepo.join(',')}"`);
   }
 
   const basicOpts: BasicOptions = {
     repoDir: absRepoDir,
-    path: pathRepo,
+    paths: pathsRepo,
     fromRef: <string>args['from-ref'],
     toRef: <string>args['to-ref'],
     onlyConvCommit: defaultValueBoolean(args['conv-commit'], true),
@@ -296,7 +273,8 @@ const expandDefaults = (args: any): CliNextTagOptions => {
 
   // default tag prefix is relative to path inside repo
   if (tagPrefix === 'auto') {
-    tagPrefix = lastPathPart(basicOpts.path);
+    // use first path as tag prefix
+    tagPrefix = lastPathPart(basicOpts.paths.length > 0 ? basicOpts.paths[0] : '');
     if (tagPrefix.length > 0) {
       tagPrefix += args.separator;
     }
@@ -350,7 +328,7 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       alias: 'd',
       type: 'string',
       describe:
-        "File path inside repo to consider when analysing changes. Commits that don't touch files in this path will be ignored. Defaults to current dir.",
+        "File path inside repo to consider when analysing changes. Can be a list separated by ','. Commits that don't touch files in this path will be ignored. Defaults to current dir. E.g.: services/service1,shared/libs",
       default: 'auto',
     })
     .option('from-ref', {
@@ -389,7 +367,7 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       alias: 'p',
       type: 'string',
       describe:
-        'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part',
+        'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part (of the first path defined)',
       default: 'auto',
     })
     .option('separator', {
@@ -548,6 +526,43 @@ const lastPathPart = (fullpath: string): string => {
     return fullpath;
   }
   return part;
+};
+
+export const expandPathWithDefaults = (
+  paths: string[],
+  absRepoDir: string,
+  currentDir: string,
+): string[] => {
+  const dpaths = paths.map((p: string) => {
+    let pathRepo = p;
+
+    // automatically detect path inside repo dir according to current dir
+    if (!pathRepo || pathRepo === 'auto') {
+      if (currentDir.includes(absRepoDir)) {
+        pathRepo = currentDir.replace(absRepoDir, '');
+      } else {
+        // defaults to repo root
+        pathRepo = '';
+      }
+
+      // support relative paths to current dir
+    } else if (pathRepo.startsWith('..')) {
+      const absPathRepo = path.resolve(currentDir, pathRepo);
+      if (absPathRepo.includes(absRepoDir)) {
+        pathRepo = absPathRepo.replace(absRepoDir, '');
+      } else {
+        throw new Error(`Path "${pathRepo}" is not inside repo dir "${absRepoDir}"`);
+      }
+    }
+
+    // path is relative to repo dir
+    // support paths starting with /
+    if (pathRepo.startsWith('/')) {
+      pathRepo = pathRepo.slice(1);
+    }
+    return pathRepo;
+  });
+  return dpaths;
 };
 
 export { run };

@@ -4,7 +4,7 @@
 import * as fs from 'node:fs';
 import { randomBytes } from 'node:crypto';
 
-import { run } from './cli';
+import { expandPathWithDefaults, run } from './cli';
 import { createSampleRepo } from './utils/tests';
 import { execCmd } from './utils/os';
 
@@ -150,10 +150,14 @@ describe('when using cli', () => {
     expect(stdout).toMatch(/^346\.0\.0/);
     expect(exitCode).toBe(0);
 
-    // get next version
+    // get next tag for multiple path sources
     stdout = '';
-    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    expect(stdout).toMatch('346.0.0346.0.0## 346.0.0');
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--path=prefix1,prefix3']);
+    expect(stdout).not.toMatch(/^346\.0\.0/); // should prefix tag with "prefix1"
+    expect(stdout).toMatch(/^prefix1\//); // should prefix tag with "prefix1"
+    expect(stdout).toMatch('9 prefix1 updating test1 and test2 files again for module prefix1');
+    expect(stdout).toMatch('test: 88 prefix3 adding test1 ');
+    expect(stdout).not.toMatch('chore: 13 prefix2 updating');
     expect(exitCode).toBe(0);
 
     // get next tag as prerelease
@@ -310,5 +314,35 @@ describe('when using cli', () => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~5']);
     };
     await expect(rr1).rejects.toThrow();
+  });
+});
+
+describe('expandPathWithDefaults', () => {
+  it('should detect relative current dir when path is auto', () => {
+    const repo = '/repo';
+    const current = '/repo/services/app';
+    const result = expandPathWithDefaults(['auto'], repo, current);
+    expect(result).toEqual(['services/app']);
+  });
+
+  it('should return empty if current dir is outside repo', () => {
+    const repo = '/repo';
+    const current = '/other/app';
+    const result = expandPathWithDefaults(['auto'], repo, current);
+    expect(result).toEqual(['']);
+  });
+
+  it('should handle relative paths', () => {
+    const repo = '/repo';
+    const current = '/repo/src';
+    const result = expandPathWithDefaults(['../test'], repo, current);
+    expect(result).toEqual(['test']);
+  });
+
+  it('should handle relative paths multiple', () => {
+    const repo = '/repo';
+    const current = '/repo/src';
+    const result = expandPathWithDefaults(['../test', '..'], repo, current);
+    expect(result).toEqual(['test', '']);
   });
 });
