@@ -367,7 +367,7 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       alias: 'p',
       type: 'string',
       describe:
-        'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part',
+        'Tag prefix to look for latest versions and to use on generated tags. If not defined will be derived from last path part (of the first path defined)',
       default: 'auto',
     })
     .option('separator', {

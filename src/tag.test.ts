@@ -276,6 +276,23 @@ describe('when generating next tag with notes', () => {
     expect(nt.tagName).toBe('prefix1/3.5.0');
     expect(nt.version).toBe('3.5.0');
   });
+  it('create tag that touches multiple paths using the first tag in array as tag prefix reference', async () => {
+    const nt = await nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: ['prefix2', 'prefix1'],
+      tagPrefix: 'p2p1/',
+      preRelease: false,
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.version).toBe('1.0.0');
+    expect(nt.tagName).toBe('p2p1/1.0.0');
+    expect(nt.releaseNotes).toContain('## p2p1/1.0.0');
+    expect(nt.releaseNotes).toContain('2 prefix1 updating test1 file');
+    expect(nt.releaseNotes).toContain('6 prefix2 updating test1 file');
+    expect(nt.releaseNotes).not.toContain('* test: 88 prefix3 adding test1 file');
+  });
 });
 
 describe('when using tag incrementer', () => {

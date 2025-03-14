@@ -129,10 +129,11 @@ Options:
   -v, --verbose                       Run with verbose logging
                                                       [boolean] [default: false]
   -d, --path                          File path inside repo to consider when
-                                      analysing changes. Commits that don't
-                                      touch files in this path will be ignored.
-                                      Defaults to current dir.
-                                                      [string] [default: "auto"]
+                                      analysing changes. Can be a list separated
+                                      by ','. Commits that don't touch files in
+                                      this path will be ignored. Defaults to
+                                      current dir. E.g.:
+                                      services/service1,shared/libs                                                      [string] [default: "auto"]
   -f, --from-ref                      Starting point ref for analysing changes
                                       in commits. Defaults to auto, which will
                                       be last version with this same tag prefix

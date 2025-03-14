@@ -152,10 +152,10 @@ describe('when using cli', () => {
 
     // get next tag for multiple path sources
     stdout = '';
-    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--paths=prefix1,prefix3']);
-    expect(stdout).toMatch('VVV');
-    // parei aqui... auto tag should be prefix1
-    expect(stdout).toMatch('1 prefix1 adding test1');
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--path=prefix1,prefix3']);
+    expect(stdout).not.toMatch(/^346\.0\.0/); // should prefix tag with "prefix1"
+    expect(stdout).toMatch(/^prefix1\//); // should prefix tag with "prefix1"
+    expect(stdout).toMatch('9 prefix1 updating test1 and test2 files again for module prefix1');
     expect(stdout).toMatch('test: 88 prefix3 adding test1 ');
     expect(stdout).not.toMatch('chore: 13 prefix2 updating');
     expect(exitCode).toBe(0);
