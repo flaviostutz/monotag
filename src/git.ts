@@ -252,3 +252,17 @@ export const remoteOriginUrl = (repoDir: string, verbose?: boolean): string | un
     return undefined;
   }
 };
+
+export const isCleanWorkingTree = (repoDir: string, verbose?: boolean): boolean => {
+  try {
+    execCmd(repoDir, `git diff --exit-code -s`, verbose);
+    return true;
+  } catch {
+    if (verbose) {
+      console.log(`There are pending changes in working tree to be commited`);
+      const diff = execCmd(repoDir, `git diff`, verbose).trim();
+      console.log(diff);
+    }
+    return false;
+  }
+};

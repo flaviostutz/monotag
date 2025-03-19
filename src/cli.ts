@@ -12,7 +12,7 @@ import yargs, { Argv } from 'yargs';
 
 import { nextTag } from './tag';
 import { execCmd } from './utils/os';
-import { gitConfigUser, lastTagForPrefix } from './git';
+import { gitConfigUser, isCleanWorkingTree, lastTagForPrefix } from './git';
 import { saveResultsToFiles } from './files';
 import { BasicOptions, CliNextTagOptions } from './types/options';
 
@@ -100,6 +100,14 @@ const execAction = async (
     }
     if (opts.verbose) {
       console.log(`Latest tag is ${latestTag}`);
+    }
+
+    // check if there are uncommited changes in the working tree
+    const cleanWorkingTree = isCleanWorkingTree(opts.repoDir, opts.verbose);
+    if (!cleanWorkingTree) {
+      throw new Error(
+        'There are uncommited changes in the working tree, so the latest tag is not up to date',
+      );
     }
 
     const ntNext = await nextTag({ ...opts, preRelease: false });
