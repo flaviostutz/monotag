@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.23.0 (2025-03-19)
+
+### Features
+
+* check if working tree is clean on action "current" [[57075f5](https://github.com/flaviostutz/monotag/commit/57075f5e7860e513a3f982921b05062db46683fa)]
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+
+
 ## 1.22.0 (2025-03-13)
 
 ### Features
