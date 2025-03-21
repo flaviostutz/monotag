@@ -10,6 +10,7 @@ import { tagParts } from './utils/tags';
 /**
  * If the latest commit already has a tag for the prefix, it will reconstruct the notes by searching previous commit logs from the previous tag to current commit log.
  * If it doesn't have the tag, it means that this is a new tag and it will build the notes from the latest tag to the current commit log.
+ * It will ignore pre-release tags while searching for the latest tag so that the release notes takes into account always from final releases
  * This is supposed to be an indempotent operation.
  */
 const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefined> => {

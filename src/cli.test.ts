@@ -8,11 +8,13 @@ import { expandPathWithDefaults, run } from './cli';
 import { createSampleRepo } from './utils/tests';
 import { execCmd } from './utils/os';
 
+// INTEGRATION TEST FOR MONOTAG
+
 describe('when using cli', () => {
   /**
    * RUN ONLY ONE TEST AT A TIME
    * TO AVOID CONCURRENCY AT THE GIT
-   * REPO LEVEL BECAUSE WE ARE MUTATTING
+   * REPO LEVEL BECAUSE WE ARE MUTATING
    * THE REPO
    */
 
@@ -200,8 +202,10 @@ describe('when using cli', () => {
       '--prerelease-identifier=alpha',
       '--notes-file=dist/notes2.md',
     ]);
-
-    execCmd('.', 'diff dist/notes1.md dist/notes2.md', true);
+    const notesAlpha0 = stdout;
+    const notes1Contents = execCmd('.', 'cat dist/notes1.md');
+    const notes2Contents = execCmd('.', 'cat dist/notes2.md');
+    expect(notes1Contents).toEqual(notes2Contents);
 
     stdout = '';
     exitCode = await run([
@@ -220,7 +224,7 @@ describe('when using cli', () => {
     // get tag/notes from latest generated version (alpha)
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    const notesAlpha = stdout;
+    expect(stdout).toBe(notesAlpha0.replaceAll('-alpha.0', ''));
 
     // git tag prerelease again without changes
     // but this time forcing the increment
@@ -235,26 +239,94 @@ describe('when using cli', () => {
       '--prerelease-increment',
     ]);
     expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.1.*Tag created successfully.*/);
+    // same release notes
+    const stwm = stdout.replace(/.*Creating tag 346.0.0-alpha.1.*Tag created successfully.*/, '');
+    expect(stwm).toBe(notesAlpha0.replaceAll('-alpha.0', '-alpha.1'));
+    expect(exitCode).toBe(0);
+    const notesAlpha1 = stwm;
+
+    // check if the same release notes are generated for the final release in comparison to pre-release
+    stdout = '';
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
+    expect(stdout).toEqual(notesAlpha0.replaceAll('-alpha.0', ''));
+    expect(stdout).toEqual(notesAlpha1.replaceAll('-alpha.1', ''));
     expect(exitCode).toBe(0);
 
-    // get current tag
+    // check if tag is current
     stdout = '';
     exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
     expect(stdout).toMatch('346.0.0-alpha.1');
     expect(exitCode).toBe(0);
 
-    // check if notes were generated getting inherated
-    // commits from previous tags that had actual changes
+    // SIMULATE PRE-RELEASE FIX WORKFLOW
+    // add more commits and tag new pre-release (simulating fixing an alpha release bug and generating a new version etc)
     stdout = '';
-    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    expect(stdout).toMatch('## 346.0.0 (');
+    execCmd(repoDir, 'echo "test fixing alpha.1 bug" > test-alpha');
+
+    // should fail as the working tree is not clean (pending files to be commited)
+    stdout = '';
+    exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('the latest tag is not up to date');
+    expect(exitCode).toBe(6);
+
+    // should fail as the working tree is not clean (pending things to be commited)
+    execCmd(repoDir, 'git add test-alpha');
+    stdout = '';
+    exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('the latest tag is not up to date');
+    expect(exitCode).toBe(6);
+
+    // commit the changes
+    execCmd(repoDir, 'git commit -m "fix: 99 adding test-alpha file to root"');
+
+    // should fail as the latest commit is not tagged
+    stdout = '';
+    exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('The latest tag is not up to date');
+    expect(exitCode).toBe(5);
+
+    // tag the new pre-release with the fixes
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag-git',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+    ]);
+    expect(stdout).toMatch(/.*Creating tag 346.0.1-alpha.0.*Tag created successfully.*/);
+    expect(stdout).toMatch('## 346.0.1 (');
+    // new commit for fixing alpha.1
+    expect(stdout).toMatch('99 adding test-alpha file to root');
+    // previous commits that also should be included in this version notes
     expect(stdout).toMatch('15 adding test2 file to root');
     expect(stdout).toMatch('**Breaking:** 4 prefix1 creating test3 file');
+    expect(stdout).toMatch('**Breaking:** 12 prefix2');
+    expect(stdout).toMatch('7 prefix2 creating test2');
+    expect(stdout).toMatch('anyscope: 10 prefix2');
+    expect(stdout).toMatch('13 prefix2 updating test1 and test2');
+    expect(stdout).toMatch('test: 5 prefix2 adding test2');
+    expect(stdout).toMatch('2 prefix1 updating test1');
+    expect(exitCode).toBe(0);
+    // check if notes were generated with similar contents, adding the commit for fixing the bug
+    expect(stdout).toEqual(notesAlpha0); // TODO should fail
+
+    const stwm2 = stdout.replace(/.*Creating tag 346.0.1-alpha.0.*Tag created successfully.*/, '');
+    expect(stwm2).toBe(notesAlpha0); // TODO should fail
+    const notesAlpha2 = stwm2;
+
+    // shouldn't fail as it was just tagged
+    stdout = '';
+    exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
+    expect(stdout).toMatch('AAAA'); // TODO
     expect(exitCode).toBe(0);
 
-    // check if notes were generated exactly with the same contents
-    // from previous tags with the same actual changes (related to the same commitid)
-    expect(stdout).toEqual(notesAlpha);
+    // check if final release notes are similar to the latest pre-release notes
+    stdout = '';
+    exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
+    expect(stdout).toEqual(notesAlpha2.replaceAll('-alpha.2', ''));
+    expect(exitCode).toBe(0);
 
     // notes links
     stdout = '';
@@ -297,8 +369,8 @@ describe('when using cli', () => {
     expect(exitCode).toBe(0);
 
     // this command will fail if content is not updated in files
-    execCmd(repoDir, 'cat packagerr.json | grep 346.0.0-alpha.1');
-    execCmd(repoDir, 'cat mypro.toml | grep 346.0.0-alpha.1');
+    execCmd(repoDir, 'cat packagerr.json | grep 346.0.0-alpha.2');
+    execCmd(repoDir, 'cat mypro.toml | grep 346.0.0-alpha.2');
 
     stdout = '';
     const rr = async (): Promise<void> => {

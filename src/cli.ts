@@ -105,9 +105,10 @@ const execAction = async (
     // check if there are uncommited changes in the working tree
     const cleanWorkingTree = isCleanWorkingTree(opts.repoDir, opts.verbose);
     if (!cleanWorkingTree) {
-      throw new Error(
+      console.log(
         'There are uncommited changes in the working tree, so the latest tag is not up to date',
       );
+      return 6;
     }
 
     const ntNext = await nextTag({ ...opts, preRelease: false });

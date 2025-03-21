@@ -112,7 +112,11 @@ export const lastTagForPrefix = async (args: {
   tagSuffix?: string;
   verbose?: boolean;
   nth?: number;
+  ignorePreReleases?: boolean;
 }): Promise<string | undefined> => {
+  if (args.verbose) {
+    console.log('\n>> lastTagForPrefix. args=', args);
+  }
   // list tags by semver in descending order
   const tags = execCmd(
     args.repoDir,
@@ -139,6 +143,17 @@ export const lastTagForPrefix = async (args: {
     }
     // it's a tag for the desired prefix
     if (tparts[2] === args.tagPrefix) {
+      if (args.ignorePreReleases) {
+        // check if this is a pre-release tag
+        // remove tag+version and tag suffix from the tag name [tagPrefix][version][pre-release][tagSuffix]
+        const preReleasePart = t
+          .replace(args.tagPrefix, '')
+          .replace(tparts[3], '') // version
+          .replace(args.tagSuffix ?? '', '');
+        if (preReleasePart) {
+          return false;
+        }
+      }
       return true;
     }
     return false;
@@ -189,6 +204,7 @@ export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Com
       tagSuffix: opts.tagSuffix,
       verbose: opts.verbose,
       nth: i,
+      ignorePreReleases: true,
     });
 
     // eslint-disable-next-line no-await-in-loop
@@ -254,15 +270,13 @@ export const remoteOriginUrl = (repoDir: string, verbose?: boolean): string | un
 };
 
 export const isCleanWorkingTree = (repoDir: string, verbose?: boolean): boolean => {
-  try {
-    execCmd(repoDir, `git diff --exit-code -s`, verbose);
-    return true;
-  } catch {
-    if (verbose) {
-      console.log(`There are pending changes in working tree to be commited`);
-      const diff = execCmd(repoDir, `git diff`, verbose).trim();
-      console.log(diff);
-    }
+  if (verbose) {
+    console.log('>> isCleanWorkingTree. repoDir=', repoDir);
+  }
+  const out = execCmd(repoDir, `git status -s`, verbose);
+  // this command only returns something if there are untracked or uncommitted changes
+  if (out.trim().length > 0) {
     return false;
   }
+  return true;
 };

@@ -9,8 +9,8 @@ export const execCmd = (
   ignoreError?: boolean,
 ): string => {
   if (verbose) {
-    console.log(`${new Date().toISOString()}: Executing on baseDir=${baseDir}`);
-    console.log(`${new Date().toISOString()}: ${shellScript}`);
+    console.log(`${new Date().toISOString()}: Executing on baseDir=${baseDir}\n`);
+    console.log(`${new Date().toISOString()}: ${shellScript}\n`);
   }
   try {
     const result = execSync(shellScript, { cwd: baseDir, shell: '/bin/bash' }).toString();

@@ -21,13 +21,15 @@ import { getVersionFromTag } from './utils/tags';
  */
 // eslint-disable-next-line complexity
 export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
+  if (opts.verbose) {
+    console.log('>> nextTag. opts=', opts);
+  }
   if (!opts.fromRef) {
     throw new Error("'fromRef' is required. Use 'auto' so it will use the latest tag");
   }
   if (!opts.toRef) {
     throw new Error("'toRef' is required");
   }
-
   // current tag
   const latestTag = await lastTagForPrefix({
     repoDir: opts.repoDir,
