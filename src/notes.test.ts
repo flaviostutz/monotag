@@ -15,11 +15,11 @@ import { CommitDetails } from './types';
 
 describe('re-generate notes from latest tag', () => {
   const repoDir = `./testcases/notes-repo-${randomBytes(2).toString('hex')}`;
-  beforeAll(async () => {
-    await createSampleRepo(repoDir);
+  beforeAll(() => {
+    createSampleRepo(repoDir);
   });
-  it('should get notes for existing prefixed tag', async () => {
-    const nt = await notesForLatestTag({
+  it('should get notes for existing prefixed tag', () => {
+    const nt = notesForLatestTag({
       repoDir,
       tagPrefix: 'prefix2/',
       paths: ['prefix2'],
@@ -31,8 +31,8 @@ describe('re-generate notes from latest tag', () => {
 
 * **Breaking:** 8 prefix2 creating test3 file`);
   });
-  it('should generate notes for non-prefixed tag', async () => {
-    const nt = await notesForLatestTag({
+  it('should generate notes for non-prefixed tag', () => {
+    const nt = notesForLatestTag({
       repoDir,
       tagPrefix: '',
       paths: [''],
@@ -44,8 +44,8 @@ describe('re-generate notes from latest tag', () => {
 * adding test1 file to root`);
   });
 
-  it('should return undefined for non existing tag', async () => {
-    const nt = await notesForLatestTag({
+  it('should return undefined for non existing tag', () => {
+    const nt = notesForLatestTag({
       repoDir,
       tagPrefix: 'SOMETHING_INEXISTENT/',
       paths: ['prefix2'],
@@ -53,8 +53,8 @@ describe('re-generate notes from latest tag', () => {
     expect(nt).toBeUndefined();
   });
 
-  it('should return empty release note if no commits found touching path', async () => {
-    const nt = await notesForLatestTag({
+  it('should return empty release note if no commits found touching path', () => {
+    const nt = notesForLatestTag({
       repoDir,
       tagPrefix: 'lonelytag/',
       paths: ['INEXISTENT_PATH'],
@@ -89,8 +89,8 @@ describe('render links utilities', () => {
 
   describe('resolve base urls', () => {
     const repoDir = `./testcases/notes-repo-${randomBytes(2).toString('hex')}`;
-    beforeAll(async () => {
-      await createSampleRepo(repoDir);
+    beforeAll(() => {
+      createSampleRepo(repoDir);
     });
     afterAll(() => {
       jest.restoreAllMocks();

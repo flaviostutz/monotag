@@ -62,7 +62,7 @@ const run = async (processArgs: string[]): Promise<number> => {
 
   const action = <string>args._[0];
 
-  const expandedArgs = expandDefaults(args);
+  const expandedArgs = expandOpts(args);
 
   if (args.verbose) {
     console.log(`>> Current dir: ${process.cwd()}`);
@@ -88,7 +88,7 @@ const execAction = async (
 
   // CURRENT ACTION
   if (action === 'current') {
-    const latestTag = await lastTagForPrefix({
+    const latestTag = lastTagForPrefix({
       repoDir: opts.repoDir,
       tagPrefix: opts.tagPrefix,
       tagSuffix: opts.tagSuffix,
@@ -111,13 +111,13 @@ const execAction = async (
       return 6;
     }
 
-    const ntNext = await nextTag({ ...opts, preRelease: false });
+    const ntNext = nextTag({ ...opts, preRelease: false });
     if (!ntNext) throw new Error('A new tag or the latest tag should have been returned');
     if (opts.verbose) {
       console.log(`Next tag would be ${ntNext.tagName}`);
     }
 
-    const ntNextPre = await nextTag({
+    const ntNextPre = nextTag({
       ...opts,
       preRelease: true,
       // avoid increasing pre-release version if no changes are detected
@@ -152,7 +152,7 @@ const execAction = async (
 
   // LATEST ACTION
   if (action === 'latest') {
-    const latestTag = await lastTagForPrefix({
+    const latestTag = lastTagForPrefix({
       repoDir: opts.repoDir,
       tagPrefix: opts.tagPrefix,
       tagSuffix: opts.tagSuffix,
@@ -171,7 +171,7 @@ const execAction = async (
   // TAG* ACTIONS
   if (action.startsWith('tag')) {
     // calculate and show tag
-    const nt = await nextTag(opts);
+    const nt = nextTag(opts);
     if (nt === undefined) {
       console.log('No changes detected and no previous tag found');
       return 4;
@@ -238,18 +238,18 @@ const execAction = async (
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const expandDefaults = (args: any): CliNextTagOptions => {
-  const verbose = defaultValueBoolean(args.verbose, false);
+const expandOpts = (opts: any): CliNextTagOptions => {
+  const verbose = defaultValueBoolean(opts.verbose, false);
 
   // find the root path of the repo
-  let repoDir = <string>args['repo-dir'];
+  let repoDir = <string>opts['repo-dir'];
   if (!repoDir) {
     repoDir = process.cwd();
   }
   const absRepoDir = execCmd(repoDir, 'git rev-parse --show-toplevel', verbose).trim();
 
   // detect current dir reference to repo
-  const pathRepoList = defaultValueListString(<string>args.path, ['auto']);
+  const pathRepoList = defaultValueListString(<string>opts.path, ['auto']);
   if (!pathRepoList) throw new Error('path must be defined');
 
   const pathsRepo = expandPathWithDefaults(pathRepoList, absRepoDir, process.cwd());
@@ -261,15 +261,15 @@ const expandDefaults = (args: any): CliNextTagOptions => {
   const basicOpts: BasicOptions = {
     repoDir: absRepoDir,
     paths: pathsRepo,
-    fromRef: <string>args['from-ref'],
-    toRef: <string>args['to-ref'],
-    onlyConvCommit: defaultValueBoolean(args['conv-commit'], true),
+    fromRef: <string>opts['from-ref'],
+    toRef: <string>opts['to-ref'],
+    onlyConvCommit: defaultValueBoolean(opts['conv-commit'], true),
     verbose,
   };
 
-  let tagPrefix = args.prefix;
+  let tagPrefix = opts.prefix;
 
-  const semverLevel = defaultValueString(args['semver-level'], 'auto') as
+  const semverLevel = defaultValueString(opts['semver-level'], 'auto') as
     | 'major'
     | 'minor'
     | 'patch'
@@ -285,42 +285,42 @@ const expandDefaults = (args: any): CliNextTagOptions => {
     // use first path as tag prefix
     tagPrefix = lastPathPart(basicOpts.paths.length > 0 ? basicOpts.paths[0] : '');
     if (tagPrefix.length > 0) {
-      tagPrefix += args.separator;
+      tagPrefix += opts.separator;
     }
   }
 
-  const bumpAction = defaultValueString(args['bump-action'], 'none') as 'latest' | 'zero' | 'none';
+  const bumpAction = defaultValueString(opts['bump-action'], 'none') as 'latest' | 'zero' | 'none';
   if (!bumpAction || !['latest', 'zero', 'none'].includes(bumpAction)) {
     throw new Error(`Invalid bump action "${bumpAction}". Must be "latest", "zero" or "none"`);
   }
 
   // add full path to bump files
-  const bumpFiles = defaultValueListString(args['bump-files'], ['package.json'])?.map((file) =>
+  const bumpFiles = defaultValueListString(opts['bump-files'], ['package.json'])?.map((file) =>
     path.join(repoDir, file),
   );
 
   return {
     ...basicOpts,
     tagPrefix,
-    tagSuffix: args.suffix,
+    tagSuffix: opts.suffix,
     semverLevel,
     bumpAction,
     bumpFiles,
-    preRelease: defaultValueBoolean(args.prerelease, false),
-    preReleaseIdentifier: defaultValueString(args['prerelease-identifier'], undefined),
-    preReleaseAlwaysIncrement: defaultValueBoolean(args['prerelease-increment'], false),
-    versionFile: defaultValueString(args['version-file'], undefined),
-    notesFile: defaultValueString(args['notes-file'], undefined),
-    tagFile: defaultValueString(args['tag-file'], undefined),
-    changelogFile: defaultValueString(args['changelog-file'], undefined),
-    minVersion: defaultValueString(args['min-version'], undefined),
-    maxVersion: defaultValueString(args['max-version'], undefined),
-    gitUsername: defaultValueString(args['git-username'], undefined),
-    gitEmail: defaultValueString(args['git-email'], undefined),
-    notesDisableLinks: defaultValueBoolean(args['no-links'], false),
-    notesBaseCommitUrl: defaultValueString(args['url-commit'], undefined),
-    notesBasePRUrl: defaultValueString(args['url-pr'], undefined),
-    notesBaseIssueUrl: defaultValueString(args['url-issue'], undefined),
+    preRelease: defaultValueBoolean(opts.prerelease, false),
+    preReleaseIdentifier: defaultValueString(opts['prerelease-identifier'], undefined),
+    preReleaseAlwaysIncrement: defaultValueBoolean(opts['prerelease-increment'], false),
+    versionFile: defaultValueString(opts['version-file'], undefined),
+    notesFile: defaultValueString(opts['notes-file'], undefined),
+    tagFile: defaultValueString(opts['tag-file'], undefined),
+    changelogFile: defaultValueString(opts['changelog-file'], undefined),
+    minVersion: defaultValueString(opts['min-version'], undefined),
+    maxVersion: defaultValueString(opts['max-version'], undefined),
+    gitUsername: defaultValueString(opts['git-username'], undefined),
+    gitEmail: defaultValueString(opts['git-email'], undefined),
+    notesDisableLinks: defaultValueBoolean(opts['no-links'], false),
+    notesBaseCommitUrl: defaultValueString(opts['url-commit'], undefined),
+    notesBasePRUrl: defaultValueString(opts['url-pr'], undefined),
+    notesBaseIssueUrl: defaultValueString(opts['url-issue'], undefined),
   };
 };
 
@@ -337,8 +337,8 @@ const addOptions = (y: Argv, saveToFile?: boolean): any => {
       alias: 'd',
       type: 'string',
       describe:
-        "File path inside repo to consider when analysing changes. Can be a list separated by ','. Commits that don't touch files in this path will be ignored. Defaults to current dir. E.g.: services/service1,shared/libs",
-      default: 'auto',
+        "File path inside repo to consider when analysing changes. Can be a list separated by ','. Commits that don't touch files in this path will be ignored. Defaults to current dir. Supports glob patterns. E.g.: services/service1,shared/**,package-lock.json",
+      default: '.',
     })
     .option('from-ref', {
       alias: 'f',
@@ -546,7 +546,7 @@ export const expandPathWithDefaults = (
     let pathRepo = p;
 
     // automatically detect path inside repo dir according to current dir
-    if (!pathRepo || pathRepo === 'auto') {
+    if (!pathRepo || pathRepo === '.' || pathRepo === './') {
       if (currentDir.includes(absRepoDir)) {
         pathRepo = currentDir.replace(absRepoDir, '');
       } else {

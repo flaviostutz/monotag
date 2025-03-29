@@ -7,48 +7,51 @@
 /* eslint-disable no-undefined */
 /* eslint-disable no-console */
 import semver from 'semver';
+import { minimatch } from 'minimatch';
 
 import { execCmd } from './utils/os';
 import { getVersionFromTag, tagParts } from './utils/tags';
-import { BasicOptions, NextTagOptions } from './types/options';
+import { BasicOptions } from './types/options';
 import { Commit } from './types/commits';
 
 /**
- * Looks for commits that touched a certain path
+ * Looks for commits that touched a certain path. fromRef and toRef are inclusive.
  * @param opts {BasicOptions} parameters for commits filtering
  * @returns {Commit[]} List of commits
  */
-export const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commit[]> => {
+export const findCommitsTouchingPath = (opts: BasicOptions): Commit[] => {
   if (!opts.repoDir) {
     throw new Error("'repoDir' must be defined");
   }
-  if (!opts.toRef) {
-    throw new Error('toRef is required');
-  }
 
-  let refs = opts.toRef;
-  if (opts.fromRef) {
-    refs = `${opts.fromRef}...${opts.toRef}`;
+  const commitListCmd = gitCommitListCmd({
+    repoDir: opts.repoDir,
+    fromRef: opts.fromRef,
+    toRef: opts.toRef,
+    verbose: opts.verbose,
+  });
+
+  // range is empty
+  if (!commitListCmd) {
+    return [];
   }
 
   execCmd(opts.repoDir, `git --version`, opts.verbose);
 
   // execute just to test if refs are valid
-  execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
+  execCmd(opts.repoDir, `${commitListCmd} --count`, opts.verbose);
 
   const outCommits = execCmd(
     opts.repoDir,
-    `git rev-list ${refs} | head -n 50 | xargs -r -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    `${commitListCmd} | sed s/^-// | head -n 100 | xargs -r -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
     opts.verbose,
   )
     .trim()
     .split('COMMIT');
 
-  execCmd(opts.repoDir, `git rev-list --count ${refs}`, opts.verbose);
-
   // this limit (with "head") is a safeguard for large repositories
-  if (outCommits.length === 50) {
-    console.log('Commits might have been limited to 50 results');
+  if (outCommits.length === 100) {
+    console.log('Commits might have been limited to 100 results');
   }
 
   const commits = outCommits
@@ -75,13 +78,18 @@ export const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commi
         if (!opts.paths || opts.paths.length === 0) {
           return true;
         }
-        // check if this file is inside any of the paths
+        // check if this file matches any of the path patterns
         return opts.paths.some((p: string): boolean => {
           // empty path means any path
           if (p.trim().length === 0) {
             return true;
           }
-          return fn.startsWith(p);
+          // check if file name matches glob pattern
+          // add ** to the end of the pattern to match any file inside a certain prefix by default
+          const dirPattern = `${p}/**`;
+          const filePattern = p;
+          return minimatch(fn, dirPattern) || minimatch(fn, filePattern);
+          // return fn.startsWith(p);
         });
       });
     })
@@ -106,14 +114,16 @@ export const findCommitsTouchingPath = async (opts: BasicOptions): Promise<Commi
  * @param {number} nth nth tag to return from the latest one
  * @returns {string} The tag with the same prefix/suffix that has the greatest semantic version
  */
-export const lastTagForPrefix = async (args: {
+export const lastTagForPrefix = (args: {
   repoDir: string;
   tagPrefix: string;
   tagSuffix?: string;
   verbose?: boolean;
   nth?: number;
   ignorePreReleases?: boolean;
-}): Promise<string | undefined> => {
+  fromRef?: string;
+  toRef?: string;
+}): string | undefined => {
   if (args.verbose) {
     console.log('\n>> lastTagForPrefix. args=', args);
   }
@@ -135,7 +145,7 @@ export const lastTagForPrefix = async (args: {
 
   // remove tags that don't match the prefix
   // or are excluded by the exceptTag parameter
-  const filteredTags = tags.filter((t: string): boolean => {
+  const filteredTagsPrefix = tags.filter((t: string): boolean => {
     const tparts = tagParts(t);
     // doesn't seem like a valid tag
     if (!tparts) {
@@ -159,10 +169,34 @@ export const lastTagForPrefix = async (args: {
     return false;
   });
 
+  // remove tags that aren't pointing to commitids that are inside range fromRef to toRef
+  const commitListCmd = gitCommitListCmd({
+    repoDir: args.repoDir,
+    fromRef: args.fromRef,
+    toRef: args.toRef,
+    verbose: args.verbose,
+  });
+  const filteredTagsRange = filteredTagsPrefix.filter((t: string): boolean => {
+    if (!args.fromRef && !args.toRef) {
+      return true;
+    }
+    const tagCommitId = execCmd(args.repoDir, `git rev-list -n 1 ${t}`, args.verbose).trim();
+    try {
+      // check if this tag points to a commit that is inside the desired commit range (from-to)
+      // range is empty, so this commit is not found in range
+      // this command will fail if grep doesn't find the tagCommitId in the commit range
+      execCmd(args.repoDir, `${commitListCmd} | sed s/^-// | grep ${tagCommitId}`, args.verbose);
+    } catch {
+      // grep fails if not found
+      return false;
+    }
+    return true;
+  });
+
   // git tag sort returns pre-released version after releases (1.0.0-alpha after 1.0.0)
   // which is semantically incorrect (first we prerelease with -alpha, then without identifier),
   // so we need to sort it again
-  const orderedTags = filteredTags.sort((a: string, b: string): number => {
+  const orderedTags = filteredTagsRange.sort((a: string, b: string): number => {
     const versionA = getVersionFromTag(a, args.tagPrefix, args.tagSuffix);
     const versionB = getVersionFromTag(b, args.tagPrefix, args.tagSuffix);
     return semver.rcompare(versionA, versionB);
@@ -181,12 +215,22 @@ export const lastTagForPrefix = async (args: {
   return undefined;
 };
 
-export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Commit[]> => {
+export const findCommitsForLatestTag = (opts: {
+  repoDir: string;
+  tagPrefix: string;
+  tagSuffix?: string;
+  fromRef?: string;
+  toRef?: string;
+  verbose?: boolean;
+  paths: string[];
+}): Commit[] => {
   // get latest tag for the prefix (might be pointing to HEAD or not)
-  const commitsUntilRef = await lastTagForPrefix({
+  const commitsUntilRef = lastTagForPrefix({
     repoDir: opts.repoDir,
     tagPrefix: opts.tagPrefix,
     tagSuffix: opts.tagSuffix,
+    fromRef: opts.fromRef,
+    toRef: opts.toRef,
     verbose: opts.verbose,
     nth: 0,
   });
@@ -198,21 +242,28 @@ export const findCommitsForLatestTag = async (opts: NextTagOptions): Promise<Com
   let commits: Commit[] = [];
   for (let i = 1; i < 10; i += 1) {
     // eslint-disable-next-line no-await-in-loop
-    const previousTag = await lastTagForPrefix({
+    const previousTag = lastTagForPrefix({
       repoDir: opts.repoDir,
       tagPrefix: opts.tagPrefix,
       tagSuffix: opts.tagSuffix,
       verbose: opts.verbose,
+      toRef: commitsUntilRef,
       nth: i,
       ignorePreReleases: true,
     });
 
     // eslint-disable-next-line no-await-in-loop
-    commits = await findCommitsTouchingPath({
-      ...opts,
+    commits = findCommitsTouchingPath({
+      repoDir: opts.repoDir,
+      paths: opts.paths,
       fromRef: previousTag,
       toRef: commitsUntilRef,
     });
+
+    // remove the commit related to the previousTag, as we want only the commits after the latest tag
+    if (previousTag) {
+      commits.shift();
+    }
 
     // commits between versions was found
     if (commits.length > 0) {
@@ -279,4 +330,24 @@ export const isCleanWorkingTree = (repoDir: string, verbose?: boolean): boolean 
     return false;
   }
   return true;
+};
+
+/**
+ * Generate git command to list commits between two refs, fromRef and toRef inclusive
+ */
+export const gitCommitListCmd = (args: {
+  repoDir: string;
+  fromRef?: string;
+  toRef?: string;
+  verbose?: boolean;
+}): string => {
+  const toRef = args.toRef ?? 'HEAD';
+  if (!args.fromRef) {
+    return `git rev-list ${toRef}`;
+  }
+  if (args.fromRef === toRef) {
+    return `git rev-parse ${toRef}`;
+  }
+  // list commits between two refs
+  return `git rev-list --boundary ${args.fromRef}..${toRef}`;
 };

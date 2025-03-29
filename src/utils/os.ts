@@ -13,7 +13,11 @@ export const execCmd = (
     console.log(`${new Date().toISOString()}: ${shellScript}\n`);
   }
   try {
-    const result = execSync(shellScript, { cwd: baseDir, shell: '/bin/bash' }).toString();
+    const result = execSync(shellScript, {
+      cwd: baseDir,
+      shell: '/bin/bash',
+      stdio: ['pipe', 'pipe', verbose ? 'pipe' : 'ignore'],
+    }).toString();
     if (verbose) {
       console.log(`${new Date().toISOString()}: ${result}`);
     }

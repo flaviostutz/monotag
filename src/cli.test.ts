@@ -393,15 +393,21 @@ describe('expandPathWithDefaults', () => {
   it('should detect relative current dir when path is auto', () => {
     const repo = '/repo';
     const current = '/repo/services/app';
-    const result = expandPathWithDefaults(['auto'], repo, current);
+    const result = expandPathWithDefaults([''], repo, current);
     expect(result).toEqual(['services/app']);
+    const result2 = expandPathWithDefaults(['./'], repo, current);
+    expect(result2).toEqual(['services/app']);
+    const result3 = expandPathWithDefaults(['.'], repo, current);
+    expect(result3).toEqual(['services/app']);
   });
 
   it('should return empty if current dir is outside repo', () => {
     const repo = '/repo';
     const current = '/other/app';
-    const result = expandPathWithDefaults(['auto'], repo, current);
+    const result = expandPathWithDefaults(['.'], repo, current);
     expect(result).toEqual(['']);
+    const result2 = expandPathWithDefaults([''], repo, current);
+    expect(result2).toEqual(['']);
   });
 
   it('should handle relative paths', () => {

@@ -20,7 +20,7 @@ import { getVersionFromTag } from './utils/tags';
  * @returns {TagNotes}
  */
 // eslint-disable-next-line complexity
-export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefined> => {
+export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
   if (opts.verbose) {
     console.log('>> nextTag. opts=', opts);
   }
@@ -31,11 +31,13 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
     throw new Error("'toRef' is required");
   }
   // current tag
-  const latestTag = await lastTagForPrefix({
+  const latestTag = lastTagForPrefix({
     repoDir: opts.repoDir,
     tagPrefix: opts.tagPrefix,
     tagSuffix: opts.tagSuffix,
     verbose: opts.verbose,
+    fromRef: opts.fromRef === 'auto' ? undefined : opts.fromRef,
+    toRef: opts.toRef,
   });
 
   if (opts.verbose) {
@@ -48,16 +50,28 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
 
   // search for changes
   if (opts.fromRef === 'auto') {
-    opts.fromRef = latestTag ?? '';
+    if (!latestTag) {
+      throw new Error('No previous tag found. Cannot use "auto" for fromRef');
+    }
+    opts.fromRef = latestTag ?? undefined;
   }
 
   if (opts.verbose) {
     console.log(
-      `Analysing commit range ${opts.fromRef}...${opts.toRef} and filtering paths "${opts.paths.join(',')}"`,
+      `Analysing commit range ${opts.fromRef ?? ''}...${opts.toRef} and filtering paths "${opts.paths.join(',')}"`,
     );
   }
 
-  const commits = await findCommitsTouchingPath(opts);
+  const commits = findCommitsTouchingPath({
+    repoDir: opts.repoDir,
+    fromRef: opts.fromRef,
+    toRef: opts.toRef,
+    paths: opts.paths,
+    verbose: opts.verbose,
+    onlyConvCommit: opts.onlyConvCommit,
+  });
+  // remove commit related to fromRef (or latest tag) itself
+  commits.shift();
 
   // no changes detected
   if (commits.length === 0) {
@@ -76,7 +90,7 @@ export const nextTag = async (opts: NextTagOptions): Promise<TagNotes | undefine
       ...opts,
     });
 
-    const releaseNotes = await notesForLatestTag(opts);
+    const releaseNotes = notesForLatestTag(opts);
 
     return {
       tagName,

@@ -1,9 +1,9 @@
+/* eslint-disable functional/immutable-data */
 /* eslint-disable no-console */
 /* eslint-disable no-undefined */
 /* eslint-disable functional/no-let */
 import { lastTagForPrefix, findCommitsForLatestTag, remoteOriginUrl } from './git';
 import { CommitDetails, CommitsSummary } from './types/commits';
-import { NextTagOptions } from './types/options';
 import { getDateFromCommit, summarizeCommits } from './commits';
 import { tagParts } from './utils/tags';
 
@@ -13,12 +13,28 @@ import { tagParts } from './utils/tags';
  * It will ignore pre-release tags while searching for the latest tag so that the release notes takes into account always from final releases
  * This is supposed to be an indempotent operation.
  */
-const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefined> => {
-  const latestTag = await lastTagForPrefix({
+const notesForLatestTag = (opts: {
+  repoDir: string;
+  paths: string[];
+  fromRef?: string;
+  toRef?: string;
+  tagPrefix: string;
+  tagSuffix?: string;
+  verbose?: boolean;
+  notesDisableLinks?: boolean;
+  notesBaseCommitUrl?: string;
+  notesBasePRUrl?: string;
+  notesBaseIssueUrl?: string;
+  onlyConvCommit?: boolean;
+}): string | undefined => {
+  const latestTag = lastTagForPrefix({
     repoDir: opts.repoDir,
     tagPrefix: opts.tagPrefix,
     tagSuffix: opts.tagSuffix,
     verbose: opts.verbose,
+    fromRef: opts.fromRef,
+    toRef: opts.toRef,
+    ignorePreReleases: true,
   });
 
   if (!latestTag) {
@@ -29,8 +45,20 @@ const notesForLatestTag = async (opts: NextTagOptions): Promise<string | undefin
   }
 
   // look for the commits that compose the latest tag for this prefix
-  const commits = await findCommitsForLatestTag(opts);
+  const commits = findCommitsForLatestTag({
+    repoDir: opts.repoDir,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
+    verbose: opts.verbose,
+    fromRef: opts.fromRef,
+    toRef: opts.toRef,
+    paths: opts.paths,
+  });
   if (commits.length === 0) {
+    if (opts.verbose) {
+      console.log(`No commits found for tag ${latestTag} in paths "${opts.paths.join(',')}"`);
+    }
+
     // if not commits found it means that the path analised has no changes, thus we don't have a release notes
     return undefined;
   }

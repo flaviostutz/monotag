@@ -107,6 +107,18 @@ npx monotag tag --path=services/my-service2 --prerelease=true
 
 See a complete github actions workflow that publishes libs to NPM with automatic versioning and release notes generation in a monorepo using monotag [here](https://github.com/flaviostutz/monotag/blob/1.0.14/.github/workflows/create-next-tag.yml)
 
+## Pre-releases
+
+Pre-releases are versions (e.g: 1.4.0-beta.1) that preceeds the final version (e.g: 1.4.0) so that it's possible for beta or alpha users to test a certain release candidate before releasing it to the broader audience. Package managers normally only automatically upgrade to "final" versions, so it's a good practice to use pre-releases to avoid clients to upgrade to a version that wasn't tested by any users and might contain bugs.
+
+For example, during a release you might have the following flow:
+  - "The team finished implementing a feature and wants to release a new package version"
+  - Version `1.4.0-beta.0` is published (`npx monotag tag-git --pre`)
+  - "Lib users reports some errors, and the team fixes it"
+  - Version `1.4.0-beta.1` is published with fixes (`npx monotag tag-git --pre`)
+  - "After a week being used, it seems that the pre-release is stable"
+  - Version `1.4.0` is published (`npx monotag tag-git`)
+
 ## Usage
 
 ### CLI
@@ -330,7 +342,7 @@ jobs:
 ```ts
 import { nextTag } from 'monotag';
 
-const nt = await nextTag({
+const nt = nextTag({
   repoDir: 'repos/myrepo',
   toRef: 'HEAD',
   path: 'modules/mymodule',

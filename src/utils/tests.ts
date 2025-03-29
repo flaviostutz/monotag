@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 import { execCmd } from './os';
 
-const createSampleRepo = async (repoDir: string): Promise<void> => {
+const createSampleRepo = (repoDir: string): void => {
   fs.rmSync(repoDir, { recursive: true, force: true });
   fs.mkdirSync(repoDir, { recursive: true });
 

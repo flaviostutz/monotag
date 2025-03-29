@@ -4,17 +4,16 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { findCommitsTouchingPath } from './git';
 import { incrementTag, nextTag } from './tag';
 import { createSampleRepo } from './utils/tests';
 
 describe('when generating next tag with notes', () => {
   const repoDir = `./testcases/nexttag-repo-${randomBytes(2).toString('hex')}`;
-  beforeAll(async () => {
-    await createSampleRepo(repoDir);
+  beforeAll(() => {
+    createSampleRepo(repoDir);
   });
-  it('should increment major on root path/prefix because something has a breaking change in history', async () => {
-    const nt = await nextTag({
+  it('should increment major on root path/prefix because something has a breaking change in history', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -32,8 +31,8 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('346.0.0');
   });
-  it('should return latest if nothing changed', async () => {
-    const nt = await nextTag({
+  it('should return latest if nothing changed', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD~16',
@@ -43,8 +42,84 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('345.2123.143');
   });
-  it('this passes on dev machine, but fails on gh actions', async () => {
-    const nt = await nextTag({
+  it('return changes since the latest tag in root', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: [''],
+      tagPrefix: '',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('346.0.0');
+    // this is a commit that is part of the previous tag, so shouldn't be included
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).toContain('2 prefix1 updating test1 file');
+    expect(nt.releaseNotes?.split('\n').length).toBe(32);
+  });
+  it('rebuild indepomtent tag if latest on root', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'HEAD~16', // first commit
+      toRef: 'HEAD~16', // first commit
+      paths: [''],
+      tagPrefix: '',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('345.2123.143');
+    expect(nt.releaseNotes).toContain('adding test1 file to root');
+    expect(nt.releaseNotes?.split('\n').length).toBe(10);
+  });
+  it('calculate next major increment in prefixed tag', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: ['prefix2'],
+      tagPrefix: 'prefix2/',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix2/21.0.0');
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).toContain('12 prefix2 adding');
+    expect(nt.releaseNotes).toContain('14 prefix1 prefix2 adding test4');
+    expect(nt.releaseNotes).toContain('10 prefix2 updating test1');
+    expect(nt.releaseNotes).toContain('13 prefix2 updating test1 and test2 files');
+    expect(nt.releaseNotes?.split('\n').length).toBe(20);
+  });
+  it('return idempotent tag for existing up-to-date tag', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: ['prefix3'],
+      tagPrefix: 'prefix3/',
+      preRelease: true,
+      preReleaseIdentifier: 'alpha',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix3/1.0.0-alpha');
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).toContain('88 prefix3 adding test1 file');
+    expect(nt.releaseNotes?.split('\n').length).toBe(10);
+  });
+  it('return idempotent tag for existing up-to-date tag with more than one tag on repo log', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD~9',
+      paths: ['prefix2'],
+      tagPrefix: 'prefix2/',
+      verbose: true,
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix2/10.10.0');
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).toContain('prefix2/10.10.0');
+    expect(nt.releaseNotes?.split('\n').length).toBe(10);
+  });
+  it('this passes on dev machine, but fails on gh actions (fixed already)', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD~16',
@@ -54,8 +129,8 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('345.2123.143');
   });
-  it('should fail if no commits found touching path', async () => {
-    const nt = await nextTag({
+  it('should fail if no commits found touching path', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -64,8 +139,8 @@ describe('when generating next tag with notes', () => {
     });
     expect(nt).toBeUndefined();
   });
-  it('should return next version if minor changes found in path after last tag', async () => {
-    const nt = await nextTag({
+  it('should return next version if minor changes found in path after last tag', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -82,8 +157,8 @@ describe('when generating next tag with notes', () => {
     expect(nt.releaseNotes?.includes('### Bug Fixes')).toBeTruthy();
     expect(nt.releaseNotes?.includes('adding test4 for both prefix1 and prefix2')).toBeTruthy();
   });
-  it('should return latest only with different suffix if nothing changed', async () => {
-    const nt = await nextTag({
+  it('should return latest only with different suffix if nothing changed', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -94,8 +169,8 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix1/3.5.0-alphaaaaa');
   });
-  it('should return latest for custom tagPrefix', async () => {
-    const nt = await nextTag({
+  it('should return latest for custom tagPrefix', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -107,8 +182,8 @@ describe('when generating next tag with notes', () => {
     expect(nt.existingTag).toBeTruthy();
     expect(nt.tagName).toBe('prefix9/v1.0.3');
   });
-  it('should return next version with suffix', async () => {
-    const nt = await nextTag({
+  it('should return next version with suffix', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -119,8 +194,8 @@ describe('when generating next tag with notes', () => {
     if (!nt) throw new Error('Shouldnt be null');
     expect(nt.tagName).toBe('prefix1/3.5.0-beta-gama');
   });
-  it('should return next version if major changes found in path after last tag', async () => {
-    const nt = await nextTag({
+  it('should return next version if major changes found in path after last tag', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -160,8 +235,8 @@ describe('when generating next tag with notes', () => {
 * Refs: closes #45
 * Authors: Flávio Stutz <flaviostutz@gmail.com>`);
   });
-  it('should simply return latest tag if no new commits found after latest tag in path', async () => {
-    const nt = await nextTag({
+  it('should simply return latest tag if no new commits found after latest tag in path', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -175,8 +250,8 @@ describe('when generating next tag with notes', () => {
     expect(nt.releaseNotes).toContain('## prefix3/1.0.0');
     expect(nt.releaseNotes).toContain('* test: 88 prefix3 adding test1 file');
   });
-  it('should return latest tag version with new suffix if no new commits found after latest tag in path', async () => {
-    const nt = await nextTag({
+  it('should return latest tag version with new suffix if no new commits found after latest tag in path', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -191,67 +266,8 @@ describe('when generating next tag with notes', () => {
     expect(nt.releaseNotes).toContain('* test: 88 prefix3 adding test1 file');
   });
 
-  it('should return zero commits for inexisting path', async () => {
-    const clogs = await findCommitsTouchingPath({
-      repoDir,
-      fromRef: 'HEAD~9',
-      toRef: 'HEAD',
-      paths: ['inexistentModule'],
-    });
-    expect(clogs).toHaveLength(0);
-  });
-  it('should fail if git command fails', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    console.log = (): void => {};
-    const exec = async (): Promise<void> => {
-      await findCommitsTouchingPath({
-        repoDir,
-        fromRef: 'HEAD~9999',
-        toRef: 'HEAD',
-        paths: [''],
-      });
-    };
-    await expect(exec).rejects.toThrow('failed');
-  });
-  it('should return commits related to prefix1 path', async () => {
-    const clogs = await findCommitsTouchingPath({
-      repoDir,
-      fromRef: 'HEAD~16',
-      toRef: 'HEAD',
-      paths: ['prefix1'],
-    });
-    expect(clogs).toHaveLength(7);
-    expect(clogs.filter((cl) => cl.message.includes('prefix1'))).toHaveLength(7);
-    expect(clogs.filter((cl) => cl.message.includes('prefix2'))).toHaveLength(1);
-  });
-  it('should return commits related to prefix2 path', async () => {
-    const clogs = await findCommitsTouchingPath({
-      repoDir,
-      fromRef: 'HEAD~12',
-      toRef: 'HEAD',
-      paths: ['prefix2'],
-    });
-    expect(clogs).toHaveLength(8);
-    expect(clogs.filter((cl) => cl.message.includes('prefix2'))).toHaveLength(8);
-    expect(clogs.filter((cl) => cl.message.includes('prefix1'))).toHaveLength(1);
-  });
-  it('should return last 5 commits', async () => {
-    const clogs = await findCommitsTouchingPath({
-      repoDir,
-      fromRef: 'HEAD~6',
-      toRef: 'HEAD',
-      paths: [''],
-    });
-    expect(clogs).toHaveLength(6);
-    expect(clogs[0].message.includes('10')).toBeTruthy();
-    expect(clogs[1].message.includes('11')).toBeTruthy();
-    expect(clogs[2].message.includes('12')).toBeTruthy();
-    expect(clogs[3].message.includes('13')).toBeTruthy();
-    expect(clogs[4].message.includes('14')).toBeTruthy();
-  });
-
-  it('should create pre-release correctly', async () => {
-    const nt = await nextTag({
+  it('should create pre-release correctly', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -263,8 +279,8 @@ describe('when generating next tag with notes', () => {
     expect(nt.tagName).toBe('prefix1/3.5.0-beta.0');
     expect(nt.version).toBe('3.5.0-beta.0');
   });
-  it('should create release correctly', async () => {
-    const nt = await nextTag({
+  it('should create release correctly', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -276,8 +292,8 @@ describe('when generating next tag with notes', () => {
     expect(nt.tagName).toBe('prefix1/3.5.0');
     expect(nt.version).toBe('3.5.0');
   });
-  it('create tag that touches multiple paths using the first tag in array as tag prefix reference', async () => {
-    const nt = await nextTag({
+  it('create tag that touches multiple paths using the first tag in array as tag prefix reference', () => {
+    const nt = nextTag({
       repoDir,
       fromRef: 'auto',
       toRef: 'HEAD',
@@ -296,7 +312,7 @@ describe('when generating next tag with notes', () => {
 });
 
 describe('when using tag incrementer', () => {
-  it('should increment major and zero other parts', async () => {
+  it('should increment major and zero other parts', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: 'major',
@@ -318,7 +334,7 @@ describe('when using tag incrementer', () => {
     expect(rr).toBe('25.0.0');
   });
 
-  it('should increment major and zero other parts -', async () => {
+  it('should increment major and zero other parts -', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix-0.1.0-beta+build999',
       type: 'major',
@@ -340,7 +356,7 @@ describe('when using tag incrementer', () => {
     expect(rr).toBe('25.0.0');
   });
 
-  it('should increment minor and zero other parts 1', async () => {
+  it('should increment minor and zero other parts 1', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: 'minor',
@@ -362,7 +378,7 @@ describe('when using tag incrementer', () => {
     expect(rr).toBe('24.23.0');
   });
 
-  it('should increment patch and zero other parts', async () => {
+  it('should increment patch and zero other parts', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: 'patch',
@@ -379,7 +395,7 @@ describe('when using tag incrementer', () => {
     rr = incrementTag({ fullTagName: '24.22.5-beta+build999', type: 'patch' });
     expect(rr).toBe('24.22.5');
   });
-  it('should increment patch and zero other parts 2', async () => {
+  it('should increment patch and zero other parts 2', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix-0.1.0-beta+build999',
       type: 'patch',
@@ -400,7 +416,7 @@ describe('when using tag incrementer', () => {
     });
     expect(rr).toBe('24.22.5');
   });
-  it('should respect minVersion when incrementing', async () => {
+  it('should respect minVersion when incrementing', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: 'major',
@@ -417,7 +433,7 @@ describe('when using tag incrementer', () => {
     expect(rr).toBe('24.22.10');
   });
 
-  it('should throw error if incremented version exceeds maxVersion', async () => {
+  it('should throw error if incremented version exceeds maxVersion', () => {
     const rr = incrementTag({
       fullTagName: 'my-service-prefix/14.22.5-abraca+build999',
       type: 'minor',
@@ -449,7 +465,7 @@ describe('when using tag incrementer', () => {
       });
     }).toThrow('Generated tag version 24.22.5 is greater than 24.22.4');
   });
-  it('should create pre-release versions', async () => {
+  it('should create pre-release versions', () => {
     let rr = incrementTag({
       fullTagName: 'my-service-prefix/0.1.0-beta+build999',
       type: 'patch',
@@ -486,7 +502,7 @@ describe('when using tag incrementer', () => {
     });
     expect(rr).toBe('my-service-prefix/0.1.5');
   });
-  it('should increment patch between pre-release and release', async () => {
+  it('should increment patch between pre-release and release', () => {
     // should keep same version when pre-release without changes
     // and not configured to always increment
     let rr = incrementTag({
@@ -536,7 +552,7 @@ describe('when using tag incrementer', () => {
     });
     expect(rr).toBe('0.3.0');
   });
-  it('inconsistencies in semver lib', async () => {
+  it('inconsistencies in semver lib', () => {
     // be aware of some inconsistencies of how inc() works in regard
     // to pre-release -> major/minor/patch increments
     // it seems likely to be a bug

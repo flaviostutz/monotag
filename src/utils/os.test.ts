@@ -1,7 +1,7 @@
 import { execCmd } from './os';
 
 describe('when executing cmd', () => {
-  it('should run multiple lines', async () => {
+  it('should run multiple lines', () => {
     const out = execCmd(
       '.',
       `
