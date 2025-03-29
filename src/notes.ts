@@ -9,13 +9,14 @@ import { tagParts } from './utils/tags';
 
 /**
  * If the latest commit already has a tag for the prefix, it will reconstruct the notes by searching previous commit logs from the previous tag to current commit log.
- * If it doesn't have the tag, it means that this is a new tag and it will build the notes from the latest tag to the current commit log.
+ * If the latest commit doesn't have the tag, it means that this is a new tag and it will build the notes from the latest tag to the current commit log.
  * It will ignore pre-release tags while searching for the latest tag so that the release notes takes into account always from final releases
  * This is supposed to be an indempotent operation.
  */
-const notesForLatestTag = (opts: {
+export const notesForLatestTag = (opts: {
   repoDir: string;
   paths: string[];
+  desiredTagName?: string;
   fromRef?: string;
   toRef?: string;
   tagPrefix: string;
@@ -37,11 +38,10 @@ const notesForLatestTag = (opts: {
     ignorePreReleases: true,
   });
 
-  if (!latestTag) {
-    if (opts.verbose) {
-      console.log(`Latest tag not found, so no release notes will be generated`);
-    }
-    return undefined;
+  if (!latestTag && opts.verbose) {
+    console.log(
+      `No existing tag found with for prefix "${opts.tagPrefix}" and suffix "${opts.tagSuffix}" in range "${opts.fromRef}...${opts.toRef}"`,
+    );
   }
 
   // look for the commits that compose the latest tag for this prefix
@@ -54,23 +54,29 @@ const notesForLatestTag = (opts: {
     toRef: opts.toRef,
     paths: opts.paths,
   });
-  if (commits.length === 0) {
-    if (opts.verbose) {
-      console.log(`No commits found for tag ${latestTag} in paths "${opts.paths.join(',')}"`);
-    }
-
-    // if not commits found it means that the path analised has no changes, thus we don't have a release notes
-    return undefined;
-  }
+  // if (commits.length === 0) {
+  //   throw new Error(
+  //     `No commits found for the latest tag ${latestTag} touching path ${opts.paths.join(',')}`,
+  //   );
+  // }
 
   // commits found for the latest tag
+  if (opts.desiredTagName && latestTag && latestTag !== opts.desiredTagName) {
+    throw new Error(
+      `Latest tag ${latestTag} does not match the desired tag name ${opts.desiredTagName}`,
+    );
+  }
+  const desiredTagName = latestTag ?? opts.desiredTagName;
+  if (!desiredTagName) {
+    throw new Error('Latest tag not found, so you need to provide a desired tag name');
+  }
 
   const commitsSummary = summarizeCommits(commits);
-  const versionDate = getDateFromCommit(commits[0].date);
+  const versionDate = commits.length > 0 ? getDateFromCommit(commits[0].date) : '';
   const formattedReleaseNotes = renderReleaseNotes({
     repoDir: opts.repoDir,
     commitsSummary,
-    tagName: latestTag,
+    tagName: desiredTagName,
     disableLinks: opts.notesDisableLinks,
     baseCommitUrl: opts.notesBaseCommitUrl,
     basePRUrl: opts.notesBasePRUrl,
@@ -83,7 +89,7 @@ const notesForLatestTag = (opts: {
   return formattedReleaseNotes;
 };
 
-const renderReleaseNotes = (args: {
+export const renderReleaseNotes = (args: {
   repoDir: string;
   commitsSummary: CommitsSummary;
   tagName: string;
@@ -359,5 +365,3 @@ export const cleanupRemoteOrigin = (remoteOriginRaw?: string): string | undefine
   remoteOrigin = remoteOrigin.replace(/\.git$/, ''); // remove .git at the end
   return remoteOrigin;
 };
-
-export { notesForLatestTag, renderReleaseNotes };

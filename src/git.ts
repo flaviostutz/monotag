@@ -262,7 +262,15 @@ export const findCommitsForLatestTag = (opts: {
 
     // remove the commit related to the previousTag, as we want only the commits after the latest tag
     if (previousTag) {
-      commits.shift();
+      const previousTagCommitId = execCmd(
+        opts.repoDir,
+        `git rev-parse ${previousTag}`,
+        opts.verbose,
+      ).trim();
+      if (commits.length > 0 && previousTagCommitId === commits[0].id) {
+        // remove the commit related to the previousTag, as we want only the commits after the latest tag
+        commits.shift();
+      }
     }
 
     // commits between versions was found
@@ -345,7 +353,9 @@ export const gitCommitListCmd = (args: {
   if (!args.fromRef) {
     return `git rev-list ${toRef}`;
   }
-  if (args.fromRef === toRef) {
+  const fromCommitId = execCmd(args.repoDir, `git rev-parse ${args.fromRef}`, args.verbose).trim();
+  const toCommitId = execCmd(args.repoDir, `git rev-parse ${toRef}`, args.verbose).trim();
+  if (fromCommitId === toCommitId) {
     return `git rev-parse ${toRef}`;
   }
   // list commits between two refs

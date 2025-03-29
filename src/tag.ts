@@ -49,22 +49,16 @@ export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
   }
 
   // search for changes
-  if (opts.fromRef === 'auto') {
-    if (!latestTag) {
-      throw new Error('No previous tag found. Cannot use "auto" for fromRef');
-    }
-    opts.fromRef = latestTag ?? undefined;
-  }
+  const fromRefFindCommits = opts.fromRef === 'auto' ? latestTag : opts.fromRef;
 
   if (opts.verbose) {
     console.log(
-      `Analysing commit range ${opts.fromRef ?? ''}...${opts.toRef} and filtering paths "${opts.paths.join(',')}"`,
+      `Analysing commit range ${fromRefFindCommits ?? ''}...${opts.toRef} and filtering paths "${opts.paths.join(',')}"`,
     );
   }
-
   const commits = findCommitsTouchingPath({
     repoDir: opts.repoDir,
-    fromRef: opts.fromRef,
+    fromRef: fromRefFindCommits,
     toRef: opts.toRef,
     paths: opts.paths,
     verbose: opts.verbose,
@@ -73,7 +67,7 @@ export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
   // remove commit related to fromRef (or latest tag) itself
   commits.shift();
 
-  // no changes detected
+  // no changes detected since last tag
   if (commits.length === 0) {
     if (opts.verbose) {
       console.log('No changes detected in commit range');
@@ -90,7 +84,11 @@ export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
       ...opts,
     });
 
-    const releaseNotes = notesForLatestTag(opts);
+    const releaseNotes = notesForLatestTag({
+      ...opts,
+      fromRef: opts.fromRef === 'auto' ? undefined : opts.fromRef,
+      desiredTagName: tagName,
+    });
 
     return {
       tagName,

@@ -62,7 +62,6 @@ describe('when using git', () => {
       tagPrefix: 'prefix2/',
       fromRef: 'HEAD~9',
       toRef: 'HEAD~9',
-      verbose: true,
     });
     expect(ltag).toBe('prefix2/10.10.0');
   });
@@ -154,7 +153,6 @@ describe('when using git', () => {
       fromRef: 'HEAD~12',
       toRef: 'HEAD',
       paths: ['prefix2'],
-      verbose: true,
     });
     expect(clogs).toHaveLength(8);
     expect(clogs.filter((cl) => cl.message.includes('prefix2'))).toHaveLength(8);

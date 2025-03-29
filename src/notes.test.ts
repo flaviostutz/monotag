@@ -25,11 +25,35 @@ describe('re-generate notes from latest tag', () => {
       paths: ['prefix2'],
     });
     if (!nt) throw new Error('Shouldnt be undefined');
-    expect(nt).toContain('## prefix2/20.10.0 (');
-    expect(nt).toContain('* 8 prefix2 creating test3 file');
+    expect(nt).toMatch('## prefix2/20.10.0 (');
+    expect(nt).toMatch('* 8 prefix2 creating test3 file');
     expect(nt).toContain(`### Features
 
 * **Breaking:** 8 prefix2 creating test3 file`);
+  });
+  it('latest tag not found for prefix3 without pre-release or suffix', () => {
+    const nt = notesForLatestTag({
+      repoDir,
+      tagPrefix: 'prefix3/',
+      paths: ['prefix3'],
+      desiredTagName: 'prefix3/3.0.0',
+    });
+    if (!nt) throw new Error('Shouldnt be undefined');
+    expect(nt).toMatch('## prefix3/3.0.0 (');
+    expect(nt).toMatch('88 prefix3 adding test1 file');
+    expect(nt.split('\n')).toHaveLength(10);
+  });
+  it('should get notes for existing prefixed tag prefix3', () => {
+    const nt = notesForLatestTag({
+      repoDir,
+      tagPrefix: 'prefix3/',
+      paths: ['prefix3'],
+      tagSuffix: '-alpha',
+    });
+    if (!nt) throw new Error('Shouldnt be undefined');
+    expect(nt).toMatch('## prefix3/1.0.0 (');
+    expect(nt).toMatch('88 prefix3 adding test1 file');
+    expect(nt.split('\n')).toHaveLength(10);
   });
   it('should generate notes for non-prefixed tag', () => {
     const nt = notesForLatestTag({
@@ -38,7 +62,7 @@ describe('re-generate notes from latest tag', () => {
       paths: [''],
     });
     if (!nt) throw new Error('Shouldnt be undefined');
-    expect(nt).toContain('## 345.2123.143 (');
+    expect(nt).toMatch('## 345.2123.143 (');
     expect(nt).toContain(`### Features
 
 * adding test1 file to root`);
@@ -49,8 +73,24 @@ describe('re-generate notes from latest tag', () => {
       repoDir,
       tagPrefix: 'SOMETHING_INEXISTENT/',
       paths: ['prefix2'],
+      desiredTagName: 'SOMETHING_INEXISTENT/5.0.0',
     });
-    expect(nt).toBeUndefined();
+    expect(nt).not.toMatch('1 prefix1');
+    expect(nt).not.toMatch('2 prefix1');
+    expect(nt).not.toMatch('3 prefix1');
+    expect(nt).not.toMatch(' 4 prefix1');
+    expect(nt).toMatch('5 prefix2');
+    expect(nt).toMatch('6 prefix2');
+    expect(nt).toMatch('7 prefix2');
+    expect(nt).toMatch('8 prefix2');
+    expect(nt).not.toMatch('88 prefix3');
+    expect(nt).not.toMatch('9 prefix1');
+    expect(nt).toMatch('10 prefix2');
+    expect(nt).not.toMatch('11 prefix1');
+    expect(nt).toMatch('12 prefix2');
+    expect(nt).toMatch('13 prefix2');
+    expect(nt).toMatch('14 prefix1');
+    expect(nt?.split('\n')).toHaveLength(24);
   });
 
   it('should return empty release note if no commits found touching path', () => {
@@ -59,7 +99,7 @@ describe('re-generate notes from latest tag', () => {
       tagPrefix: 'lonelytag/',
       paths: ['INEXISTENT_PATH'],
     });
-    expect(nt).toBeUndefined();
+    expect(nt).toMatch('## lonelytag/1.0.0');
   });
 });
 
@@ -131,7 +171,7 @@ describe('render links utilities', () => {
 
     it('should render the subject correctly', () => {
       const result = renderSubject('feat: new feature subject');
-      expect(result).toContain('new feature subject');
+      expect(result).toMatch('new feature subject');
     });
 
     it('should handle empty input gracefully', () => {
@@ -223,7 +263,7 @@ describe('renderCommit', () => {
       parsedLog: { subject: 'Add feature X', scope: 'my-feature-123' },
       commit: { id: 'abc123' },
     } as unknown as CommitDetails;
-    expect(renderCommit(commitDetails)).toContain('* my-feature-123: Add feature X [abc123]');
+    expect(renderCommit(commitDetails)).toMatch('* my-feature-123: Add feature X [abc123]');
   });
 
   it('doesnt remove issue reference if not replacing', () => {
@@ -245,7 +285,7 @@ describe('renderCommit', () => {
       },
       commit: { id: 'abc123' },
     } as unknown as CommitDetails;
-    expect(renderCommit(commitDetails)).toContain('* Fix bug Y [abc123]');
+    expect(renderCommit(commitDetails)).toMatch('* Fix bug Y [abc123]');
   });
 
   it('links commit ID if baseCommitUrl is provided', () => {
@@ -254,6 +294,6 @@ describe('renderCommit', () => {
       commit: { id: 'def456' },
     } as CommitDetails;
     const result = renderCommit(commitDetails, 'http://example.com/commits/');
-    expect(result).toContain('Enhance performance [[def456](http://example.com/commits/def456)]');
+    expect(result).toMatch('Enhance performance [[def456](http://example.com/commits/def456)]');
   });
 });
