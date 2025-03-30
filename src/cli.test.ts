@@ -352,6 +352,21 @@ describe('when using cli', () => {
     expect(stdout).toMatch('346.0.1-alpha.0');
     expect(exitCode).toBe(0);
 
+    // check if increment pre-release is working properly
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag',
+      `--repo-dir=${repoDir}`,
+      '--prerelease=true',
+      '--prerelease-identifier=alpha',
+      '--prerelease-increment=true',
+    ]);
+    expect(stdout).not.toEqual(notesAlpha10.replaceAll('-alpha.0', ''));
+    expect(stdout).toEqual(notesAlpha10.replaceAll('-alpha.0', '-alpha.1'));
+    expect(exitCode).toBe(0);
+
     // check if final release notes are similar to the latest pre-release notes
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
