@@ -129,6 +129,7 @@ const createSampleRepo = (repoDir: string): void => {
     echo 'test2c' > prefix1/test2
     git add prefix1/test2
     git commit -m 'fix(user-ui): 9 prefix1 updating test1 and test2 files again for module prefix1'
+    git tag prefix99/1.0.0
 
     [ -n "$CI" ] && sleep 1
 
@@ -137,6 +138,7 @@ const createSampleRepo = (repoDir: string): void => {
     echo 'test2c' > prefix2/test2
     git add prefix2/test2
     git commit -m 'fix(anyscope): 10 prefix2 updating test1 and test2 files again for module prefix2'
+    git tag prefix3/1.0.1-beta.0
 
     [ -n "$CI" ] && sleep 1
 
@@ -145,6 +147,7 @@ const createSampleRepo = (repoDir: string): void => {
     echo 'test2d' > prefix1/test2
     git add prefix1/test2
     git commit -m 'fix(tests): 11 prefix1 updating test1 and test2 files for module prefix1'
+    git tag prefix99/1.0.1-beta.0
 
     [ -n "$CI" ] && sleep 1
 
@@ -153,6 +156,7 @@ const createSampleRepo = (repoDir: string): void => {
     echo 'test3d' > prefix2/test3
     git add prefix2/test3
     git commit -m 'feat!: 12 prefix2 adding test3 file for module prefix2'
+    git tag prefix3/1.0.1-beta.1
 
     [ -n "$CI" ] && sleep 1
 
@@ -161,6 +165,7 @@ const createSampleRepo = (repoDir: string): void => {
     echo 'test2c' > prefix2/test2
     git add prefix2/test2
     git commit -m 'chore: 13 prefix2 updating test1 and test2 files for module prefix2 closes #45'
+    git tag prefix3/1.0.1
 
     [ -n "$CI" ] && sleep 1
 
@@ -176,6 +181,9 @@ const createSampleRepo = (repoDir: string): void => {
     git add test2
     git commit -m 'feat: 15 adding test2 file to root'
     git tag prefix3/shouldbeignored
+    git tag prefix99/2.0.0-beta.0
+    git tag prefix99/2.0.0
+    git tag prefix66/3.0.0-beta.0
 
     `,
     false,

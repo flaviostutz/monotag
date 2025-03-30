@@ -7,7 +7,10 @@ import {
   findCommitsForLatestTag,
   findCommitsTouchingPath,
   gitConfigUser,
+  isFirstCommit,
   lastTagForPrefix,
+  resolveCommitIdForRef,
+  tagExistsInRepo,
 } from './git';
 import { execCmd } from './utils/os';
 import { createSampleRepo } from './utils/tests';
@@ -90,6 +93,54 @@ describe('when using git', () => {
     });
     expect(ltag).toBeUndefined();
   });
+  it('should get latest tag for prefix66 of pre-release', () => {
+    const ltag = lastTagForPrefix({
+      repoDir,
+      tagPrefix: 'prefix66/',
+      fromRef: 'HEAD~16',
+      toRef: 'HEAD~',
+    });
+    expect(ltag).toBeUndefined();
+  });
+  it('should get latest tag for prefix3 including pre-releases', () => {
+    const ltag = lastTagForPrefix({
+      repoDir,
+      tagPrefix: 'prefix3/',
+      fromRef: 'HEAD~16',
+      toRef: 'HEAD~3',
+    });
+    expect(ltag).toBe('prefix3/1.0.1-beta.1');
+  });
+  it('should get latest tag for prefix3 ignoring pre-releases', () => {
+    const ltag = lastTagForPrefix({
+      repoDir,
+      tagPrefix: 'prefix3/',
+      fromRef: 'HEAD~16',
+      toRef: 'HEAD',
+      ignorePreReleases: true,
+    });
+    expect(ltag).toBe('prefix3/1.0.1');
+  });
+  it('should get latest tag for prefix99 ignoring pre-releases', () => {
+    const ltag = lastTagForPrefix({
+      repoDir,
+      tagPrefix: 'prefix99/',
+      fromRef: 'HEAD~16',
+      toRef: 'HEAD~1',
+      ignorePreReleases: true,
+    });
+    expect(ltag).toBe('prefix99/1.0.0');
+  });
+  it('should get latest tag for prefix99 including pre-releases', () => {
+    const ltag = lastTagForPrefix({
+      repoDir,
+      tagPrefix: 'prefix99/',
+      fromRef: 'HEAD~16',
+      toRef: 'HEAD~1',
+      ignorePreReleases: false,
+    });
+    expect(ltag).toBe('prefix99/1.0.1-beta.0');
+  });
   it('should get latest tag for prefix2 in range from (first commit)...to', () => {
     const ltag = lastTagForPrefix({
       repoDir,
@@ -108,7 +159,7 @@ describe('when using git', () => {
     expect(ltag).toBeUndefined();
   });
   it('should return null if no tag found for prefix99', () => {
-    const ltag = lastTagForPrefix({ repoDir, tagPrefix: 'prefix99/' });
+    const ltag = lastTagForPrefix({ repoDir, tagPrefix: 'prefix999/' });
     expect(ltag).toBeUndefined();
   });
   it('should get latest tag for empty prefix', () => {
@@ -214,6 +265,25 @@ describe('when using git', () => {
       tagPrefix: '',
     });
     expect(commits).toHaveLength(1);
+  });
+  it('isFirstCommit check true', () => {
+    const firstCommitId = execCmd(repoDir, 'git rev-list HEAD | tail -1 | head -1').trim();
+    const is = isFirstCommit(repoDir, firstCommitId);
+    expect(is).toBeTruthy();
+  });
+  it('isFirstCommit check false', () => {
+    const secondCommitId = execCmd(repoDir, 'git rev-list HEAD | tail -2 | head -1').trim();
+    const is = isFirstCommit(repoDir, secondCommitId);
+    expect(is).toBeFalsy();
+  });
+  it('resolveCommit Id by ref', () => {
+    const secondCommitId = execCmd(repoDir, 'git rev-list HEAD | tail -2 | head -1').trim();
+    const is = resolveCommitIdForRef(repoDir, 'HEAD~15');
+    expect(is).toBe(secondCommitId);
+  });
+  it('tagExistsInRepo', () => {
+    const is = tagExistsInRepo(repoDir, 'prefix1/1.10.0');
+    expect(is).toBeTruthy();
   });
 });
 describe('gitConfigUser', () => {

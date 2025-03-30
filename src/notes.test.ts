@@ -36,6 +36,7 @@ describe('re-generate notes from latest tag', () => {
       repoDir,
       tagPrefix: 'prefix3/',
       paths: ['prefix3'],
+      toRef: 'HEAD~6',
       desiredTagName: 'prefix3/3.0.0',
     });
     if (!nt) throw new Error('Shouldnt be undefined');
@@ -51,7 +52,7 @@ describe('re-generate notes from latest tag', () => {
       tagSuffix: '-alpha',
     });
     if (!nt) throw new Error('Shouldnt be undefined');
-    expect(nt).toMatch('## prefix3/1.0.0 (');
+    expect(nt).toMatch('## prefix3/1.0.1 (');
     expect(nt).toMatch('88 prefix3 adding test1 file');
     expect(nt.split('\n')).toHaveLength(10);
   });

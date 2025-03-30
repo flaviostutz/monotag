@@ -173,6 +173,26 @@ describe('when using cli', () => {
       '--prerelease-identifier=alpha',
     ]);
     expect(stdout).toMatch(/^346.0.0-alpha.0/);
+    expect(stdout).not.toContain('adding test1 file to root');
+    expect(stdout).toContain('15 adding test2');
+    expect(stdout).toContain('2 prefix1 ');
+    expect(exitCode).toBe(0);
+
+    // get existing pre-release tag
+    stdout = '';
+    exitCode = await run([
+      '',
+      '',
+      'tag',
+      `--repo-dir=${repoDir}`,
+      '--prefix=prefix66/',
+      '--prerelease=true',
+      '--prerelease-identifier=beta',
+    ]);
+    expect(stdout).toMatch('prefix66/3.0.0-beta.0');
+    expect(stdout).toContain('adding test1 file to root');
+    expect(stdout).toContain('15 adding test2');
+    expect(stdout).toContain('2 prefix1 ');
     expect(exitCode).toBe(0);
 
     // git tag as prerelease
@@ -187,6 +207,11 @@ describe('when using cli', () => {
       '--notes-file=dist/notes1.md',
     ]);
     expect(stdout).toMatch(/.*Creating tag 346.0.0-alpha.0.*Tag created successfully.*/);
+    expect(stdout).toContain('346.0.0-alpha.0');
+    expect(stdout).toContain('## 346.0.0 (');
+    expect(stdout).not.toContain('adding test1 file to root');
+    expect(stdout).toContain('15 adding test2');
+    expect(stdout).toContain('2 prefix1 ');
     expect(exitCode).toBe(0);
 
     // git tag as prerelease again without changes to see
@@ -202,6 +227,12 @@ describe('when using cli', () => {
       '--prerelease-identifier=alpha',
       '--notes-file=dist/notes2.md',
     ]);
+    expect(stdout).toContain('346.0.0-alpha.0');
+    expect(stdout).toContain('## 346.0.0 (');
+    expect(stdout).not.toContain('adding test1 file to root');
+    expect(stdout).toContain('15 adding test2');
+    expect(stdout).toContain('2 prefix1 ');
+
     const notesAlpha0 = stdout;
     const notes1Contents = execCmd('.', 'cat dist/notes1.md');
     const notes2Contents = execCmd('.', 'cat dist/notes2.md');

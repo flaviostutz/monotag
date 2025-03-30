@@ -54,7 +54,7 @@ describe('when generating next tag with notes', () => {
     expect(nt.tagName).toBe('346.0.0');
     // this is a commit that is part of the previous tag, so shouldn't be included
     expect(nt.releaseNotes).not.toContain('adding test1 file to root');
-    expect(nt.releaseNotes).toContain('2 prefix1 updating test1 file');
+    expect(nt.releaseNotes).toContain('15 adding test2 file to root');
     expect(nt.releaseNotes?.split('\n').length).toBe(32);
   });
   it('rebuild indepomtent tag if latest on root', () => {
@@ -87,6 +87,87 @@ describe('when generating next tag with notes', () => {
     expect(nt.releaseNotes).toContain('13 prefix2 updating test1 and test2 files');
     expect(nt.releaseNotes?.split('\n').length).toBe(20);
   });
+  it('calculate tag with pre-release', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: ['prefix2'],
+      tagPrefix: 'prefix2/',
+      preRelease: true,
+      preReleaseIdentifier: 'alpha',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix2/21.0.0-alpha.0');
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).toContain('12 prefix2 adding');
+    expect(nt.releaseNotes).toContain('14 prefix1 prefix2 adding test4');
+    expect(nt.releaseNotes).toContain('10 prefix2 updating test1');
+    expect(nt.releaseNotes).toContain('13 prefix2 updating test1 and test2 files');
+    expect(nt.releaseNotes?.split('\n').length).toBe(20);
+  });
+
+  it('calculate tag with pre-release in root', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: [''],
+      tagPrefix: '',
+      preRelease: true,
+      preReleaseIdentifier: 'alpha',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('346.0.0-alpha.0');
+    expect(nt.existingTag).toBeFalsy();
+    // this is a commit that is part of the previous tag, so shouldn't be included
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).toContain('15 adding test2 file to root');
+    // this is part of the pre-release
+    expect(nt.releaseNotes).toContain('12 prefix2 adding');
+    expect(nt.releaseNotes).toContain('88 prefix3');
+    expect(nt.releaseNotes?.split('\n').length).toBe(32);
+  });
+
+  it('return same existing pre-release tag', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'HEAD~16',
+      toRef: 'HEAD~3',
+      paths: ['prefix3'],
+      tagPrefix: 'prefix3/',
+      preRelease: true,
+      preReleaseIdentifier: 'beta',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix3/1.1.0-beta.0');
+    expect(nt.existingTag).toBeFalsy();
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).not.toContain('15 adding test2 file to root');
+    expect(nt.releaseNotes).toContain('88 prefix3');
+    expect(nt.releaseNotes?.split('\n').length).toBe(10);
+  });
+
+  it('calculate tag with final version in root', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: [''],
+      tagPrefix: '',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.existingTag).toBeFalsy();
+    expect(nt.tagName).toBe('346.0.0');
+    // this is a commit that is part of the previous tag, so shouldn't be included
+    expect(nt.releaseNotes).not.toContain('adding test1 file to root');
+    expect(nt.releaseNotes).toContain('15 adding test2 file to root');
+    // this is part of the pre-release
+    expect(nt.releaseNotes).toContain('12 prefix2 adding');
+    expect(nt.releaseNotes).toContain('88 prefix3');
+    expect(nt.releaseNotes?.split('\n').length).toBe(32);
+  });
+
   it('return idempotent tag for existing up-to-date tag', () => {
     const nt = nextTag({
       repoDir,
@@ -98,7 +179,7 @@ describe('when generating next tag with notes', () => {
       preReleaseIdentifier: 'alpha',
     });
     if (!nt) throw new Error('Shouldnt be null');
-    expect(nt.tagName).toBe('prefix3/1.0.0-alpha');
+    expect(nt.tagName).toBe('prefix3/1.0.2-alpha.0');
     expect(nt.releaseNotes).not.toContain('adding test1 file to root');
     expect(nt.releaseNotes).toContain('88 prefix3 adding test1 file');
     expect(nt.releaseNotes?.split('\n').length).toBe(10);
@@ -234,7 +315,7 @@ describe('when generating next tag with notes', () => {
 * Refs: closes #45
 * Authors: Flávio Stutz <flaviostutz@gmail.com>`);
   });
-  it('should simply return latest tag if no new commits found after latest tag in path', () => {
+  it('return new tag based on latest for alpha suffix even if it doesnt exist', () => {
     const nt = nextTag({
       repoDir,
       fromRef: 'auto',
@@ -244,9 +325,23 @@ describe('when generating next tag with notes', () => {
       tagSuffix: '-alpha',
     });
     if (!nt) throw new Error('Shoulnt be null');
-    expect(nt.tagName).toBe('prefix3/1.0.0-alpha');
+    expect(nt.tagName).toBe('prefix3/1.0.1-alpha');
+    expect(nt.existingTag).toBeFalsy();
+    expect(nt.releaseNotes).toContain('## prefix3/1.0.1');
+    expect(nt.releaseNotes).toContain('* test: 88 prefix3 adding test1 file');
+  });
+  it('should simply return latest tag if no new commits found after latest tag in path', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: ['prefix3'],
+      tagPrefix: 'prefix3/',
+    });
+    if (!nt) throw new Error('Shoulnt be null');
+    expect(nt.tagName).toBe('prefix3/1.0.1');
     expect(nt.existingTag).toBeTruthy();
-    expect(nt.releaseNotes).toContain('## prefix3/1.0.0');
+    expect(nt.releaseNotes).toContain('## prefix3/1.0.1');
     expect(nt.releaseNotes).toContain('* test: 88 prefix3 adding test1 file');
   });
   it('should return latest tag version with new suffix if no new commits found after latest tag in path', () => {
@@ -259,10 +354,67 @@ describe('when generating next tag with notes', () => {
       tagSuffix: '-rc1.0-all',
     });
     if (!nt) throw new Error('Shouldnt be null');
-    expect(nt.tagName).toBe('prefix3/1.0.0-rc1.0-all');
+    expect(nt.tagName).toBe('prefix3/1.0.1-rc1.0-all');
     expect(nt.existingTag).toBeFalsy();
-    expect(nt.releaseNotes).toContain('## prefix3/1.0.0 (');
+    expect(nt.releaseNotes).toContain('## prefix3/1.0.1 (');
     expect(nt.releaseNotes).toContain('* test: 88 prefix3 adding test1 file');
+  });
+
+  it('should return latest tag present in HEAD', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: [''],
+      tagPrefix: 'prefix99/',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix99/2.0.0');
+    expect(nt.existingTag).toBeTruthy();
+    expect(nt.releaseNotes).not.toContain('9 prefix1');
+    expect(nt.releaseNotes).toContain('10 prefix2');
+    expect(nt.releaseNotes).toContain('13 prefix2');
+    expect(nt.releaseNotes).toContain('15 adding test2');
+  });
+
+  it('should return latest tag present in HEAD in pre-release', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: [''],
+      tagPrefix: 'prefix66/',
+      preRelease: true,
+      preReleaseIdentifier: 'beta',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix66/3.0.0-beta.0');
+    expect(nt.existingTag).toBeTruthy();
+    expect(nt.releaseNotes).toContain('9 prefix1');
+    expect(nt.releaseNotes).toContain('10 prefix2');
+    expect(nt.releaseNotes).toContain('13 prefix2');
+    expect(nt.releaseNotes).toContain('6 prefix2');
+    expect(nt.releaseNotes).toContain('2 prefix1');
+    expect(nt.releaseNotes).toContain('adding test1 file to root');
+  });
+
+  it('should return final version still untagged from HEAD', () => {
+    const nt = nextTag({
+      repoDir,
+      fromRef: 'auto',
+      toRef: 'HEAD',
+      paths: [''],
+      tagPrefix: 'prefix66/',
+    });
+    if (!nt) throw new Error('Shouldnt be null');
+    expect(nt.tagName).toBe('prefix66/3.0.0');
+    expect(nt.existingTag).toBeFalsy();
+    expect(nt.releaseNotes).toContain('9 prefix1');
+    expect(nt.releaseNotes).toContain('10 prefix2');
+    expect(nt.releaseNotes).toContain('13 prefix2');
+    expect(nt.releaseNotes).toContain('6 prefix2');
+    expect(nt.releaseNotes).toContain('2 prefix1');
+    expect(nt.releaseNotes).toContain('adding test1 file to root');
   });
 
   it('should create pre-release correctly', () => {

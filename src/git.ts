@@ -20,6 +20,9 @@ import { Commit } from './types/commits';
  * @returns {Commit[]} List of commits
  */
 export const findCommitsTouchingPath = (opts: BasicOptions): Commit[] => {
+  if (opts.verbose) {
+    console.log('>> findCommitsTouchingPath');
+  }
   if (!opts.repoDir) {
     throw new Error("'repoDir' must be defined");
   }
@@ -125,30 +128,29 @@ export const lastTagForPrefix = (args: {
   toRef?: string;
 }): string | undefined => {
   if (args.verbose) {
-    console.log('\n>> lastTagForPrefix. args=', args);
+    console.log(`\n>> lastTagForPrefix. ip=${args.ignorePreReleases}`);
   }
   // list tags by semver in descending order
+  // this limit (with "head") is a safeguard for large repositories
   const tags = execCmd(
     args.repoDir,
-    `git tag --list '${args.tagPrefix}*' --sort=-v:refname | head -n 100`,
+    `git tag --list '${args.tagPrefix}*' --sort=-v:refname | head -n 200`,
     args.verbose,
   ).split('\n');
 
-  // this limit (with "head") is a safeguard for large repositories
-
   if (args.verbose) {
-    if (tags.length === 100) {
-      console.log('Tags analysis ight have been limited to last 100 results');
+    if (tags.length === 200) {
+      console.log('Tags analysis might have been limited to last 200 results');
     }
     console.log(`${tags.length} with prefix '${args.tagPrefix}' found`);
   }
 
   // remove tags that don't match the prefix
-  // or are excluded by the exceptTag parameter
   const filteredTagsPrefix = tags.filter((t: string): boolean => {
     const tparts = tagParts(t);
     // doesn't seem like a valid tag
     if (!tparts) {
+      if (args.verbose) console.log(`\n>>> REMOVING TAG1 ${t}`);
       return false;
     }
     // it's a tag for the desired prefix
@@ -161,11 +163,14 @@ export const lastTagForPrefix = (args: {
           .replace(tparts[3], '') // version
           .replace(args.tagSuffix ?? '', '');
         if (preReleasePart) {
+          if (args.verbose) console.log(`\n>>> REMOVING PRE-RELEASE TAG ${t}`);
           return false;
         }
       }
+      if (args.verbose) console.log(`\n>>> KEEPING TAG ${t}`);
       return true;
     }
+    if (args.verbose) console.log(`\n>>> REMOVING TAG ${t}`);
     return false;
   });
 
@@ -180,14 +185,15 @@ export const lastTagForPrefix = (args: {
     if (!args.fromRef && !args.toRef) {
       return true;
     }
-    const tagCommitId = execCmd(args.repoDir, `git rev-list -n 1 ${t}`, args.verbose).trim();
     try {
       // check if this tag points to a commit that is inside the desired commit range (from-to)
       // range is empty, so this commit is not found in range
       // this command will fail if grep doesn't find the tagCommitId in the commit range
+      const tagCommitId = resolveCommitIdForTag(args.repoDir, t, args.verbose);
       execCmd(args.repoDir, `${commitListCmd} | sed s/^-// | grep ${tagCommitId}`, args.verbose);
     } catch {
       // grep fails if not found
+      if (args.verbose) console.log(`\n>>> REMOVING TAG outside ${t}`);
       return false;
     }
     return true;
@@ -225,7 +231,7 @@ export const findCommitsForLatestTag = (opts: {
   paths: string[];
 }): Commit[] => {
   // get latest tag for the prefix (might be pointing to HEAD or not)
-  const commitsUntilRef = lastTagForPrefix({
+  const latestTag = lastTagForPrefix({
     repoDir: opts.repoDir,
     tagPrefix: opts.tagPrefix,
     tagSuffix: opts.tagSuffix,
@@ -235,51 +241,51 @@ export const findCommitsForLatestTag = (opts: {
     nth: 0,
   });
 
+  if (opts.verbose) console.log(`\n\n>>> latestTag ${latestTag}\n\n`);
+
   // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
   // which leads to no commits between those tags
   // go back in history to find a previous tag that actually
   // has commits in relation to the current tag (or HEAD)
-  let commits: Commit[] = [];
-  for (let i = 1; i < 10; i += 1) {
+  for (let i = 1; i < 30; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     const previousTag = lastTagForPrefix({
       repoDir: opts.repoDir,
       tagPrefix: opts.tagPrefix,
       tagSuffix: opts.tagSuffix,
       verbose: opts.verbose,
-      toRef: commitsUntilRef,
+      toRef: latestTag,
       nth: i,
       ignorePreReleases: true,
     });
 
+    if (opts.verbose) console.log(`\n\n>>> previousTag i ${i} ${previousTag}\n\n`);
+
     // eslint-disable-next-line no-await-in-loop
-    commits = findCommitsTouchingPath({
+    const commits = findCommitsTouchingPath({
       repoDir: opts.repoDir,
       paths: opts.paths,
       fromRef: previousTag,
-      toRef: commitsUntilRef,
+      toRef: latestTag,
     });
 
-    // remove the commit related to the previousTag, as we want only the commits after the latest tag
+    // remove the commit related to the previousTag, as we want only the commits after the previous tag
+    if (opts.verbose) console.log(`\n>>>> pt ${previousTag}\n\n`);
     if (previousTag) {
-      const previousTagCommitId = execCmd(
-        opts.repoDir,
-        `git rev-parse ${previousTag}`,
-        opts.verbose,
-      ).trim();
+      const previousTagCommitId = resolveCommitIdForTag(opts.repoDir, previousTag);
+      if (opts.verbose) console.log(`\n>>>> ptci ${previousTagCommitId} ${commits[0].id}\n\n`);
       if (commits.length > 0 && previousTagCommitId === commits[0].id) {
-        // remove the commit related to the previousTag, as we want only the commits after the latest tag
         commits.shift();
       }
     }
 
     // commits between versions was found
     if (commits.length > 0) {
-      break;
+      return commits;
     }
   }
 
-  return commits;
+  return [];
 };
 
 export const gitConfigUser = (
@@ -310,7 +316,7 @@ export const gitConfigUser = (
 
 export const tagExistsInRepo = (repoDir: string, tagName: string, verbose?: boolean): boolean => {
   try {
-    execCmd(repoDir, `git show-ref --tags --quiet --verify -- "refs/tags/${tagName}"`, verbose);
+    execCmd(repoDir, `git show-ref --tags --verify -- "refs/tags/${tagName}"`, verbose);
     return true;
   } catch {
     return false;
@@ -360,4 +366,29 @@ export const gitCommitListCmd = (args: {
   }
   // list commits between two refs
   return `git rev-list --boundary ${args.fromRef}..${toRef}`;
+};
+
+export const isFirstCommit = (repoDir: string, commitId: string, verbose?: boolean): boolean => {
+  try {
+    execCmd(
+      repoDir,
+      `git log --oneline --reverse --no-abbrev-commit | head -1 | grep ${commitId}`,
+      verbose,
+    );
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const resolveCommitIdForRef = (repoDir: string, ref: string, verbose?: boolean): string => {
+  return execCmd(repoDir, `git rev-parse --verify ${ref}`, verbose).trim();
+};
+
+export const resolveCommitIdForTag = (
+  repoDir: string,
+  tagName: string,
+  verbose?: boolean,
+): string => {
+  return execCmd(repoDir, `git rev-list -n 1 ${tagName}`, verbose).trim();
 };

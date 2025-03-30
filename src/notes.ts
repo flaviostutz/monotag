@@ -35,7 +35,6 @@ export const notesForLatestTag = (opts: {
     verbose: opts.verbose,
     fromRef: opts.fromRef,
     toRef: opts.toRef,
-    ignorePreReleases: true,
   });
 
   if (!latestTag && opts.verbose) {
@@ -54,19 +53,8 @@ export const notesForLatestTag = (opts: {
     toRef: opts.toRef,
     paths: opts.paths,
   });
-  // if (commits.length === 0) {
-  //   throw new Error(
-  //     `No commits found for the latest tag ${latestTag} touching path ${opts.paths.join(',')}`,
-  //   );
-  // }
 
-  // commits found for the latest tag
-  if (opts.desiredTagName && latestTag && latestTag !== opts.desiredTagName) {
-    throw new Error(
-      `Latest tag ${latestTag} does not match the desired tag name ${opts.desiredTagName}`,
-    );
-  }
-  const desiredTagName = latestTag ?? opts.desiredTagName;
+  const desiredTagName = opts.desiredTagName ?? latestTag;
   if (!desiredTagName) {
     throw new Error('Latest tag not found, so you need to provide a desired tag name');
   }
