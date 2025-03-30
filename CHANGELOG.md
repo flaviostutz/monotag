@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.24.0 (2025-03-21)
+
+### Features
+
+* release notes now include all changes from the latest final release, not from the latest pre-release tag [[fee61e7](https://github.com/flaviostutz/monotag/commit/fee61e791ae16e8fc9f23854fcb22369d7598bd8)]
+
+### Maintenance
+
+* fixing errors [[f74dc73](https://github.com/flaviostutz/monotag/commit/f74dc73f8a4f61637ad7fe3808c0cb8d6d434c3f)]
+* fixing more edge cases [[0aff0ce](https://github.com/flaviostutz/monotag/commit/0aff0ce63cacf321f11f95ff9d72b56679792016)]
+* fixing various edge cases for notes generation [[7404dc6](https://github.com/flaviostutz/monotag/commit/7404dc60286f8a5baff80ce0e91847cdb97fe720)]
+* refactor notes scope generation [[963ce64](https://github.com/flaviostutz/monotag/commit/963ce64aec6acc20ba9fa2dd33ef18b4e6adf23c)]
+
+### Misc
+
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+
+
 ## 1.23.0 (2025-03-19)
 
 ### Features
