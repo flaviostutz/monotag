@@ -2,22 +2,35 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undefined */
 /* eslint-disable functional/no-let */
-import { lastTagForPrefix, findCommitsForLatestTag, remoteOriginUrl } from './git';
+import { remoteOriginUrl, resolveCommitIdForTag, resolveCommitIdForRef } from './git';
 import { CommitDetails, CommitsSummary } from './types/commits';
-import { getDateFromCommit, summarizeCommits } from './commits';
+import { getDateFromCommit, resolveCommitsForTag, summarizeCommits } from './commits';
 import { tagParts } from './utils/tags';
 
 /**
- * If the latest commit already has a tag for the prefix, it will reconstruct the notes by searching previous commit logs from the previous tag to current commit log.
- * If the latest commit doesn't have the tag, it means that this is a new tag and it will build the notes from the latest tag to the current commit log.
- * It will ignore pre-release tags while searching for the latest tag so that the release notes takes into account always from final releases
+ * Given a specific tag, look for the commits that compose the tag and build the release notes.
  * This is supposed to be an indempotent operation.
  */
-export const notesForLatestTag = (opts: {
+export const notesForTag = (opts: {
   repoDir: string;
+  /**
+   * The tag name to use for the release notes. If doesn't exist in repo, toRef will be required.
+   */
+  tagName: string;
   paths: string[];
-  desiredTagName?: string;
-  fromRef?: string;
+  /**
+   * Reference for the start of the range of the commit analysis to compute the notes
+   * If not defined, it will be automatically defined by searching for the previous tag to the tagName
+   * that actually produces commits in the range.
+   * e.g.: if tagName is "1.1.0", it will look for the previous tag "1.0.0"
+   */
+  // fromRef?: string;
+  /**
+   * Reference for the end of the range of the commit analysis to compute the notes
+   * If not defined, it will use the reference of tagName in repo.
+   * Required if tagName doesn't exist in repo
+   * @default reference of tagName (if exists)
+   */
   toRef?: string;
   tagPrefix: string;
   tagSuffix?: string;
@@ -27,36 +40,43 @@ export const notesForLatestTag = (opts: {
   notesBasePRUrl?: string;
   notesBaseIssueUrl?: string;
   onlyConvCommit?: boolean;
+  /**
+   * If true, it won't include pre-releases in the search for the "fromRef" tag
+   */
+  ignorePreReleases?: boolean;
 }): string | undefined => {
-  const latestTag = lastTagForPrefix({
-    repoDir: opts.repoDir,
-    tagPrefix: opts.tagPrefix,
-    tagSuffix: opts.tagSuffix,
-    verbose: opts.verbose,
-    fromRef: opts.fromRef,
-    toRef: opts.toRef,
-  });
-
-  if (!latestTag && opts.verbose) {
-    console.log(
-      `No existing tag found with for prefix "${opts.tagPrefix}" and suffix "${opts.tagSuffix}" in range "${opts.fromRef}...${opts.toRef}"`,
-    );
+  if (opts.verbose) {
+    console.log(`\n>> notesForTag`);
   }
 
-  // look for the commits that compose the latest tag for this prefix
-  const commits = findCommitsForLatestTag({
+  if (!opts.repoDir) {
+    throw new Error("'repoDir' is required");
+  }
+  if (opts.paths.length === 0) {
+    throw new Error("'paths' cannot be empty");
+  }
+
+  const toCommitId = resolveToCommitId({
     repoDir: opts.repoDir,
-    tagPrefix: opts.tagPrefix,
-    tagSuffix: opts.tagSuffix,
-    verbose: opts.verbose,
-    fromRef: opts.fromRef,
+    tagName: opts.tagName,
     toRef: opts.toRef,
-    paths: opts.paths,
+    verbose: opts.verbose,
   });
 
-  const desiredTagName = opts.desiredTagName ?? latestTag;
-  if (!desiredTagName) {
-    throw new Error('Latest tag not found, so you need to provide a desired tag name');
+  const commits = resolveCommitsForTag({
+    repoDir: opts.repoDir,
+    paths: opts.paths,
+    tagRef: toCommitId,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
+    ignorePreReleases: opts.ignorePreReleases,
+    verbose: opts.verbose,
+  });
+
+  if (opts.verbose) {
+    console.log(
+      `\n>> toCommitId=${toCommitId}; firstCommit=${commits[0].id} commitCount=${commits.length}`,
+    );
   }
 
   const commitsSummary = summarizeCommits(commits);
@@ -64,7 +84,7 @@ export const notesForLatestTag = (opts: {
   const formattedReleaseNotes = renderReleaseNotes({
     repoDir: opts.repoDir,
     commitsSummary,
-    tagName: desiredTagName,
+    tagName: opts.tagName,
     disableLinks: opts.notesDisableLinks,
     baseCommitUrl: opts.notesBaseCommitUrl,
     basePRUrl: opts.notesBasePRUrl,
@@ -352,4 +372,44 @@ export const cleanupRemoteOrigin = (remoteOriginRaw?: string): string | undefine
   remoteOrigin = remoteOrigin.replace(/https:\/\/.*@/, 'https://'); // remove user from URL
   remoteOrigin = remoteOrigin.replace(/\.git$/, ''); // remove .git at the end
   return remoteOrigin;
+};
+
+export const resolveToCommitId = (opts: {
+  repoDir: string;
+  tagName: string;
+  toRef?: string;
+  verbose?: boolean;
+}): string => {
+  let tagCommitId;
+
+  // eslint-disable-next-line functional/no-try-statements
+  try {
+    tagCommitId = resolveCommitIdForTag(opts.repoDir, opts.tagName, opts.verbose);
+  } catch {
+    // tagName doesn't exist in repo
+    if (opts.verbose) {
+      console.log(`Tag ${opts.tagName} doesn't exist in repo`);
+    }
+  }
+
+  if (opts.toRef) {
+    let toRefCommitId;
+    // eslint-disable-next-line functional/no-try-statements
+    try {
+      toRefCommitId = resolveCommitIdForRef(opts.repoDir, opts.toRef, opts.verbose);
+    } catch {
+      // toRef doesn't exist in repo
+      throw new Error(`toRef ${opts.toRef} doesn't exist in repo`);
+    }
+    if (tagCommitId && tagCommitId !== toRefCommitId) {
+      throw new Error(
+        `Tag ${opts.tagName} and toRef ${opts.toRef} point to different commits. ${tagCommitId} != ${toRefCommitId}`,
+      );
+    }
+    return toRefCommitId;
+  }
+  if (!tagCommitId) {
+    throw new Error(`'toRef' is required if 'tagName' doesn't exist in repo`);
+  }
+  return tagCommitId;
 };

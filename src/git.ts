@@ -127,9 +127,6 @@ export const lastTagForPrefix = (args: {
   fromRef?: string;
   toRef?: string;
 }): string | undefined => {
-  if (args.verbose) {
-    console.log(`\n>> lastTagForPrefix. ip=${args.ignorePreReleases}`);
-  }
   // list tags by semver in descending order
   // this limit (with "head") is a safeguard for large repositories
   const tags = execCmd(
@@ -150,7 +147,6 @@ export const lastTagForPrefix = (args: {
     const tparts = tagParts(t);
     // doesn't seem like a valid tag
     if (!tparts) {
-      if (args.verbose) console.log(`\n>>> REMOVING TAG1 ${t}`);
       return false;
     }
     // it's a tag for the desired prefix
@@ -163,14 +159,11 @@ export const lastTagForPrefix = (args: {
           .replace(tparts[3], '') // version
           .replace(args.tagSuffix ?? '', '');
         if (preReleasePart) {
-          if (args.verbose) console.log(`\n>>> REMOVING PRE-RELEASE TAG ${t}`);
           return false;
         }
       }
-      if (args.verbose) console.log(`\n>>> KEEPING TAG ${t}`);
       return true;
     }
-    if (args.verbose) console.log(`\n>>> REMOVING TAG ${t}`);
     return false;
   });
 
@@ -193,7 +186,6 @@ export const lastTagForPrefix = (args: {
       execCmd(args.repoDir, `${commitListCmd} | sed s/^-// | grep ${tagCommitId}`, args.verbose);
     } catch {
       // grep fails if not found
-      if (args.verbose) console.log(`\n>>> REMOVING TAG outside ${t}`);
       return false;
     }
     return true;
@@ -219,73 +211,6 @@ export const lastTagForPrefix = (args: {
 
   // tag with prefix not found
   return undefined;
-};
-
-export const findCommitsForLatestTag = (opts: {
-  repoDir: string;
-  tagPrefix: string;
-  tagSuffix?: string;
-  fromRef?: string;
-  toRef?: string;
-  verbose?: boolean;
-  paths: string[];
-}): Commit[] => {
-  // get latest tag for the prefix (might be pointing to HEAD or not)
-  const latestTag = lastTagForPrefix({
-    repoDir: opts.repoDir,
-    tagPrefix: opts.tagPrefix,
-    tagSuffix: opts.tagSuffix,
-    fromRef: opts.fromRef,
-    toRef: opts.toRef,
-    verbose: opts.verbose,
-    nth: 0,
-  });
-
-  if (opts.verbose) console.log(`\n\n>>> latestTag ${latestTag}\n\n`);
-
-  // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
-  // which leads to no commits between those tags
-  // go back in history to find a previous tag that actually
-  // has commits in relation to the current tag (or HEAD)
-  for (let i = 1; i < 30; i += 1) {
-    // eslint-disable-next-line no-await-in-loop
-    const previousTag = lastTagForPrefix({
-      repoDir: opts.repoDir,
-      tagPrefix: opts.tagPrefix,
-      tagSuffix: opts.tagSuffix,
-      verbose: opts.verbose,
-      toRef: latestTag,
-      nth: i,
-      ignorePreReleases: true,
-    });
-
-    if (opts.verbose) console.log(`\n\n>>> previousTag i ${i} ${previousTag}\n\n`);
-
-    // eslint-disable-next-line no-await-in-loop
-    const commits = findCommitsTouchingPath({
-      repoDir: opts.repoDir,
-      paths: opts.paths,
-      fromRef: previousTag,
-      toRef: latestTag,
-    });
-
-    // remove the commit related to the previousTag, as we want only the commits after the previous tag
-    if (opts.verbose) console.log(`\n>>>> pt ${previousTag}\n\n`);
-    if (previousTag) {
-      const previousTagCommitId = resolveCommitIdForTag(opts.repoDir, previousTag);
-      if (opts.verbose) console.log(`\n>>>> ptci ${previousTagCommitId} ${commits[0].id}\n\n`);
-      if (commits.length > 0 && previousTagCommitId === commits[0].id) {
-        commits.shift();
-      }
-    }
-
-    // commits between versions was found
-    if (commits.length > 0) {
-      return commits;
-    }
-  }
-
-  return [];
 };
 
 export const gitConfigUser = (

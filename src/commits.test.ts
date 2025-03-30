@@ -1,10 +1,14 @@
+import { randomBytes } from 'node:crypto';
+
 import { Commit } from './types/commits';
 import {
   getDateFromCommit,
   movePrefixFromCommitLog,
+  resolveCommitsForTag,
   semverGreaterThan,
   summarizeCommits,
 } from './commits';
+import { createSampleRepo } from './utils/tests';
 
 describe('getDateFromCommit', () => {
   it('should extract the date from a string with date and time', () => {
@@ -386,5 +390,97 @@ describe('movePrefixFromCommitLog', () => {
   it('should handle "BREAKING CHANGES" in message body', () => {
     const input = 'feat: add new feature\n\nBREAKING CHANGES: new API';
     expect(movePrefixFromCommitLog(input)).toBe(input);
+  });
+});
+
+describe('when resolving commit for tag', () => {
+  const repoDir = `./testcases/commits-repo-${randomBytes(2).toString('hex')}`;
+  beforeAll(() => {
+    createSampleRepo(repoDir);
+  });
+
+  it('find commits related to prefix2 tag 10.0.0', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'prefix2/10.0.0',
+      paths: ['prefix2'],
+      tagPrefix: 'prefix2/',
+    });
+    expect(clogs).toHaveLength(1);
+    expect(clogs[0].message).toMatch('5 prefix2 adding test2 file');
+  });
+  it('find commits related to prefix2 tag 10.1.0', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'prefix2/10.1.0',
+      paths: ['prefix2'],
+      tagPrefix: 'prefix2/',
+    });
+    expect(clogs).toHaveLength(1);
+    expect(clogs[0].message).toMatch('7 prefix2');
+  });
+  it('find commits related to HEAD (346.0.0-alpha.0)', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'HEAD',
+      paths: [''],
+      tagPrefix: '',
+    });
+    expect(clogs).toHaveLength(16);
+    expect(clogs[0].message).toMatch('1 prefix1');
+    expect(clogs[9].message).toMatch('9 prefix1');
+    expect(clogs[15].message).toMatch('15 adding ');
+  });
+  it('find commits related to prefix2 tag prefix3/1.0.1-beta.0', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'prefix3/1.0.1-beta.0',
+      paths: ['prefix3'],
+      tagPrefix: 'prefix3/',
+    });
+    expect(clogs).toHaveLength(1);
+    expect(clogs[0].message).toMatch('88 prefix3 adding');
+  });
+  it('find commits related to prefix1 tag prefix1/1.0.0', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'prefix1/1.0.0',
+      paths: ['prefix1'],
+      tagPrefix: 'prefix1/',
+    });
+    expect(clogs).toHaveLength(1);
+    expect(clogs[0].message).toMatch('1 prefix1 adding');
+  });
+  it('find commits related to prefix1 tag prefix1/1.0.1', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'prefix1/1.0.1',
+      paths: ['prefix1'],
+      tagPrefix: 'prefix1/',
+    });
+    expect(clogs).toHaveLength(1);
+    expect(clogs[0].message).toMatch('2 prefix1');
+  });
+  it('find commits related to prefix1 tag prefix1/1.2.0', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'prefix1/1.2.0',
+      paths: ['prefix1'],
+      tagPrefix: 'prefix1/',
+    });
+    expect(clogs).toHaveLength(1);
+    expect(clogs[0].message).toMatch('3 prefix1');
+  });
+  it('find commits related to prefix1 in HEAD', () => {
+    const clogs = resolveCommitsForTag({
+      repoDir,
+      tagRef: 'HEAD',
+      paths: ['prefix1'],
+      tagPrefix: 'prefix1/',
+    });
+    expect(clogs).toHaveLength(3);
+    expect(clogs[0].message).toMatch('9 prefix1');
+    expect(clogs[1].message).toMatch('11 prefix1');
+    expect(clogs[2].message).toMatch('4 prefix1');
   });
 });

@@ -4,6 +4,7 @@
 import conventionalCommitsParser from 'conventional-commits-parser';
 
 import { Commit, CommitDetails, CommitsSummary, SemverLevelNone } from './types/commits';
+import { findCommitsTouchingPath, lastTagForPrefix, resolveCommitIdForTag } from './git';
 
 export const getDateFromCommit = (dateWithTime: string): string => {
   return /(\d{4}-\d{2}-\d{2})/.exec(dateWithTime)?.[0] ?? '';
@@ -183,4 +184,55 @@ export const movePrefixFromCommitLog = (commitLog: string): string => {
 
   // move prefix to the end of the commit log, if exists
   return `${suffix[0]}${prefixClean ? ` (${prefixClean})` : ''}`;
+};
+
+export const resolveCommitsForTag = (opts: {
+  repoDir: string;
+  tagRef: string;
+  paths: string[];
+  tagPrefix: string;
+  tagSuffix?: string;
+  verbose?: boolean;
+  ignorePreReleases?: boolean;
+}): Commit[] => {
+  // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
+  // which leads to no commits between those tags
+  // go back in history to find a previous tag that actually
+  // has commits in relation to the current tag (or HEAD)
+  // eslint-disable-next-line functional/no-let
+  for (let i = 0; i < 30; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const previousTag = lastTagForPrefix({
+      repoDir: opts.repoDir,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      verbose: opts.verbose,
+      toRef: opts.tagRef,
+      ignorePreReleases: opts.ignorePreReleases,
+      nth: i,
+    });
+
+    // eslint-disable-next-line no-await-in-loop
+    const commits = findCommitsTouchingPath({
+      repoDir: opts.repoDir,
+      paths: opts.paths,
+      fromRef: previousTag,
+      toRef: opts.tagRef,
+    });
+
+    // remove the commit related to the previousTag, as we want only the commits after the previous tag
+    if (previousTag) {
+      const previousTagCommitId = resolveCommitIdForTag(opts.repoDir, previousTag);
+      if (commits.length > 0 && previousTagCommitId === commits[0].id) {
+        commits.shift();
+      }
+    }
+
+    // commits between versions was found
+    if (commits.length > 0) {
+      return commits;
+    }
+  }
+
+  return [];
 };

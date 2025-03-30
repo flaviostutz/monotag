@@ -4,7 +4,6 @@
 import { randomBytes } from 'node:crypto';
 
 import {
-  findCommitsForLatestTag,
   findCommitsTouchingPath,
   gitConfigUser,
   isFirstCommit,
@@ -247,25 +246,6 @@ describe('when using git', () => {
     expect(clogs[6].message).toMatch('15 ');
   });
 
-  it('find commits related to the latest tag', () => {
-    const clogs = findCommitsForLatestTag({
-      repoDir,
-      paths: ['prefix2'],
-      tagPrefix: 'prefix2/',
-      fromRef: 'HEAD~16',
-      toRef: 'HEAD~9',
-    });
-    expect(clogs).toHaveLength(1);
-    expect(clogs[0].message).toMatch('7 prefix2 creating');
-  });
-  it('latest tag in root have only one commit because its in the beginning of the history', () => {
-    const commits = findCommitsForLatestTag({
-      repoDir,
-      paths: [''],
-      tagPrefix: '',
-    });
-    expect(commits).toHaveLength(1);
-  });
   it('isFirstCommit check true', () => {
     const firstCommitId = execCmd(repoDir, 'git rev-list HEAD | tail -1 | head -1').trim();
     const is = isFirstCommit(repoDir, firstCommitId);

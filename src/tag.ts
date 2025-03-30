@@ -11,10 +11,10 @@ import {
   resolveCommitIdForTag,
   tagExistsInRepo,
 } from './git';
-import { notesForLatestTag, renderReleaseNotes } from './notes';
+import { notesForTag } from './notes';
 import { NextTagOptions } from './types/options';
 import { SemverLevelNone, TagNotes } from './types/commits';
-import { getDateFromCommit, summarizeCommits } from './commits';
+import { summarizeCommits } from './commits';
 import { getVersionFromTag } from './utils/tags';
 
 /**
@@ -36,6 +36,7 @@ export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
   if (!opts.toRef) {
     throw new Error("'toRef' is required");
   }
+
   // current tag
   const latestTag = lastTagForPrefix({
     repoDir: opts.repoDir,
@@ -76,25 +77,21 @@ export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
   // but don't remove if it's the first commit in history
   // (it has no previous tag, so this commit is also part of the changes)
   if (commits.length > 0 && fromRefFindCommits) {
-    if (opts.verbose) console.log(`\n\n>>> fromRefFindCommits ${fromRefFindCommits}`);
     const fromRefCommitId = resolveCommitIdForRef(opts.repoDir, fromRefFindCommits, opts.verbose);
-    if (opts.verbose)
-      console.log(`\n\n>>> fromRefCommitId ${fromRefCommitId} commitId[0] ${commits[0].id}`);
     // remove first commit if it's related to the latestTag
     if (fromRefCommitId === commits[0].id) {
-      if (opts.verbose) console.log(`\n\n>>> removing first commit ${commits[0].id}`);
       commits.shift();
     }
   }
 
   if (opts.verbose) {
-    console.log(`\n\n>>Commit changes detected: ${commits.length}\n\n`);
+    console.log(`\n>> Commit changes detected: ${commits.length}\n\n`);
   }
 
   // no changes detected since last tag
   if (commits.length === 0) {
     if (opts.verbose) {
-      console.log('\n\n>>No changes detected in commit range\n\n');
+      console.log('\n>> No changes detected in commit range\n\n');
     }
 
     if (!latestTag) {
@@ -103,15 +100,31 @@ export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
 
     // reconstruct existing latest tag
     const tagName = incrementTag({
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      minVersion: opts.minVersion,
+      maxVersion: opts.maxVersion,
+      preRelease: opts.preRelease,
+      preReleaseIdentifier: opts.preReleaseIdentifier,
+      preReleaseAlwaysIncrement: opts.preReleaseAlwaysIncrement,
       fullTagName: latestTag,
       type: 'none',
-      ...opts,
     });
 
-    const releaseNotes = notesForLatestTag({
-      ...opts,
-      fromRef: opts.fromRef === 'auto' ? undefined : opts.fromRef,
-      desiredTagName: tagName,
+    const releaseNotes = notesForTag({
+      repoDir: opts.repoDir,
+      tagName,
+      toRef: latestTagCommitId,
+      paths: opts.paths,
+      tagPrefix: opts.tagPrefix,
+      tagSuffix: opts.tagSuffix,
+      verbose: opts.verbose,
+      onlyConvCommit: opts.onlyConvCommit,
+      notesDisableLinks: opts.notesDisableLinks,
+      notesBaseCommitUrl: opts.notesBaseCommitUrl,
+      notesBasePRUrl: opts.notesBasePRUrl,
+      notesBaseIssueUrl: opts.notesBaseIssueUrl,
+      ignorePreReleases: true,
     });
 
     return {
@@ -133,42 +146,35 @@ export const nextTag = (opts: NextTagOptions): TagNotes | undefined => {
 
   const currentTag = latestTag ?? `${opts.tagPrefix}0.0.0${opts.tagSuffix}`;
 
-  if (opts.verbose) {
-    console.log(
-      `\n\n>>>> always increment ${opts.preReleaseAlwaysIncrement} currentTag ${currentTag}`,
-    );
-  }
-
   const tagName = incrementTag({
+    maxVersion: opts.maxVersion,
+    minVersion: opts.minVersion,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
+    preRelease: opts.preRelease,
+    preReleaseIdentifier: opts.preReleaseIdentifier,
+    preReleaseAlwaysIncrement: opts.preReleaseAlwaysIncrement,
     fullTagName: currentTag,
     type:
       !opts.semverLevel || opts.semverLevel === 'auto'
         ? commitsSummary.level
         : (opts.semverLevel ?? 'none'),
-    ...opts,
   });
 
-  if (opts.verbose) {
-    console.log(`\n\n>>>> incremented ${tagName}`);
-  }
-
-  // look for a previous tag that actually has commits to compose the release notes
-  // sometimes multiple tags are applied to the same commitid (e.g: 1.0.0-beta and 1.0.0)
-  // which doesn't generate a release note. In this case we need to go back in history and find the latest commit that touched the path
-  // const commitsForNotes = await lookForCommitsInPreviousTags(opts, 0);
-  // const relevantCommitsSummary = summarizeCommits(commitsForNotes);
-  const versionDate = getDateFromCommit(commits[0].date);
-  const releaseNotes = renderReleaseNotes({
+  const releaseNotes = notesForTag({
     repoDir: opts.repoDir,
-    commitsSummary,
     tagName,
-    versionDate,
-    onlyConvCommit: opts.onlyConvCommit,
-    disableLinks: opts.notesDisableLinks,
-    baseCommitUrl: opts.notesBaseCommitUrl,
-    basePRUrl: opts.notesBasePRUrl,
-    baseIssueUrl: opts.notesBaseIssueUrl,
+    toRef: opts.toRef,
+    paths: opts.paths,
+    tagPrefix: opts.tagPrefix,
+    tagSuffix: opts.tagSuffix,
     verbose: opts.verbose,
+    onlyConvCommit: opts.onlyConvCommit,
+    notesDisableLinks: opts.notesDisableLinks,
+    notesBaseCommitUrl: opts.notesBaseCommitUrl,
+    notesBasePRUrl: opts.notesBasePRUrl,
+    notesBaseIssueUrl: opts.notesBaseIssueUrl,
+    ignorePreReleases: true,
   });
 
   return {

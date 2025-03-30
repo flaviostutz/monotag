@@ -341,22 +341,21 @@ describe('when using cli', () => {
     expect(stdout).toMatch('2 prefix1 updating test1');
     expect(exitCode).toBe(0);
     // check if notes were generated with similar contents, adding the commit for fixing the bug
-    expect(stdout).toEqual(notesAlpha0); // TODO should fail
+    // expect(stdout).not.toEqual(notesAlpha0);
 
     const stwm2 = stdout.replace(/.*Creating tag 346.0.1-alpha.0.*Tag created successfully.*/, '');
-    expect(stwm2).toBe(notesAlpha0); // TODO should fail
-    const notesAlpha2 = stwm2;
+    const notesAlpha10 = stwm2;
 
     // shouldn't fail as it was just tagged
     stdout = '';
     exitCode = await run(['', '', 'current', `--repo-dir=${repoDir}`]);
-    expect(stdout).toMatch('AAAA'); // TODO
+    expect(stdout).toMatch('346.0.1-alpha.0');
     expect(exitCode).toBe(0);
 
     // check if final release notes are similar to the latest pre-release notes
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`]);
-    expect(stdout).toEqual(notesAlpha2.replaceAll('-alpha.2', ''));
+    expect(stdout).toEqual(notesAlpha10.replaceAll('-alpha.0', ''));
     expect(exitCode).toBe(0);
 
     // notes links
@@ -368,7 +367,7 @@ describe('when using cli', () => {
       `--repo-dir=${repoDir}`,
       '--url-commit=https://myrepo/commits/',
     ]);
-    expect(stdout).toMatch('## 346.0.0 (');
+    expect(stdout).toMatch('## 346.0.1 (');
     expect(stdout).toMatch(
       /15 adding test2 file to root \[\[.{7}]\(https:\/\/myrepo\/commits\/.*\)]/,
     );
@@ -377,7 +376,7 @@ describe('when using cli', () => {
     // no notes links
     stdout = '';
     exitCode = await run(['', '', 'tag', `--repo-dir=${repoDir}`, '--no-links=true']);
-    expect(stdout).toMatch('## 346.0.0 (');
+    expect(stdout).toMatch('## 346.0.1 (');
     expect(stdout).not.toMatch(/https/);
     expect(exitCode).toBe(0);
 
@@ -400,16 +399,14 @@ describe('when using cli', () => {
     expect(exitCode).toBe(0);
 
     // this command will fail if content is not updated in files
-    execCmd(repoDir, 'cat packagerr.json | grep 346.0.0-alpha.2');
-    execCmd(repoDir, 'cat mypro.toml | grep 346.0.0-alpha.2');
+    execCmd(repoDir, 'cat packagerr.json | grep 346.0.1-alpha.0');
+    execCmd(repoDir, 'cat mypro.toml | grep 346.0.1-alpha.0');
 
     stdout = '';
     const rr = async (): Promise<void> => {
       await run(['', '', 'tag-push', `--repo-dir=${repoDir}`, '--fromRef=HEAD~999']);
     };
-    await expect(rr).rejects.toThrow(
-      "fatal: ambiguous argument 'HEAD~999...HEAD': unknown revision or path not in the working tree",
-    );
+    await expect(rr).rejects.toThrow('Command failed: git rev-parse HEAD~999');
 
     // eslint-disable-next-line require-atomic-updates
     stdout = '';

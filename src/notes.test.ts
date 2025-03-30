@@ -3,24 +3,78 @@ import { randomBytes } from 'node:crypto';
 
 import {
   cleanupRemoteOrigin,
-  notesForLatestTag,
+  notesForTag,
   renderCommit,
   renderSubject,
   resolveBaseCommitUrl,
   resolveBaseIssueUrl,
   resolveBasePRUrl,
+  resolveToCommitId,
 } from './notes';
 import { createSampleRepo } from './utils/tests';
 import { CommitDetails } from './types';
+import { isFirstCommit } from './git';
 
 describe('re-generate notes from latest tag', () => {
   const repoDir = `./testcases/notes-repo-${randomBytes(2).toString('hex')}`;
   beforeAll(() => {
     createSampleRepo(repoDir);
   });
-  it('should get notes for existing prefixed tag', () => {
-    const nt = notesForLatestTag({
+
+  it('resolve toCommitId from tagName', () => {
+    const cid = resolveToCommitId({
       repoDir,
+      tagName: 'prefix2/20.10.0',
+    });
+    expect(cid.length > 5).toBeTruthy();
+  });
+  it('resolve toCommitId from ref', () => {
+    const cid = resolveToCommitId({
+      repoDir,
+      tagName: 'inexisting_tag',
+      toRef: 'HEAD~16',
+    });
+    expect(isFirstCommit(repoDir, cid)).toBeTruthy();
+  });
+  it('resolve toCommitId require valid ref', () => {
+    const fn = (): string =>
+      resolveToCommitId({
+        repoDir,
+        tagName: 'inexisting_tag',
+      });
+    expect(fn).toThrow("'toRef' is required if 'tagName'");
+  });
+  it('resolve toCommitId valid roRef required if tagName not found', () => {
+    const fn = (): string =>
+      resolveToCommitId({
+        repoDir,
+        tagName: 'inexisting_tag',
+        toRef: 'STRAGE_REF',
+      });
+    expect(fn).toThrow("toRef STRAGE_REF doesn't exist in repo");
+  });
+  it('resolve toCommitId roRef must point to the same as an existing tag', () => {
+    const cid = resolveToCommitId({
+      repoDir,
+      tagName: 'lonelytag/1.0.0',
+      toRef: 'HEAD~15',
+    });
+    expect(cid.length > 5).toBeTruthy();
+  });
+  it('resolve toCommitId: should fail if toRef doesnt point to the same commit id as an existing tag', () => {
+    const f = (): string =>
+      resolveToCommitId({
+        repoDir,
+        tagName: 'lonelytag/1.0.0',
+        toRef: 'HEAD~5',
+      });
+    expect(f).toThrow('point to different commits');
+  });
+
+  it('should get notes for existing prefixed tag', () => {
+    const nt = notesForTag({
+      repoDir,
+      tagName: 'prefix2/20.10.0',
       tagPrefix: 'prefix2/',
       paths: ['prefix2'],
     });
@@ -32,12 +86,12 @@ describe('re-generate notes from latest tag', () => {
 * **Breaking:** 8 prefix2 creating test3 file`);
   });
   it('latest tag not found for prefix3 without pre-release or suffix', () => {
-    const nt = notesForLatestTag({
+    const nt = notesForTag({
       repoDir,
+      tagName: 'prefix3/3.0.0',
       tagPrefix: 'prefix3/',
       paths: ['prefix3'],
       toRef: 'HEAD~6',
-      desiredTagName: 'prefix3/3.0.0',
     });
     if (!nt) throw new Error('Shouldnt be undefined');
     expect(nt).toMatch('## prefix3/3.0.0 (');
@@ -45,8 +99,22 @@ describe('re-generate notes from latest tag', () => {
     expect(nt.split('\n')).toHaveLength(10);
   });
   it('should get notes for existing prefixed tag prefix3', () => {
-    const nt = notesForLatestTag({
+    const nt = notesForTag({
       repoDir,
+      tagName: 'prefix3/1.0.1',
+      tagPrefix: 'prefix3/',
+      paths: ['prefix3'],
+      tagSuffix: '-alpha',
+    });
+    if (!nt) throw new Error('Shouldnt be undefined');
+    expect(nt).toMatch('## prefix3/1.0.1 (');
+    expect(nt).toMatch('88 prefix3 adding test1 file');
+    expect(nt.split('\n')).toHaveLength(10);
+  });
+  it('should get notes for existing prefixed tag prefix3 beta', () => {
+    const nt = notesForTag({
+      repoDir,
+      tagName: 'prefix3/1.0.1-beta.0',
       tagPrefix: 'prefix3/',
       paths: ['prefix3'],
       tagSuffix: '-alpha',
@@ -57,8 +125,9 @@ describe('re-generate notes from latest tag', () => {
     expect(nt.split('\n')).toHaveLength(10);
   });
   it('should generate notes for non-prefixed tag', () => {
-    const nt = notesForLatestTag({
+    const nt = notesForTag({
       repoDir,
+      tagName: '345.2123.143',
       tagPrefix: '',
       paths: [''],
     });
@@ -70,11 +139,12 @@ describe('re-generate notes from latest tag', () => {
   });
 
   it('should return undefined for non existing tag', () => {
-    const nt = notesForLatestTag({
+    const nt = notesForTag({
       repoDir,
+      toRef: 'HEAD',
+      tagName: 'SOMETHING_INEXISTENT/5.0.0',
       tagPrefix: 'SOMETHING_INEXISTENT/',
-      paths: ['prefix2'],
-      desiredTagName: 'SOMETHING_INEXISTENT/5.0.0',
+      paths: ['prefix2', 'prefix3'],
     });
     expect(nt).not.toMatch('1 prefix1');
     expect(nt).not.toMatch('2 prefix1');
@@ -84,19 +154,20 @@ describe('re-generate notes from latest tag', () => {
     expect(nt).toMatch('6 prefix2');
     expect(nt).toMatch('7 prefix2');
     expect(nt).toMatch('8 prefix2');
-    expect(nt).not.toMatch('88 prefix3');
+    expect(nt).toMatch('88 prefix3');
     expect(nt).not.toMatch('9 prefix1');
     expect(nt).toMatch('10 prefix2');
     expect(nt).not.toMatch('11 prefix1');
     expect(nt).toMatch('12 prefix2');
     expect(nt).toMatch('13 prefix2');
     expect(nt).toMatch('14 prefix1');
-    expect(nt?.split('\n')).toHaveLength(24);
+    expect(nt?.split('\n')).toHaveLength(25);
   });
 
   it('should return empty release note if no commits found touching path', () => {
-    const nt = notesForLatestTag({
+    const nt = notesForTag({
       repoDir,
+      tagName: 'lonelytag/1.0.0',
       tagPrefix: 'lonelytag/',
       paths: ['INEXISTENT_PATH'],
     });
