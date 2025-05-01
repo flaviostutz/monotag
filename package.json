@@ -38,7 +38,7 @@
   "devDependencies": {
     "@babel/preset-typescript": "^7.23.2",
     "@stutzlab/eslint-config": "^3.2.1",
-    "@tsconfig/node20": "^20.1.4",
+    "@tsconfig/node20": "^20.1.5",
     "@types/conventional-commits-parser": "^5.0.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.14.8",
