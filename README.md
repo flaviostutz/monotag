@@ -284,6 +284,9 @@ The library exposes its ts types, so you can use VSCode for auto completing and 
   - Calculate next tag, add latest change notes to existing changelog.md file, add to repo, commit with "chore(release): myservice/1.3.0", tag git with "myservice/1.3.0" and push newly created commit (with changelog.md) and new tag to remote git repo.
 
 
+- `monotag list`
+  - Lists tags in the monorepo related to current dir/tag prefix.
+
 ### Github actions workflow
 
 - Create file .github/workflows/create-next-tag.yml in your repo

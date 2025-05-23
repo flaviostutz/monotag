@@ -8,6 +8,7 @@ build: install
 
 run:
 	npx ts-node src/main.ts tag --repo-dir=. --changelog-file=CHANGELOG.md --verbose
+	# npx ts-node src/main.ts list --repo-dir=. --verbose
 
 lint:
 	pnpm exec eslint ./src --ext .ts

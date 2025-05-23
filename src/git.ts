@@ -13,6 +13,43 @@ import { execCmd } from './utils/os';
 import { getVersionFromTag, tagParts } from './utils/tags';
 import { BasicOptions } from './types/options';
 import { Commit } from './types/commits';
+/**
+ * List all versions for a given prefix, sorted by semver (descending).
+ * Ignores any tags that don't match the prefix or are not semver.
+ */
+export function listVersionsForPrefix(
+  repoDir: string,
+  tagPrefix: string,
+  verbose?: boolean,
+): string[] {
+  const tags = execCmd(repoDir, `git tag --list '${tagPrefix}*'`, verbose)
+    .split('\n')
+    .filter((t: string) => t.trim().length > 0)
+    // keep only tags from the desired prefix with a valid semver version
+    .filter((t: string) => {
+      const tparts = tagParts(t);
+      if (!tparts) {
+        return false;
+      }
+      if (tparts[2] === tagPrefix) {
+        // check if version is semver
+        const version = getVersionFromTag(t, tagPrefix);
+        if (!version) {
+          return false;
+        }
+        const semverVersion = semver.coerce(version);
+        return semverVersion !== null;
+      }
+      return false;
+    });
+  // Sort tags by semver (descending)
+  return tags.sort((a, b) => {
+    // Extract version part after prefix
+    const aVer = a.replace(tagPrefix, '').replace(/^[/-]/, '');
+    const bVer = b.replace(tagPrefix, '').replace(/^[/-]/, '');
+    return semver.rcompare(aVer, bVer);
+  });
+}
 
 /**
  * Looks for commits that touched a certain path. fromRef and toRef are inclusive.

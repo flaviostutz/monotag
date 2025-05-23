@@ -40,7 +40,7 @@ const createSampleRepo = (repoDir: string): void => {
     git tag prefix9/v1.0.3
     git tag prefix1/1.0.0
     git tag prefix1/abracadabra
-    git tag prefix1/20230118.17
+    git tag prefix1/abracadabra2
     git tag prefix1-abracadabra
     git tag lonelytag/1.0.0
 

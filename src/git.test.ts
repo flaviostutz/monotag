@@ -8,6 +8,7 @@ import {
   gitConfigUser,
   isFirstCommit,
   lastTagForPrefix,
+  listVersionsForPrefix,
   resolveCommitIdForRef,
   tagExistsInRepo,
 } from './git';
@@ -265,7 +266,28 @@ describe('when using git', () => {
     const is = tagExistsInRepo(repoDir, 'prefix1/1.10.0');
     expect(is).toBeTruthy();
   });
+
+  it('should list tags for a prefix sorted by semver descending', () => {
+    // prefix1/ tags: 3.4.5-alpha, 3.3.5, 1.10.0, etc.
+    const tags = listVersionsForPrefix(repoDir, 'prefix1/');
+    expect(tags[0]).toBe('prefix1/3.4.5-alpha');
+    expect(tags).toContain('prefix1/3.3.5');
+    expect(tags.at(-1)).toMatch(/^prefix1\//);
+  });
+
+  it('should return empty array for unknown prefix', () => {
+    const tags = listVersionsForPrefix(repoDir, 'unknownprefix/');
+    expect(tags).toEqual([]);
+  });
+
+  it('should remove tags with non-semver suffixes', () => {
+    // Add a tag with a non-semver suffix to the repo and check it sorts last
+    execCmd(repoDir, "git tag 'prefix1/notasemver'");
+    const tags = listVersionsForPrefix(repoDir, 'prefix1/');
+    expect(tags.at(-1)).toBe('prefix1/1.0.0');
+  });
 });
+
 describe('gitConfigUser', () => {
   const repoDir = `./testcases/gitconfig-repo-${randomBytes(4).toString('hex')}`;
   beforeAll(() => {

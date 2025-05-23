@@ -12,7 +12,7 @@ import yargs, { Argv } from 'yargs';
 
 import { nextTag } from './tag';
 import { execCmd } from './utils/os';
-import { gitConfigUser, isCleanWorkingTree, lastTagForPrefix } from './git';
+import { gitConfigUser, isCleanWorkingTree, lastTagForPrefix, listVersionsForPrefix } from './git';
 import { saveResultsToFiles } from './files';
 import { BasicOptions, CliNextTagOptions } from './types/options';
 
@@ -41,6 +41,7 @@ const run = async (processArgs: string[]): Promise<number> => {
       'Calculate next tag, git-tag and git-push it to remote',
       (y): Argv => addOptions(y, true),
     )
+    .command('list', 'List all tags in the monorepo', (y): Argv => addOptions(y, false))
     .help()
     .example([
       [
@@ -233,10 +234,22 @@ const execAction = async (
     }
   }
 
+  // LIST ACTION
+  if (action === 'list') {
+    const tags = listVersionsForPrefix(opts.repoDir, opts.tagPrefix, opts.verbose);
+    if (tags.length === 0) {
+      console.log('No tags found in repository');
+      return 1;
+    }
+    tags.map((tag: string) => console.log(tag));
+    return 0;
+  }
+
   console.log(await yargs2.getHelp());
   return 1;
 };
 
+// LIST ACTION
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const expandOpts = (opts: any): CliNextTagOptions => {
   const verbose = defaultValueBoolean(opts.verbose, false);
