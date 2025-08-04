@@ -106,8 +106,12 @@ const execAction = async (
     // check if there are uncommited changes in the working tree
     const cleanWorkingTree = isCleanWorkingTree(opts.repoDir, opts.verbose);
     if (!cleanWorkingTree) {
+      const out = execCmd(opts.repoDir, `git status -s`, opts.verbose);
+
       console.log(
-        'There are uncommited changes in the working tree, so the latest tag is not up to date',
+        `There are uncommited changes in the working tree, so the latest tag is not up to date.
+        Changes detected:
+        ${out}`,
       );
       return 6;
     }
