@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.26.0 (2025-05-23)
+
+### Features
+
+* version list [[4eb5201](https://github.com/flaviostutz/monotag/commit/4eb520156d6532c09ecf5dc4974fea017074464f)]
+
+### Maintenance
+
+* release: 1.25.0 [[97cd8f8](https://github.com/flaviostutz/monotag/commit/97cd8f80af271e85c13166d65e1410aa60e90273)]
+* add more logs when changes detected [[3f3bdbb](https://github.com/flaviostutz/monotag/commit/3f3bdbb771f2bb7767173a5d6bc5d970d65dbc96)]
+
+### Misc
+
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+
+
 ## 1.25.0 (2025-03-31)
 
 ### Features
