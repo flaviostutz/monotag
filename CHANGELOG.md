@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.25.0 (2025-03-31)
+
+### Features
+
+* version list [[4eb5201](https://github.com/flaviostutz/monotag/commit/4eb520156d6532c09ecf5dc4974fea017074464f)]
+
+### Maintenance
+
+* release: 1.24.0 [[dcc4e18](https://github.com/flaviostutz/monotag/commit/dcc4e18e75c51f9c407bd79439dac30d2a181e3c)]
+* add prerelease increment test [[c8c4c9c](https://github.com/flaviostutz/monotag/commit/c8c4c9c41577bfeec0f642fc4e8e785f523ae560)]
+* refactor notes scope generation [[963ce64](https://github.com/flaviostutz/monotag/commit/963ce64aec6acc20ba9fa2dd33ef18b4e6adf23c)]
+* upgrade monotag for release workflows [[92d03e9](https://github.com/flaviostutz/monotag/commit/92d03e912d3932bd99d0693ef38072e619e64786)]
+
+### Misc
+
+
+### Info
+
+* Authors: Flávio Stutz <flaviostutz@gmail.com>
+
+
 ## 1.24.0 (2025-03-21)
 
 ### Features
