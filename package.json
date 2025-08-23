@@ -51,7 +51,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "conventional-commits-parser": "^5.0.0",
+    "conventional-commits-parser": "^6.1.0",
     "minimatch": "^10.0.1",
     "semver": "^7.7.1",
     "yargs": "^17.6.2"
