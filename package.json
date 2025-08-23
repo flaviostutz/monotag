@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/flaviostutz/monotag#readme",
   "devDependencies": {
-    "@babel/preset-typescript": "^7.23.2",
+    "@babel/preset-typescript": "^7.27.1",
     "@stutzlab/eslint-config": "^3.2.1",
     "@tsconfig/node20": "^20.1.4",
     "@types/conventional-commits-parser": "^5.0.1",
