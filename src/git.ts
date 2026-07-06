@@ -81,64 +81,63 @@ export const findCommitsTouchingPath = (opts: BasicOptions): Commit[] => {
   // execute just to test if refs are valid
   execCmd(opts.repoDir, `${commitListCmd} --count`, opts.verbose);
 
+  // NUL (%x00) is used as field separator because git guarantees commit messages,
+  // author idents and file names cannot contain NUL bytes, so fields can never be
+  // shifted by delimiter chars inside the commit message (e.g. ';' or 'COMMIT')
   const outCommits = execCmd(
     opts.repoDir,
-    `${commitListCmd} | sed s/^-// | head -n 100 | xargs -r -L 1 git show --name-only --pretty='format:COMMIT;%H;%cn <%ce>;%ci;%s;'`,
+    `${commitListCmd} | sed s/^-// | head -n 100 | xargs -r -L 1 git show --name-only --pretty='format:COMMIT%x00%H%x00%cn <%ce>%x00%ci%x00%s'`,
     opts.verbose,
-  )
-    .trim()
-    .split('COMMIT');
+  );
 
-  // this limit (with "head") is a safeguard for large repositories
-  if (outCommits.length === 100) {
-    console.log('Commits might have been limited to 100 results');
-  }
-
-  const commits = outCommits
-    .map((celem: string): Commit | undefined => {
-      if (celem.trim().length === 0) {
-        return undefined;
-      }
-      const fields = celem.trim().split(';');
-      const com: Commit = {
+  const allCommits: Commit[] = [];
+  let currentCommit: Commit | undefined;
+  for (const line of outCommits.split('\n')) {
+    // header line starting a new commit record
+    if (line.startsWith('COMMIT\0')) {
+      const fields = line.split('\0');
+      currentCommit = {
         id: fields[1],
         author: fields[2],
         date: fields[3],
         message: fields[4],
-        files: fields[5].trim().split('\n'),
+        files: [],
       };
-      return com;
-    })
-    .filter((cm: Commit | undefined): boolean => {
-      if (!cm) {
-        return false;
-      }
-      // only keep commits that have touched any file inside any of the paths provided to be analised
-      return cm.files.some((fn: string): boolean => {
-        if (!opts.paths || opts.paths.length === 0) {
-          return true;
-        }
-        // check if this file matches any of the path patterns
-        return opts.paths.some((p: string): boolean => {
-          // empty path means any path
-          if (p.trim().length === 0) {
-            return true;
-          }
-          // check if file name matches glob pattern
-          // add ** to the end of the pattern to match any file inside a certain prefix by default
-          const dirPattern = `${p}/**`;
-          const filePattern = p;
-          return minimatch(fn, dirPattern) || minimatch(fn, filePattern);
-          // return fn.startsWith(p);
-        });
+      allCommits.push(currentCommit);
+      continue;
+    }
+    // remaining non-blank lines contain the file names touched by the commit
+    if (currentCommit && line.trim().length > 0) {
+      currentCommit.files.push(line.trim());
+    }
+  }
+
+  // this limit (with "head") is a safeguard for large repositories
+  if (allCommits.length === 100) {
+    console.log('Commits might have been limited to 100 results');
+  }
+
+  const anyPathMatches =
+    !opts.paths || opts.paths.length === 0 || opts.paths.some((p) => p.trim().length === 0);
+
+  const commits = allCommits.filter((cm: Commit): boolean => {
+    // empty path means any path (commits without files, such as merge commits, also match)
+    if (anyPathMatches) {
+      return true;
+    }
+    // only keep commits that have touched any file inside any of the paths provided to be analised
+    return cm.files.some((fn: string): boolean => {
+      // check if this file matches any of the path patterns
+      return opts.paths.some((p: string): boolean => {
+        // check if file name matches glob pattern
+        // add ** to the end of the pattern to match any file inside a certain prefix by default
+        const dirPattern = `${p}/**`;
+        const filePattern = p;
+        return minimatch(fn, dirPattern) || minimatch(fn, filePattern);
+        // return fn.startsWith(p);
       });
-    })
-    .map((cm: Commit | undefined): Commit => {
-      if (!cm) {
-        throw new Error('Unexpected undefined commit');
-      }
-      return cm;
     });
+  });
 
   return commits.reverse();
 };
