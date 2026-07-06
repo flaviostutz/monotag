@@ -322,3 +322,57 @@ describe('gitConfigUser', () => {
     expect(outEmail).toBe('testUser@myemail.com');
   });
 });
+
+describe('when commit messages contain parsing delimiters', () => {
+  const repoDir = `./testcases/git-delimiters-repo-${randomBytes(2).toString('hex')}`;
+  beforeAll(() => {
+    execCmd(
+      '.',
+      `
+      rm -rf ${repoDir}
+      mkdir -p ${repoDir}
+      cd ${repoDir}
+
+      git init -b master
+      git config user.email 'flaviostutz@gmail.com'
+      git config user.name 'Flávio Stutz'
+
+      mkdir mod1 mod2
+
+      echo 'test1' > mod1/file1
+      git add mod1/file1
+      git commit -m 'fix: handle currency in header; SHAR-798 (#23489)'
+
+      echo 'test2' > mod1/file2
+      git add mod1/file2
+      git commit -m 'feat: some feature COMMIT marker; QE-1 (#2)'
+
+      echo 'test3' > mod2/file1
+      git add mod2/file1
+      git commit -m 'chore: control commit without delimiters'
+    `,
+    );
+  });
+  it('should keep full message and files when message contains ";"', () => {
+    const clogs = findCommitsTouchingPath({
+      repoDir,
+      toRef: 'HEAD',
+      paths: ['mod1'],
+    });
+    expect(clogs).toHaveLength(2);
+    expect(clogs[0].message).toBe('fix: handle currency in header; SHAR-798 (#23489)');
+    expect(clogs[0].files).toEqual(['mod1/file1']);
+    expect(clogs[1].message).toBe('feat: some feature COMMIT marker; QE-1 (#2)');
+    expect(clogs[1].files).toEqual(['mod1/file2']);
+  });
+  it('should not mix commits from other paths', () => {
+    const clogs = findCommitsTouchingPath({
+      repoDir,
+      toRef: 'HEAD',
+      paths: ['mod2'],
+    });
+    expect(clogs).toHaveLength(1);
+    expect(clogs[0].message).toBe('chore: control commit without delimiters');
+    expect(clogs[0].files).toEqual(['mod2/file1']);
+  });
+});
